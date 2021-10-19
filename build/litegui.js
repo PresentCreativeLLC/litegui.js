@@ -1,4 +1,10 @@
-//packer version
+/******/ (() => { // webpackBootstrap
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
+(() => {
+/*!*********************!*\
+  !*** ./src/core.js ***!
+  \*********************/
 
 /**
 * Core namespace of LiteGUI library, it holds some useful functions
@@ -1711,6 +1717,13 @@ function dataURItoBlob( dataURI ) {
 	mime = mime.substr(0, mime.length - 7); //strip ";base64"
     return new Blob([ab], { type: mime });
 }
+})();
+
+// This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
+(() => {
+/*!************************!*\
+  !*** ./src/widgets.js ***!
+  \************************/
 //enclose in a scope
 (function(){
 
@@ -2807,6 +2820,13 @@ LiteGUI.ComplexList = ComplexList;
 
 
 })();
+})();
+
+// This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
+(() => {
+/*!************************!*\
+  !*** ./src/console.js ***!
+  \************************/
 //enclose in a scope
 (function(){
 
@@ -2951,6 +2971,13 @@ LiteGUI.Console = Console;
 
 
 })();
+})();
+
+// This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
+(() => {
+/*!*********************!*\
+  !*** ./src/area.js ***!
+  \*********************/
 //enclose in a scope
 (function(){
 
@@ -3127,7 +3154,7 @@ LiteGUI.Console = Console;
 		var dynamic_section = null;
 		if(editable)
 		{
-			splitinfo = " - " + (Area.splitbar_size + 2) +"px"; //2 px margin ¿?
+			splitinfo = " - " + (Area.splitbar_size + 2) +"px"; //2 px margin ï¿½?
 			splitbar = document.createElement("div");
 			splitbar.className = "litesplitbar " + direction;
 			if(direction == "vertical")
@@ -3566,6 +3593,13 @@ LiteGUI.Console = Console;
 	LiteGUI.Split = Split;
 
 })();
+})();
+
+// This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
+(() => {
+/*!************************!*\
+  !*** ./src/menubar.js ***!
+  \************************/
 (function(){
 
 	/************** MENUBAR ************************/
@@ -3949,6 +3983,13 @@ LiteGUI.Console = Console;
 
 	LiteGUI.Menubar = Menubar;
 })();
+})();
+
+// This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
+(() => {
+/*!*********************!*\
+  !*** ./src/tabs.js ***!
+  \*********************/
 /**************  ***************************/
 (function(){
 	
@@ -4636,6 +4677,13 @@ LiteGUI.Console = Console;
 
 	LiteGUI.Tabs = Tabs;
 })();
+})();
+
+// This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
+(() => {
+/*!************************!*\
+  !*** ./src/dragger.js ***!
+  \************************/
 (function(){
 
 	/***** DRAGGER **********/
@@ -4720,6 +4768,7 @@ LiteGUI.Console = Console;
 
 				dragger.data = [e.screenX, e.screenY];
 
+				that.dragging = true;
 				LiteGUI.trigger( element,"start_dragging");
 			}
 
@@ -4757,6 +4806,7 @@ LiteGUI.Console = Console;
 
 		function inner_up(e)
 		{
+			that.dragging = false;
 			LiteGUI.trigger(element, "stop_dragging");
 			var doc = doc_binded || document;
 			doc_binded = null;
@@ -4786,7 +4836,6 @@ LiteGUI.Console = Console;
 				value = options.min;
 
 			input.value = value.toFixed( precision );
-			//input.value = ((value * 1000)<<0) / 1000; //remove ugly decimals
 			if(options.units)
 				input.value += options.units;
 			LiteGUI.trigger(input,"change");
@@ -4819,6 +4868,13 @@ LiteGUI.Console = Console;
 	LiteGUI.Dragger = Dragger;
 
 })();
+})();
+
+// This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
+(() => {
+/*!*********************!*\
+  !*** ./src/tree.js ***!
+  \*********************/
 //enclose in a scope
 (function(){
 
@@ -6151,6 +6207,13 @@ LiteGUI.Console = Console;
 
 	LiteGUI.Tree = Tree;
 })();
+})();
+
+// This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
+(() => {
+/*!**********************!*\
+  !*** ./src/panel.js ***!
+  \**********************/
 //enclose in a scope
 (function(){
 
@@ -6223,6 +6286,13 @@ LiteGUI.Console = Console;
 
 	LiteGUI.Panel = Panel;
 })();
+})();
+
+// This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
+(() => {
+/*!***********************!*\
+  !*** ./src/dialog.js ***!
+  \***********************/
 (function(){
 	/****************** DIALOG **********************/
 	/**
@@ -6928,6 +6998,13 @@ LiteGUI.Console = Console;
 
 	LiteGUI.Dialog = Dialog;
 })();
+})();
+
+// This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
+(() => {
+/*!**********************!*\
+  !*** ./src/table.js ***!
+  \**********************/
 //enclose in a scope
 (function(){
 
@@ -7145,6 +7222,14 @@ LiteGUI.Table = Table;
 
 
 })();
+})();
+
+// This entry need to be wrapped in an IIFE because it need to be isolated against other entry modules.
+(() => {
+/*!**************************!*\
+  !*** ./src/inspector.js ***!
+  \**************************/
+
 /**
 * Inspector allows to create a list of widgets easily, it also provides methods to create the widgets automatically.<br/>
 * Every widget is created calling the function add followed by the widget name, p.e. addSlider or addVector3 or addNumber.<br/>
@@ -7161,7 +7246,7 @@ LiteGUI.Table = Table;
 	name_width: width of the name part of widgets <br/>
 	full: set to true if you want the inspector to use all the parent width and height <br/>
 	widgets_per_row: number of widgets per row, default is 1 but you can change it if you want to pack several widgets in a row (useful for small widgets like checkboxes) <br/>
-	one_line: widgets are place one next to the other horizontaly <br/>
+	one_line: widgets are place one next to the other horizontally <br/>
 	onchange: callback to call when something changes <br/>
    } <br/>
 
@@ -7608,7 +7693,7 @@ Inspector.assignValue = function(value)
 		instance[this.name] = value;
 	else if( value && value.length && current_value && current_value.length && 
 		( !Object.getOwnPropertyDescriptor( instance, this.name ) || !Object.getOwnPropertyDescriptor( instance, this.name ).set ) &&  //no setters
-		( !Object.getOwnPropertyDescriptor( instance.__proto__, this.name ) || !Object.getOwnPropertyDescriptor( instance.__proto__, this.name ).set ) ) 
+		( !Object.getOwnPropertyDescriptor( Object.getPrototypeOf(instance), this.name ) || !Object.getOwnPropertyDescriptor( Object.getPrototypeOf(instance), this.name ).set ) ) 
 	{
 		for(var i = 0; i < value.length; ++i)
 			current_value[i] = value[i];
@@ -8196,15 +8281,25 @@ Inspector.prototype.addNumber = function(name, value, options)
 		that.values[name] = e.target.value;
 		//Inspector.onWidgetChange.call(that,this,name,ret, options);
 
-		if(options.callback)
+		if(options.callback && dragger.dragging)
 		{
 			var ret = options.callback.call( element, parseFloat( e.target.value) ); 
+			if( typeof(ret) == "number")
+				this.value = ret;
+		}
+		else if(options.finalCallback && !dragger.dragging)
+		{
+			var ret = options.finalCallback.call( element, parseFloat( e.target.value) ); 
 			if( typeof(ret) == "number")
 				this.value = ret;
 		}
 		LiteGUI.trigger( element, "wchange", e.target.value );
 		if(that.onchange)
 			that.onchange(name,e.target.value,element);
+	});
+
+	dragger.root.addEventListener("stop_dragging", function(e) {
+		LiteGUI.trigger( input, "change");
 	});
 
 	element.setValue = function( v, skip_event) { 
@@ -9745,39 +9840,252 @@ Inspector.prototype.addColor = function( name, value, options )
 			if(rgbelement)
 				rgbelement.innerHTML = LiteGUI.Inspector.parseColor(myColor.rgb);
 		});
-
-		myColor.onImmediateChange = function() 
-		{
+		input_element.addEventListener("focusin", function(e) { 
+			input_element.focused = true;
+		});
+		input_element.addEventListener("focusout", function(e) { 
+			input_element.focused = false;
 			var v = [ myColor.rgb[0] * myColor.rgb_intensity, myColor.rgb[1] * myColor.rgb_intensity, myColor.rgb[2] * myColor.rgb_intensity ];
-			//Inspector.onWidgetChange.call(that,element,name,v, options);
-			var event_data = [v.concat(), myColor.toString()];
-			LiteGUI.trigger( element, "wbeforechange", event_data );
-			that.values[name] = v;
-			if(options.callback)
-				options.callback.call( element, v.concat(), "#" + myColor.toString(), myColor );
-			LiteGUI.trigger( element, "wchange", event_data );
-			if(that.onchange) that.onchange(name, v.concat(), element);
-		}
-
-		//alpha dragger
-		options.step = options.step || 0.01;
-		options.dragger_class = "nano";
-
-		var dragger = new LiteGUI.Dragger(1, options);
-		element.querySelector('.wcontent').appendChild(dragger.root);
-		dragger.input.addEventListener("change", function(e)
-		{
-			var v = parseFloat( this.value );
-			myColor.rgb_intensity = v;
-			if (myColor.onImmediateChange)
-				myColor.onImmediateChange();
+			if(options.finalCallback)
+				options.finalCallback.call( element, v.concat(), "#" + myColor.toString(), myColor );
 		});
 
-		element.setValue = function(value,skip_event) { 
-			myColor.fromRGB(value[0],value[1],value[2]);
-			if(!skip_event)
-				LiteGUI.trigger( dragger.input, "change" ); 
+		if(options.add_dragger)
+		{
+			myColor.onImmediateChange = function(dragging) 
+			{
+				var v = [ myColor.rgb[0] * myColor.rgb_intensity, myColor.rgb[1] * myColor.rgb_intensity, myColor.rgb[2] * myColor.rgb_intensity ];
+				//Inspector.onWidgetChange.call(that,element,name,v, options);
+				var event_data = [v.concat(), myColor.toString()];
+				LiteGUI.trigger( element, "wbeforechange", event_data );
+				that.values[name] = v;
+				if(options.callback && dragging)
+					options.callback.call( element, v.concat(), "#" + myColor.toString(), myColor );
+				else if(options.finalCallback && !dragging)
+					options.finalCallback.call( element, v.concat(), "#" + myColor.toString(), myColor );
+				LiteGUI.trigger( element, "wchange", event_data );
+				if(that.onchange) that.onchange(name, v.concat(), element);
+			}
+	
+			//alpha dragger
+			options.step = options.step || 0.01;
+			options.dragger_class = "nano";
+
+			var dragger = new LiteGUI.Dragger(1, options);
+			element.querySelector('.wcontent').appendChild(dragger.root);
+			let callOnInmediateChange = function(dragging) {
+				if (myColor.onImmediateChange)
+					myColor.onImmediateChange(dragging);
+			}
+			let callOnStopDragging = function() {
+				if(!input_element.focused)
+				{
+					callOnInmediateChange(false);
+				}
+			}
+			dragger.root.addEventListener("stop_dragging", callOnStopDragging );
+			dragger.input.addEventListener("change", function(e)
+			{
+				var v = parseFloat( this.value );
+				myColor.rgb_intensity = v;
+				callOnInmediateChange(dragger.dragging);
+			});
+	
+			element.setValue = function(value,skip_event) { 
+				myColor.fromRGB(value[0],value[1],value[2]);
+				if(!skip_event)
+					LiteGUI.trigger( dragger.input, "change" ); 
+			};
+		}
+		else
+		{
+			myColor.onImmediateChange = function() 
+			{
+				var v = [ myColor.rgb[0] * myColor.rgb_intensity, myColor.rgb[1] * myColor.rgb_intensity, myColor.rgb[2] * myColor.rgb_intensity ];
+				//Inspector.onWidgetChange.call(that,element,name,v, options);
+				var event_data = [v.concat(), myColor.toString()];
+				LiteGUI.trigger( element, "wbeforechange", event_data );
+				that.values[name] = v;
+				if(options.callback)
+					options.callback.call( element, v.concat(), "#" + myColor.toString(), myColor );LiteGUI.trigger( element, "wchange", event_data );
+				if(that.onchange) that.onchange(name, v.concat(), element);
+			}
+			element.setValue = function(value) { 
+				myColor.fromRGB(value[0],value[1],value[2]);
+			};
+		}
+
+		element.getValue = function() { 
+			return value;
 		};
+	}
+	else
+	{
+		input_element.addEventListener("change", function(e) { 
+			var rgbelement = element.querySelector(".rgb-color");
+			if(rgbelement)
+				rgbelement.innerHTML = LiteGUI.Inspector.parseColor(myColor.rgb);
+		});
+	}
+
+	this.processElement(element, options);
+	return element;
+}
+
+Inspector.prototype.addColorPosition = function( name, value, options )
+{
+	options = this.processOptions(options);
+
+	value = value || [0.0,0.0,0.0];
+	var that = this;
+	this.values[name] = value;
+	
+	var code = "<input tabIndex='"+this.tab_index+"' id='colorpicker-"+name+"' class='color' value='"+(value[0]+","+value[1]+","+value[2])+"' "+(options.disabled?"disabled":"")+"/>";
+	this.tab_index++;
+
+	if(options.show_rgb)
+		code += "<span class='rgb-color'>"+Inspector.parseColor(value)+"</span>";
+	var element = this.createWidget(name,code, options);
+	this.append(element,options); //add now or jscolor dont work
+
+	//create jsColor 
+	var input_element = element.querySelector("input.color");
+	var myColor = null;
+
+	if( window.jscolor )
+	{
+
+		//SHOWS CONTEXTUAL MENU
+		//block focusing
+		/*
+		input_element.addEventListener("contextmenu", function(e) { 
+			if(e.button != 2) //right button
+				return false;
+			//create the context menu
+			var contextmenu = new LiteGUI.ContextMenu( ["Copy in HEX","Copy in RGBA"], { event: e, callback: inner_action });
+			e.preventDefault(); 
+			e.stopPropagation();
+
+			input_element.addEventListener("focus", block_focus , true);
+			setTimeout(function(){ input_element.removeEventListener("focus", block_focus , true);},1000);
+
+			return false;
+		},true);	
+
+		function block_focus(e)
+		{
+			e.stopPropagation();
+			e.stopImmediatePropagation();
+			e.preventDefault();
+			return false;
+		}
+
+		function inner_action(v)
+		{
+			if(v == "Copy in HEX")
+			{
+				LiteGUI.toClipboard( "in HEX");
+			}
+			else
+			{
+				LiteGUI.toClipboard( "in RGB");
+			}
+		}
+		*/
+
+		myColor = new jscolor.color(input_element);
+		myColor.pickerFaceColor = "#333";
+		myColor.pickerBorderColor = "black";
+		myColor.pickerInsetColor = "#222";
+		myColor.position = options.position || 0;
+
+		if(options.disabled) 
+			myColor.pickerOnfocus = false; //this doesnt work
+
+		if( value.constructor !== String && value.length && value.length > 2)
+		{
+			myColor.fromRGB(value[0],value[1],value[2]);
+		}
+
+		//update values in rgb format
+		input_element.addEventListener("change", function(e) { 
+			var rgbelement = element.querySelector(".rgb-color");
+			if(rgbelement)
+				rgbelement.innerHTML = LiteGUI.Inspector.parseColor(myColor.rgb);
+		});
+		input_element.addEventListener("focusin", function(e) { 
+			input_element.focused = true;
+		});
+		input_element.addEventListener("focusout", function(e) { 
+			input_element.focused = false;
+			if(options.finalCallback)
+				options.finalCallback.call( element, myColor.position, "#" + myColor.toString(), myColor );
+		});
+
+		if(options.add_dragger)
+		{
+			myColor.onImmediateChange = function(dragging) 
+			{
+				var v = [ myColor.rgb[0], myColor.rgb[1], myColor.rgb[2] ];
+				//Inspector.onWidgetChange.call(that,element,name,v, options);
+				var event_data = [v.concat(), myColor.toString()];
+				LiteGUI.trigger( element, "wbeforechange", event_data );
+				that.values[name] = v;
+				if(options.callback && dragging)
+					options.callback.call( element, myColor.position, "#" + myColor.toString(), myColor );
+				else if(options.finalCallback && !dragging)
+					options.finalCallback.call( element, myColor.position, "#" + myColor.toString(), myColor );
+				LiteGUI.trigger( element, "wchange", event_data );
+				if(that.onchange) that.onchange(name, v.concat(), element);
+			}
+	
+			//alpha dragger
+			options.step = options.step || 0.01;
+			options.dragger_class = "nano";
+
+			var dragger = new LiteGUI.Dragger(myColor.position, options);
+			element.querySelector('.wcontent').appendChild(dragger.root);
+			let callOnInmediateChange = function(dragging) {
+				if (myColor.onImmediateChange)
+					myColor.onImmediateChange(dragging);
+			}
+			let callOnStopDragging = function() {
+				if(!input_element.focused)
+				{
+					callOnInmediateChange(false);
+				}
+			}
+			dragger.root.addEventListener("stop_dragging", callOnStopDragging );
+			dragger.input.addEventListener("change", function(e)
+			{
+				var v = parseFloat( this.value );
+				myColor.position = v;
+				callOnInmediateChange(dragger.dragging);
+			});
+	
+			element.setValue = function(value,skip_event) { 
+				myColor.fromRGB(value[0],value[1],value[2]);
+				if(!skip_event)
+					LiteGUI.trigger( dragger.input, "change" ); 
+			};
+		}
+		else
+		{
+			myColor.onImmediateChange = function() 
+			{
+				var v = [ myColor.rgb[0] * myColor.rgb_intensity, myColor.rgb[1] * myColor.rgb_intensity, myColor.rgb[2] * myColor.rgb_intensity ];
+				//Inspector.onWidgetChange.call(that,element,name,v, options);
+				var event_data = [v.concat(), myColor.toString()];
+				LiteGUI.trigger( element, "wbeforechange", event_data );
+				that.values[name] = v;
+				if(options.callback)
+					options.callback.call( element, v.concat(), "#" + myColor.toString(), myColor );LiteGUI.trigger( element, "wchange", event_data );
+				if(that.onchange) that.onchange(name, v.concat(), element);
+			}
+			element.setValue = function(value) { 
+				myColor.fromRGB(value[0],value[1],value[2]);
+			};
+		}
 
 		element.getValue = function() { 
 			return value;
@@ -9808,6 +10116,8 @@ Inspector.prototype.addFile = function(name, value, options)
 	var content = element.querySelector(".wcontent");
 	content.style.position = "relative";
 	var input = element.querySelector(".wcontent input");
+	if (options.accept)
+		input.accept = options.accept;
 	var filename_element = element.querySelector(".wcontent .filename");
 	if(value)
 		filename_element.innerText = value.name;
@@ -10347,3 +10657,7 @@ Inspector.parseColor = function(color)
 }
 
 LiteGUI.Inspector = Inspector;
+})();
+
+/******/ })()
+;

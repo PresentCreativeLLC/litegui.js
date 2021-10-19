@@ -1,56 +1,66 @@
-YUI.add('api-filter', function (Y) {
+YUI.add('api-filter', (Y) =>
+{
 
-Y.APIFilter = Y.Base.create('apiFilter', Y.Base, [Y.AutoCompleteBase], {
-    // -- Initializer ----------------------------------------------------------
-    initializer: function () {
-        this._bindUIACBase();
-        this._syncUIACBase();
-    },
-    getDisplayName: function(name) {
+	Y.APIFilter = Y.Base.create('apiFilter', Y.Base, [Y.AutoCompleteBase], {
+		// -- Initializer ----------------------------------------------------------
+		initializer: function ()
+		{
+			this._bindUIACBase();
+			this._syncUIACBase();
+		},
+		getDisplayName: function(name)
+		{
 
-        Y.each(Y.YUIDoc.meta.allModules, function(i) {
-            if (i.name === name && i.displayName) {
-                name = i.displayName;
-            }
-        });
+			Y.each(Y.YUIDoc.meta.allModules, (i) =>
+			{
+				if (i.name === name && i.displayName)
+				{
+					name = i.displayName;
+				}
+			});
 
-        if (this.get('queryType') === 'elements') {
-            name = '&lt;' + name + '&gt;';
-        }
+			if (this.get('queryType') === 'elements')
+			{
+				name = '&lt;' + name + '&gt;';
+			}
 
-        return name;
-    }
+			return name;
+		}
 
-}, {
-    // -- Attributes -----------------------------------------------------------
-    ATTRS: {
-        resultHighlighter: {
-            value: 'phraseMatch'
-        },
+	}, {
+		// -- Attributes -----------------------------------------------------------
+		ATTRS: {
+			resultHighlighter: {
+				value: 'phraseMatch'
+			},
 
-        // May be set to "classes", "elements" or "modules".
-        queryType: {
-            value: 'classes'
-        },
+			// May be set to "classes", "elements" or "modules".
+			queryType: {
+				value: 'classes'
+			},
 
-        source: {
-            valueFn: function() {
-                var self = this;
-                return function(q) {
-                    var data = Y.YUIDoc.meta[self.get('queryType')],
-                        out = [];
-                    Y.each(data, function(v) {
-                        if (v.toLowerCase().indexOf(q.toLowerCase()) > -1) {
-                            out.push(v);
-                        }
-                    });
-                    return out;
-                };
-            }
-        }
-    }
-});
+			source: {
+				valueFn: function()
+				{
+					const self = this;
+					return function(q)
+					{
+						const data = Y.YUIDoc.meta[self.get('queryType')],
+							out = [];
+						Y.each(data, (v) =>
+						{
+							if (v.toLowerCase().indexOf(q.toLowerCase()) > -1)
+							{
+								out.push(v);
+							}
+						});
+						return out;
+					};
+				}
+			}
+		}
+	});
 
 }, '3.4.0', {requires: [
-    'autocomplete-base', 'autocomplete-highlighters', 'autocomplete-sources'
+	'autocomplete-base', 'autocomplete-highlighters', 'autocomplete-sources'
 ]});

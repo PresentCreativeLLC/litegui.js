@@ -48,12 +48,14 @@
 	*/
 
 	vertical-align: top;
+	display: flex;
 	min-height: 1.2em;
 	/*user-select: none;*/
 }
 
 .inspector:not(.one_line) .widget.even {
 	background-color: rgba(40,40,40,0.5);
+	display: flex;
 }
 
 
@@ -282,7 +284,9 @@
 	-webkit-user-select: none;
 	overflow: hidden;
 	white-space:nowrap;
-	width: 80px;
+	width: fit-content;
+	min-width: 80px;
+	flex-grow: 0;
 }
 
 .inspector.one_line .wname 
@@ -296,15 +300,12 @@
 }
 
 .inspector .wcontent {
-	display: inline-block;
+	display: inline-flex;
 	-moz-box-sizing: border-box;	
 	-webkit-box-sizing: border-box;	
 	box-sizing: border-box;
 	padding: 2px;
-
-	width: -webkit-calc( 100% - 80px );
-	width: -moz-calc( 100% - 80px );
-	width: calc( 100% - 80px );
+	flex-grow: 2;
 }
 
 .inspector.proportionalnamesize .wname {
@@ -322,12 +323,13 @@
 }
 
 .inspector .inputfield {
-	display: inline-block;
+	display: inline-flex;
 	background-color: #222;
 	border: 0;
 	border-top: 1px solid #000; 
 	border-bottom: 1px solid #3f3f3f; 
 	border-radius: 3px;	
+	width: 100%;
 }
 
 .inspector .wcontent .inputfield input:focus, .inspector .wcontent .inputfield textarea:focus
@@ -426,6 +428,7 @@
 .inspector .wcontent input.nano {
 	/*width: 22px;*/
 	width: 1.5em;
+	flex: 2;
 	/* margin-left: 3px; */
 }
 
@@ -466,7 +469,7 @@
 }
 
 .inspector .wcontent .checkbox {
-	width: 4em;
+	flex: 1;
 	display: inline-block;
 	background-color: #222;
 	border: 0;
@@ -549,6 +552,7 @@
 	display: inline-block;
 	vertical-align: top;
 	margin-left: 2px;
+	flex-grow: 2;
 	/*margin-right: 2px;*/
 }
 
@@ -580,6 +584,7 @@
 	vertical-align: top;
 	margin: 0 2px;
 	cursor: n-resize;
+	flex: 1;
 }
 
 .inspector .drag_widget.disabled {
@@ -596,9 +601,10 @@
 	border-bottom: 1px solid #666;
     border-top: 1px solid #111;
 
-	width: -moz-calc(100% - 40px);
-	width: -webkit-calc(100% - 40px);
-	width: calc(100% - 40px);
+	/* width: -moz-calc(100% - 70px); */
+	/* width: -webkit-calc(100% - 70px); */
+	/* width: calc(100% - 70px); */
+	flex-grow: 3;
 
 	user-select: text;
 	-moz-user-select: text;
@@ -685,10 +691,13 @@ button.wcombobutton {
 	padding: 0 4px 0 4px !important;
 	margin: 0 !important;
 	border-radius: 0 !important;
+	flex-grow: 1;
 }
 
 button.wcombobutton.selected {
 	background: #AAA;
+	color: #000;
+	text-shadow: none;
 }
 
 .inspector .wtag {

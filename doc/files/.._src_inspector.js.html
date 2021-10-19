@@ -508,7 +508,7 @@ Inspector.assignValue = function(value)
 		instance[this.name] = value;
 	else if( value &amp;&amp; value.length &amp;&amp; current_value &amp;&amp; current_value.length &amp;&amp; 
 		( !Object.getOwnPropertyDescriptor( instance, this.name ) || !Object.getOwnPropertyDescriptor( instance, this.name ).set ) &amp;&amp;  //no setters
-		( !Object.getOwnPropertyDescriptor( instance.__proto__, this.name ) || !Object.getOwnPropertyDescriptor( instance.__proto__, this.name ).set ) ) 
+		( !Object.getOwnPropertyDescriptor( Object.getPrototypeOf(instance), this.name ) || !Object.getOwnPropertyDescriptor( Object.getPrototypeOf(instance), this.name ).set ) ) 
 	{
 		for(var i = 0; i &lt; value.length; ++i)
 			current_value[i] = value[i];
