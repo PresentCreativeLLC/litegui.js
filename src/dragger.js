@@ -2,14 +2,21 @@
 {
 
 	/** *** DRAGGER **********/
-	function Dragger(value, options)
+	function Dragger(v, options)
 	{
+		let value = v;
 		if (value === null || value === undefined)
-		{value = 0;}
+		{
+			value = 0;
+		}
 		else if (value.constructor === String)
-		{value = parseFloat(value);}
+		{
+			value = parseFloat(value);
+		}
 		else if (value.constructor !== Number)
-		{value = 0;}
+		{
+			value = 0;
+		}
 
 		this.value = value;
 		const that = this;
@@ -43,12 +50,19 @@
 
 		input.addEventListener("keydown",(e) =>
 		{
-			if (e.keyCode == 38)
-			{inner_inc(1,e);}
-			else if (e.keyCode == 40)
-			{inner_inc(-1,e);}
+			const keyCode = e.key || e.keyCode;
+			if (keyCode == 38)
+			{
+				inner_inc(1,e);
+			}
+			else if (keyCode == 40)
+			{
+				inner_inc(-1,e);
+			}
 			else
-			{return;}
+			{
+				return;
+			}
 			e.stopPropagation();
 			e.preventDefault();
 			return true;
@@ -63,8 +77,17 @@
 		element.dragger = dragger;
 
 		dragger.addEventListener("mousedown",inner_down);
-		input.addEventListener("wheel",inner_wheel,false);
-		input.addEventListener("mousewheel",inner_wheel,false);
+
+		const inner_wheel = function(e)
+		{
+			if (document.activeElement !== input) {return;}
+			const delta = e.wheelDelta !== undefined ? e.wheelDelta : (e.deltaY ? -e.deltaY/3 : 0);
+			inner_inc(delta > 0 ? 1 : -1, e);
+			e.stopPropagation();
+			e.preventDefault();
+		};
+		input.addEventListener("wheel",inner_wheel.bind(input),false);
+		input.addEventListener("mousewheel",inner_wheel.bind(input),false);
 
 		let doc_binded = null;
 
@@ -109,17 +132,6 @@
 			return false;
 		}
 
-		function inner_wheel(e)
-		{
-			// Console.log("wheel!");
-			if (document.activeElement !== this)
-			{return;}
-			const delta = e.wheelDelta !== undefined ? e.wheelDelta : (e.deltaY ? -e.deltaY/3 : 0);
-			inner_inc(delta > 0 ? 1 : -1, e);
-			e.stopPropagation();
-			e.preventDefault();
-		}
-
 		function inner_up(e)
 		{
 			that.dragging = false;
@@ -138,22 +150,32 @@
 
 		function inner_inc(v,e)
 		{
+			let value = v;
 			if (!options.linear)
-			{v = v > 0 ? Math.pow(v,1.2) : Math.pow(Math.abs(v), 1.2) * -1;}
+			{
+				value = value > 0 ? Math.pow(value,1.2) : Math.pow(Math.abs(value), 1.2) * -1;
+			}
 			let scale = (options.step ? options.step : 1.0);
 			if (e && e.shiftKey)
-			{scale *= 10;}
+			{
+				scale *= 10;
+			}
 			else if (e && e.ctrlKey)
-			{scale *= 0.1;}
-			let value = parseFloat(input.value) + v * scale;
-			if (options.max != null && value > options.max)
-			{value = options.max;}
-			if (options.min != null && value < options.min)
-			{value = options.min;}
+			{
+				scale *= 0.1;
+			}
+			let result = parseFloat(input.value) + value * scale;
+			if (options.max != null && result > options.max)
+			{
+				result = options.max;
+			}
+			if (options.min != null && result < options.min)
+			{
+				result = options.min;
+			}
 
-			input.value = value.toFixed(precision);
-			if (options.units)
-			{input.value += options.units;}
+			input.value = result.toFixed(precision);
+			if (options.units) {input.value += options.units;}
 			LiteGUI.trigger(input,"change");
 		}
 	}
@@ -166,15 +188,12 @@
 
 	Dragger.prototype.setValue = function(v, skip_event)
 	{
-		v = parseFloat(v);
-		this.value = v;
-		if (this.options.precision)
-		{v = v.toFixed(this.options.precision);}
-		if (this.options.units)
-		{v += this.options.units;}
-		this.input.value = v;
-		if (!skip_event)
-		{LiteGUI.trigger(this.input, "change");}
+		let value = parseFloat(v);
+		this.value = value;
+		if (this.options.precision) {value = value.toFixed(this.options.precision);}
+		if (this.options.units) {value += this.options.units;}
+		this.input.value = value;
+		if (!skip_event) {LiteGUI.trigger(this.input, "change");}
 	};
 
 	Dragger.prototype.getValue = function()

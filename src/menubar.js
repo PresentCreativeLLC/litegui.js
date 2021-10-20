@@ -39,8 +39,7 @@
 	{
 		data = data || {};
 
-		if (typeof(data) == "function")
-		{data = { callback: data };}
+		if (typeof(data) == "function") {data = { callback: data };}
 
 		const prev_length = this.menu.length;
 
@@ -52,8 +51,7 @@
 
 		while (menu)
 		{
-			if (current_token > 5)
-			{throw ("Error: Menubar too deep");}
+			if (current_token > 5) {throw ("Error: Menubar too deep");}
 			// Token not found in this menu, create it
 			if (menu.length == current_pos)
 			{
@@ -96,8 +94,7 @@
 			current_pos++;
 		}
 
-		if (prev_length != this.menu.length)
-		{this.updateMenu();}
+		if (prev_length != this.menu.length) {this.updateMenu();}
 	};
 
 	Menubar.prototype.remove = function(path)
@@ -111,7 +108,7 @@
 		const index = menu.parent.children.indexOf(menu);
 		if (index != -1)
 		{menu.parent.children.splice(index, 1);}
-	},
+	};
 
 	Menubar.prototype.separator = function(path, order)
 	{
@@ -124,28 +121,25 @@
 	// Returns the menu entry that matches this path
 	Menubar.prototype.findMenu = function(path)
 	{
-		let tokens = path.split("/");
+		const tokens = path.split("/");
 		let current_token = 0;
 		let current_pos = 0;
 		let menu = this.menu;
 
 		while (menu)
 		{
-			// no more tokens, return last found menu
-			if (current_token == tokens.length)
-				{return menu;}
+			// No more tokens, return last found menu
+			if (current_token == tokens.length) {return menu;}
 
-			// this menu doesnt have more entries
-			if (menu.length <= current_pos)
-				{return null;}
+			// This menu doesn't have more entries
+			if (menu.length <= current_pos) {return null;}
 
-			if (tokens[ current_token ] == "*")
-				{return menu[ current_pos ].children;}
+			if (tokens[ current_token ] == "*") {return menu[ current_pos ].children;}
 
-			// token found in this menu, get inside for next token
+			// Token found in this menu, get inside for next token
 			if (tokens[ current_token ] == menu[ current_pos ].name)
 			{
-				if (current_token == tokens.length - 1) // last token
+				if (current_token == tokens.length - 1) // Last token
 				{
 					return menu[ current_pos ];
 				}
@@ -157,7 +151,7 @@
 
 			}
 
-			// check next entry in this menu
+			// Check next entry in this menu
 			current_pos++;
 		}
 		return null;
@@ -169,6 +163,36 @@
 		const that = this;
 
 		this.content.innerHTML = "";
+		const clickCallback = function(element, e)
+		{
+			const el = element;
+			const item = el.data;
+
+			if (item.data && item.data.callback && typeof(item.data.callback) == "function")
+			{
+				item.data.callback(item.data);
+			}
+
+			if (!that.is_open)
+			{
+				that.is_open = true;
+				that.showMenu(item, e, el);
+			}
+			else
+			{
+				that.is_open = false;
+				that.hidePanels();
+			}
+		};
+		const mouseOverCallback = function(element, e)
+		{
+			that.hidePanels();
+			if (that.is_open || that.auto_open)
+			{
+				const el = element;
+				that.showMenu(el.data, e, el);
+			}
+		};
 		for (const i in this.menu)
 		{
 			const element = document.createElement("li");
@@ -178,31 +202,8 @@
 			this.menu[i].element = element;
 
 			/* ON CLICK TOP MAIN MENU ITEM */
-			element.addEventListener("click", function(e)
-			{
-				const item = this.data;
-
-				if (item.data && item.data.callback && typeof(item.data.callback) == "function")
-				{item.data.callback(item.data);}
-
-				if (!that.is_open)
-				{
-					that.is_open = true;
-					that.showMenu(item, e, this);
-				}
-				else
-				{
-					that.is_open = false;
-					that.hidePanels();
-				}
-			});
-
-			element.addEventListener("mouseover", function(e)
-			{
-				that.hidePanels();
-				if (that.is_open || that.auto_open)
-				{that.showMenu(this.data, e, this);}
-			});
+			element.addEventListener("click", clickCallback.bind(undefined,element));
+			element.addEventListener("mouseover", mouseOverCallback.bind(undefined,element));
 		}
 	};
 
@@ -220,37 +221,99 @@
 	Menubar.prototype.showMenu = function(menu, e, root, is_submenu)
 	{
 
-		if (!is_submenu)
-		{this.hidePanels();}
+		if (!is_submenu) {this.hidePanels();}
 
-		if (!menu.children || !menu.children.length)
-		{return;}
+		if (!menu.children || !menu.children.length) {return;}
 
 		const that = this;
-		if (that.closing_by_leave)
-		{clearInterval(that.closing_by_leave);}
+		if (that.closing_by_leave) {clearInterval(that.closing_by_leave);}
 
 		const element = document.createElement("div");
 		element.className = "litemenubar-panel";
 
 		const sorted_entries = [];
-		for (var i in menu.children)
-		{sorted_entries.push(menu.children[i]);}
+		for (const i in menu.children)
+		{
+			sorted_entries.push(menu.children[i]);
+		}
 
 		if (this.sort_entries)
 		{
-sorted_entries.sort((a,b) => {
-			var a_order = 10;
-			var b_order = 10;
-			if (a && a.data && a.data.order != null) {a_order = a.data.order;}
-			if (a && a.separator && a.order != null) {a_order = a.order;}
-			if (b && b.data && b.data.order != null) {b_order = b.data.order;}
-			if (b && b.separator && b.order != null) {b_order = b.order;}
-			return a_order - b_order;
-		});
-}
+			sorted_entries.sort((a,b) =>
+			{
+				let a_order = 10;
+				let b_order = 10;
+				if (a && a.data && a.data.order != null) {a_order = a.data.order;}
+				if (a && a.separator && a.order != null) {a_order = a.order;}
+				if (b && b.data && b.data.order != null) {b_order = b.data.order;}
+				if (b && b.separator && b.order != null) {b_order = b.order;}
+				return a_order - b_order;
+			});
+		}
 
-		for (var i in sorted_entries)
+		/* ON CLICK SUBMENU ITEM */
+		const clickCallback = function(element,e)
+		{
+			const el = element;
+			const item = el.data;
+			if (item.data)
+			{
+				if (item.data.disabled) {return;}
+
+				// To change variables directly
+				if (item.data.instance && item.data.property)
+				{
+					if (item.data.type == "checkbox")
+					{
+						item.data.instance[item.data.property] = !item.data.instance[item.data.property];
+						if (item.data.instance[item.data.property])
+						{
+							el.classList.add("checked");
+						}
+						else
+						{
+							el.classList.remove("checked");
+						}
+					}
+					else if (item.data.hasOwnProperty("value"))
+					{
+						item.data.instance[item.data.property] = item.data.value;
+					}
+				}
+
+				// To have a checkbox behaviour
+				if (item.data.checkbox != null)
+				{
+					item.data.checkbox = !item.data.checkbox;
+					if (item.data.checkbox)
+					{
+						el.classList.add("checked");
+					}
+					else
+					{
+						el.classList.remove("checked");
+					}
+				}
+
+				// Execute a function
+				if (item.data.callback && typeof(item.data.callback) == "function")
+				{
+					item.data.callback(item.data);
+				}
+			}
+
+			// More menus
+			if (item.children && item.children.length)
+			{
+				that.showMenu(item, e, el, true);
+			}
+			else
+			{
+				that.is_open = false;
+				that.hidePanels();
+			}
+		};
+		for (const i in sorted_entries)
 		{
 			const item = document.createElement("p");
 			const menu_item = sorted_entries[i];
@@ -288,61 +351,10 @@ sorted_entries.sort((a,b) => {
 				{item.className += " disabled";}
 			}
 
-			/* ON CLICK SUBMENU ITEM */
-			item.addEventListener("click",function()
+			item.addEventListener("click", clickCallback.bind(undefined,item));
+
+			item.addEventListener("mouseenter",(e) =>
 			{
-				const item = this.data;
-				if (item.data)
-				{
-					if (item.data.disabled)
-					{return;}
-
-					// To change variables directly
-					if (item.data.instance && item.data.property)
-					{
-						if (item.data.type == "checkbox")
-						{
-							item.data.instance[item.data.property] = !item.data.instance[item.data.property];
-							if (item.data.instance[item.data.property])
-							{this.classList.add("checked");}
-							else
-							{this.classList.remove("checked");}
-						}
-						else if (item.data.hasOwnProperty("value"))
-						{
-							item.data.instance[item.data.property] = item.data.value;
-						}
-					}
-
-					// To have a checkbox behaviour
-					if (item.data.checkbox != null)
-					{
-						item.data.checkbox = !item.data.checkbox;
-						if (item.data.checkbox)
-						{this.classList.add("checked");}
-						else
-						{this.classList.remove("checked");}
-					}
-
-					// Execute a function
-					if (item.data.callback && typeof(item.data.callback) == "function")
-					{item.data.callback(item.data);}
-				}
-
-				// More menus
-				if (item.children && item.children.length)
-				{
-					that.showMenu(item, e, this, true);
-				}
-				else
-				{
-					that.is_open = false;
-					that.hidePanels();
-				}
-			});
-
-			item.addEventListener("mouseenter",(e)=> 
-{
 				/*
 				 *If( that.auto_open && this.classList.contains("has_submenu") )
 				 *	LiteGUI.trigger( this, "click" );
@@ -352,23 +364,26 @@ sorted_entries.sort((a,b) => {
 			element.appendChild(item);
 		}
 
-		element.addEventListener("mouseleave",(e)=> 
-{
-
+		element.addEventListener("mouseleave",(e) =>
+		{
 			if (that.closing_by_leave)
-			{clearInterval(that.closing_by_leave);}
+			{
+				clearInterval(that.closing_by_leave);
+			}
 
-			that.closing_by_leave = setTimeout(() 
-=> {
+			that.closing_by_leave = setTimeout(() =>
+			{
 				that.is_open = false;
 				that.hidePanels();
 			},LiteGUI.Menubar.closing_time);
 		});
 
-		element.addEventListener("mouseenter",(e)=> 
-{
+		element.addEventListener("mouseenter",(e) =>
+		{
 			if (that.closing_by_leave)
-			{clearInterval(that.closing_by_leave);}
+			{
+				clearInterval(that.closing_by_leave);
+			}
 			that.closing_by_leave = null;
 		});
 

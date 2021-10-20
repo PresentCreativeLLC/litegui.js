@@ -7,7 +7,7 @@
  */
 
 
-var LiteGUI = {
+const LiteGUI = {
 	root: null,
 	content: null,
 
@@ -78,18 +78,18 @@ var LiteGUI = {
 		modalbg.style.display = "none";
 
 		// Create menubar
-		if (options.menubar)
-		{this.createMenubar();}
+		if (options.menubar) {this.createMenubar();}
 
 		// Called before anything
-		if (options.gui_callback)
-		{options.gui_callback();}
+		if (options.gui_callback) {options.gui_callback();}
 
 		// External windows
 		window.addEventListener("beforeunload", (e) =>
 		{
 			for (const i in LiteGUI.windows)
-			{LiteGUI.windows[i].close();}
+			{
+				LiteGUI.windows[i].close();
+			}
 			LiteGUI.windows = [];
 		});
 	},
@@ -104,9 +104,10 @@ var LiteGUI = {
 	 */
 	trigger: function(element, event_name, params, origin)
 	{
+		// TODO: fix the deprecated elements
 		const evt = document.createEvent('CustomEvent');
 		evt.initCustomEvent(event_name, true,true, params); // CanBubble, cancelable, detail
-		evt.srcElement = origin;
+		evt.target = origin;
 		if (element.dispatchEvent)
 		{element.dispatchEvent(evt);}
 		else if (element.__events)
@@ -125,12 +126,9 @@ var LiteGUI = {
 	 */
 	bind: function(element, event, callback)
 	{
-		if (!element)
-		{throw ("Cannot bind to null");}
-		if (!event)
-		{throw ("Event bind missing");}
-		if (!callback)
-		{throw ("Bind callback missing");}
+		if (!element) {throw ("Cannot bind to null");}
+		if (!event) {throw ("Event bind missing");}
+		if (!callback) {throw ("Bind callback missing");}
 
 		if (element.constructor === String)
 		{element = document.querySelectorAll(element);}
@@ -138,17 +136,25 @@ var LiteGUI = {
 		if (element.constructor === NodeList || element.constructor === Array)
 		{
 			for (let i = 0; i < element.length; ++i)
-			{inner(element[i]);}
+			{
+				inner(element[i]);
+			}
 		}
 		else
-		{inner(element);}
+		{
+			inner(element);
+		}
 
 		function inner(element)
 		{
 			if (element.addEventListener)
-			{element.addEventListener(event, callback);}
+			{
+				element.addEventListener(event, callback);
+			}
 			else if (element.__events)
-			{element.__events.addEventListener(event, callback);}
+			{
+				element.__events.addEventListener(event, callback);
+			}
 			else
 			{
 				// Create a dummy HTMLentity so we can use it to bind HTML events
@@ -214,30 +220,37 @@ var LiteGUI = {
 	 * @method remove
 	 * @param {Object} litegui_element it also supports HTMLentity, selector string or Array of elements
 	 */
-	remove: function(element)
+	remove: function(litegui_element)
 	{
-		if (!element)
-		{return;}
+		if (!litegui_element) {return;}
 
-		if (element.constructor === String) // Selector
+		if (litegui_element.constructor === String) // Selector
 		{
-			const elements = document.querySelectorAll(element);
-			for (var i = 0; i < elements.length; ++i)
+			const elements = document.querySelectorAll(litegui_element);
+			for (let i = 0; i < elements.length; ++i)
 			{
-				var element = elements[i];
+				const element = elements[i];
 				if (element && element.parentNode)
-				{element.parentNode.removeChild(element);}
+				{
+					element.parentNode.removeChild(element);
+				}
 			}
 		}
-		if (element.constructor === Array || element.constructor === NodeList)
+		if (litegui_element.constructor === Array || litegui_element.constructor === NodeList)
 		{
-			for (var i = 0; i < element.length; ++i)
-			{LiteGUI.remove(element[i]);}
+			for (let i = 0; i < litegui_element.length; ++i)
+			{
+				LiteGUI.remove(litegui_element[i]);
+			}
 		}
-		else if (element.root && element.root.parentNode) // Ltiegui widget
-		{element.root.parentNode.removeChild(element.root);}
-		else if (element.parentNode) // Regular HTML entity
-		{element.parentNode.removeChild(element);}
+		else if (litegui_element.root && litegui_element.root.parentNode) // Ltiegui widget
+		{
+			litegui_element.root.parentNode.removeChild(litegui_element.root);
+		}
+		else if (litegui_element.parentNode) // Regular HTML entity
+		{
+			litegui_element.parentNode.removeChild(litegui_element);
+		}
 	},
 
 	/**
@@ -584,15 +597,26 @@ var LiteGUI = {
 	 */
 	requireScript: function(url, on_complete, on_error, on_progress, version)
 	{
-		if (!url)
-		{throw ("invalid URL");}
+		if (!url) {throw ("invalid URL");}
 
-		if (url.constructor === String)
-		{url = [url];}
+		if (url.constructor === String) {url = [url];}
 
 		let total = url.length;
 		const size = total;
 		const loaded_scripts = [];
+		const onload = function(script, e)
+		{
+			total--;
+			loaded_scripts.push(script);
+			if (total)
+			{
+				if (on_progress) {on_progress(script.original_src, script.num);}
+			}
+			else if (on_complete)
+			{
+				on_complete(loaded_scripts);
+			}
+		};
 
 		for (const i in url)
 		{
@@ -602,18 +626,7 @@ var LiteGUI = {
 			script.src = url[i] + (version ? "?version=" + version : "");
 			script.original_src = url[i];
 			script.async = false;
-			script.onload = function(e)
-			{
-				total--;
-				loaded_scripts.push(this);
-				if (total)
-				{
-					if (on_progress)
-					{on_progress(this.original_src, this.num);}
-				}
-				else if (on_complete)
-				{on_complete(loaded_scripts);}
-			};
+			script.onload = onload.bind(undefined, script);
 			if (on_error)
 			{
 				script.onerror = function(err)
@@ -680,14 +693,20 @@ var LiteGUI = {
 		if (id_class)
 		{
 			const t = id_class.split(" ");
-			for (var i = 0; i < t.length; i++)
+			for (let i = 0; i < t.length; i++)
 			{
 				if (t[i][0] == ".")
-				{elem.classList.add(t[i].substr(1));}
+				{
+					elem.classList.add(t[i].substr(1));
+				}
 				else if (t[i][0] == "#")
-				{elem.id = t[i].substr(1);}
+				{
+					elem.id = t[i].substr(1);
+				}
 				else
-				{elem.id = t[i];}
+				{
+					elem.id = t[i];
+				}
 			}
 		}
 		elem.root = elem;
@@ -701,15 +720,19 @@ var LiteGUI = {
 			{elem.setAttribute("style",style);}
 			else
 			{
-				for (var i in style)
-				{elem.style[i] = style[i];}
+				for (const i in style)
+				{
+					elem.style[i] = style[i];
+				}
 			}
 		}
 
 		if (events)
 		{
-			for (var i in events)
-			{elem.addEventListener(i, events[i]);}
+			for (const i in events)
+			{
+				elem.addEventListener(i, events[i]);
+			}
 		}
 		return elem;
 	},
@@ -730,17 +753,18 @@ var LiteGUI = {
 		elem = elem.childNodes[0]; // To get the node
 		if (values)
 		{
-			for (var i in values)
+			for (const i in values)
 			{
 				const subelem = elem.querySelector(i);
-				if (subelem)
-				{subelem.innerText = values[i];}
+				if (subelem) {subelem.innerText = values[i];}
 			}
 		}
 		if (style)
 		{
-			for (var i in style)
-			{elem.style[i] = style[i];}
+			for (const i in style)
+			{
+				elem.style[i] = style[i];
+			}
 		}
 		return elem;
 	},
@@ -761,7 +785,7 @@ var LiteGUI = {
 		if (id_class)
 		{
 			const t = id_class.split(" ");
-			for (var i = 0; i < t.length; i++)
+			for (let i = 0; i < t.length; i++)
 			{
 				if (t[i][0] == ".")
 				{elem.classList.add(t[i].substr(1));}
@@ -782,8 +806,10 @@ var LiteGUI = {
 			{elem.setAttribute("style",style);}
 			else
 			{
-				for (var i in style)
-				{elem.style[i] = style[i];}
+				for (const i in style)
+				{
+					elem.style[i] = style[i];
+				}
 			}
 		}
 		return elem;
@@ -792,11 +818,15 @@ var LiteGUI = {
 	getParents: function(element)
 	{
 		const elements = [];
-		while ((element = element.parentElement) !== null)
+		let curElement = element.parentElement;
+		while (curElement !== null)
 		{
 			if (element.nodeType !== Node.ELEMENT_NODE)
-			{continue;}
+			{
+				continue;
+			}
 			elements.push(elem);
+			curElement = curElement.parentElement;
 		}
 		return elements;
 	},
@@ -810,20 +840,23 @@ var LiteGUI = {
 
 		// Transfer style
 		const styles = document.querySelectorAll("link[rel='stylesheet'],style");
-		for (var i = 0; i < styles.length; i++)
-		{new_window.document.write(styles[i].outerHTML);}
+		for (let i = 0; i < styles.length; i++)
+		{
+			new_window.document.write(styles[i].outerHTML);
+		}
 
 		// Transfer scripts (optional because it can produce some errors)
 		if (options.scripts)
 		{
 			const scripts = document.querySelectorAll("script");
-			for (var i = 0; i < scripts.length; i++)
+			for (let i = 0; i < scripts.length; i++)
 			{
 				if (scripts[i].src) // Avoid inline scripts, otherwise a cloned website would be created
-				{new_window.document.write(scripts[i].outerHTML);}
+				{
+					new_window.document.write(scripts[i].outerHTML);
+				}
 			}
 		}
-
 
 		const content = options.content || "";
 		new_window.document.write("</head><body>"+content+"</body></html>");
@@ -924,17 +957,23 @@ var LiteGUI = {
 		const dialog = this.showMessage(content,options);
 		dialog.content.style.paddingBottom = "10px";
 		const buttons = dialog.content.querySelectorAll("button");
-		for (let i = 0; i < buttons.length; i++)
-		{buttons[i].addEventListener("click", inner);}
-		buttons[0].focus();
 
-		function inner(v)
+		const inner = (v) =>
 		{
-			var v = this.dataset["value"] == "yes";
+			const button = v.target;
+			const value = button.dataset["value"] == "yes";
 			dialog.close(); // Close before callback
 			if (callback)
-			{callback(v);}
+			{
+				callback(value);
+			}
+		};
+		for (let i = 0; i < buttons.length; i++)
+		{
+			const button = buttons[i];
+			button.addEventListener("click", inner);
 		}
+		buttons[0].focus();
 
 		return dialog;
 	},
@@ -967,36 +1006,38 @@ var LiteGUI = {
 		options.noclose = true;
 		const dialog = this.showMessage(content, options);
 
-		const buttons = dialog.content.querySelectorAll("button");
-		for (let i = 0; i < buttons.length; i++)
-		{buttons[i].addEventListener("click", inner);}
-
-		const input = dialog.content.querySelector("input,textarea");
-		input.addEventListener("keydown", inner_key, true);
-
-		function inner()
+		const inner = function(e)
 		{
+			const button = e.target;
 			let value = input.value;
-			if (this.dataset && this.dataset["value"] == "cancel")
-			{value = null;}
+			if (button.dataset && button.dataset["value"] == "cancel")
+			{
+				value = null;
+			}
 			dialog.close(); // Close before callback
-			if (callback)
-			{callback(value);}
-		}
+			if (callback) {callback(value);}
+		};
 
-		function inner_key(e)
+		const inner_key = function(e)
 		{
-			if (!e)
-			{e = window.event;}
+			if (!e) {e = window.event;}
 			const keyCode = e.keyCode || e.which;
 			if (keyCode == '13')
 			{
-				inner();
+				inner(e);
 				return false;
 			}
-			if (keyCode == '29')
-			{dialog.close();}
+			if (keyCode == '29') {dialog.close();}
+		};
+
+		const buttons = dialog.content.querySelectorAll("button");
+		for (let i = 0; i < buttons.length; i++)
+		{
+			buttons[i].addEventListener("click", inner);
 		}
+
+		const input = dialog.content.querySelector("input,textarea");
+		input.addEventListener("keydown", inner_key, true);
 
 		input.focus();
 		return dialog;
@@ -1018,9 +1059,11 @@ var LiteGUI = {
 		options.width = options.width || 280;
 		// Options.height = 100;
 		if (typeof(content) == "string")
-		{content = "<p>" + content + "</p>";}
+		{
+			content = "<p>" + content + "</p>";
+		}
 
-		for (var i in choices)
+		for (const i in choices)
 		{
 			content +="<button class='litebutton' data-value='"+i+"' style='width:45%; margin-left: 10px'>"+(choices[i].content || choices[i])+"</button>";
 		}
@@ -1029,15 +1072,17 @@ var LiteGUI = {
 		const dialog = this.showMessage(content,options);
 		dialog.content.style.paddingBottom = "10px";
 		const buttons = dialog.content.querySelectorAll("button");
-		for (var i = 0; i < buttons.length; i++)
-		{buttons[i].addEventListener("click", inner);}
 
-		function inner(v)
+		const inner = (v) =>
 		{
-			var v = choices[ this.dataset["value"] ];
+			const button = v.target;
+			const value = choices[ button.dataset["value"] ];
 			dialog.close(); // Close before callback
-			if (callback)
-			{callback(v);}
+			if (callback) {callback(value);}
+		};
+		for (let i = 0; i < buttons.length; i++)
+		{
+			buttons[i].addEventListener("click", inner);
 		}
 
 		return dialog;
@@ -1093,7 +1138,8 @@ var LiteGUI = {
 	 */
 	getUrlVars: function()
 	{
-		let vars = [], hash;
+		const vars = [];
+		let hash;
 		const hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
 		for (let i = 0; i < hashes.length; i++)
 		{
@@ -1212,19 +1258,31 @@ var LiteGUI = {
 
 			const v = object[i];
 			if (v == null)
-			{o[i] = null;}
+			{
+				o[i] = null;
+			}
 			else if (isFunction(v))
-			{continue;}
+			{
+				continue;
+			}
 			else if (typeof(v) == "number" || typeof(v) == "string")
-			{o[i] = v;}
+			{
+				o[i] = v;
+			}
 			else if (v.constructor == Float32Array) // Typed arrays are ugly when serialized
-			{o[i] = Array.apply([], v);} // Clone
+			{
+				o[i] = Array.apply([], v); // Clone
+			}
 			else if (isArray(v))
 			{
 				if (o[i] && o[i].constructor == Float32Array) // Reuse old container
-				{o[i].set(v);}
-				else
-				{o[i] = JSON.parse(JSON.stringify(v));} // V.slice(0); //not safe using slice because it doesnt clone content, only container
+				{
+					o[i].set(v);
+				}
+				else // Not safe using slice because it doesn't clone content, only container
+				{
+					o[i] = JSON.parse(JSON.stringify(v));
+				}
 			}
 			else // Slow but safe
 			{
@@ -1244,7 +1302,7 @@ var LiteGUI = {
 
 	safeName: function(str)
 	{
-		return String(str).replace(/[\s\.]/g, '');
+		return String(str).replace(/[\s.]/g, '');
 	},
 
 	// Those useful HTML unicode codes that I never remeber but I always need
@@ -1284,13 +1342,11 @@ var LiteGUI = {
 	 */
 	sizeToCSS: function(v)
 	{
-		if (v ===  undefined || v === null)
-		{return null;}
-		if (v.constructor === String)
-		{return v;}
-		if (v >= 0)
-		{return (v|0) + "px";}
-		return "calc( 100% - " + Math.abs(v|0) + "px )";
+		const value = v;
+		if (value ===  undefined || value === null) {return null;}
+		if (value.constructor === String) {return value;}
+		if (value >= 0) {return (value|0) + "px";}
+		return "calc( 100% - " + Math.abs(value|0) + "px )";
 	},
 
 	/**
@@ -1326,9 +1382,13 @@ var LiteGUI = {
 			evt.stopPropagation();
 			evt.preventDefault();
 			if (evt.type == "dragenter" && callback_enter)
-			{callback_enter(evt, this);}
+			{
+				callback_enter(evt, element);
+			}
 			if (evt.type == "dragexit" && callback_exit)
-			{callback_exit(evt, this);}
+			{
+				callback_exit(evt, element);
+			}
 		}
 
 		function onDrop(evt)
@@ -1342,7 +1402,9 @@ var LiteGUI = {
 
 			let r = undefined;
 			if (callback_drop)
-			{r = callback_drop(evt);}
+			{
+				r = callback_drop(evt);
+			}
 			if (r)
 			{
 				evt.stopPropagation();
@@ -1358,11 +1420,13 @@ Object.defineProperty(String.prototype, "template", {
 	value: function(data, eval_code)
 	{
 		let tpl = this;
-		let re = /{{([^}}]+)?}}/g, match;
-	    while (match = re.exec(tpl))
+		const re = /{{([^}}]+)?}}/g;
+		let match;
+	    while (match)
 		{
 			const str = eval_code ? (new Function("with(this) { try { return " + match[1] +"} catch(e) { return 'error';} }")).call(data) : data[match[1]];
 		    tpl = tpl.replace(match[0], str);
+			match = re.exec(tpl);
 	    }
 	    return tpl;
 	},
@@ -1403,9 +1467,9 @@ function purgeElement(d, skip)
 
 if (typeof escapeHtmlEntities == 'undefined')
 {
-	escapeHtmlEntities = function (text)
+	const escapeHtmlEntities = function (text)
 	{
-		return text.replace(/[\u00A0-\u2666<>\&]/g, (c) =>
+		return text.replace(/[\u00A0-\u2666<>&]/g, (c) =>
 		{
 			return '&' +
                 (escapeHtmlEntities.entityTable[c.charCodeAt(0)] || '#'+c.charCodeAt(0)) + ';';
@@ -1705,7 +1769,7 @@ function beautifyCode(code, reserved, skip_css)
 	});
 
 	// Strings
-	code = code.replace(/(\"(\\.|[^\"])*\")/g, (v) =>
+	code = code.replace(/("(\\.|[^"])*")/g, (v) =>
 	{
 		return "<span class='str'>" + v + "</span>";
 	});
@@ -1753,13 +1817,13 @@ function beautifyJSON(code, skip_css)
 	});
 
 	// Strings
-	code = code.replace(/(\"(\\.|[^\"])*\")/g, (v) =>
+	code = code.replace(/("(\\.|[^"])*")/g, (v) =>
 	{
 		return "<span class='str'>" + v + "</span>";
 	});
 
 	// Comments
-	code = code.replace(/(\/\/[a-zA-Z0-9\?\!\(\)_ ]*)/g, (v) =>
+	code = code.replace(/(\/\/[a-zA-Z0-9?!()_ ]*)/g, (v) =>
 	{
 		return "<span class='cmnt'>" + v + "</span>";
 	});

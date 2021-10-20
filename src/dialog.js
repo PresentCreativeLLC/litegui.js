@@ -44,8 +44,7 @@
 		this.content = options.content || "";
 
 		const panel = document.createElement("div");
-		if (options.id)
-		{panel.id = options.id;}
+		if (options.id) {panel.id = options.id;}
 
 		panel.className = "litedialog " + (options.className || "");
 		panel.data = this;
@@ -60,13 +59,13 @@
 				code += "<button class='litebutton mini-button minimize-button'>-</button>";
 				code += "<button class='litebutton mini-button maximize-button' style='display:none'></button>";
 			}
-			if (options.hide)
-			{code += "<button class='litebutton mini-button hide-button'></button>";}
-			if (options.detachable)
-			{code += "<button class='litebutton mini-button detach-button'></button>";}
+			if (options.hide) {code += "<button class='litebutton mini-button hide-button'></button>";}
+			if (options.detachable) {code += "<button class='litebutton mini-button detach-button'></button>";}
 
 			if (options.close || options.closable)
-			{code += "<button class='litebutton mini-button close-button'>"+ LiteGUI.special_codes.close +"</button>";}
+			{
+				code += "<button class='litebutton mini-button close-button'>"+ LiteGUI.special_codes.close +"</button>";
+			}
 			code += "</div>";
 		}
 
@@ -87,48 +86,58 @@
 		if (options.buttons)
 		{
 			for (const i in options.buttons)
-			{this.addButton(options.buttons[i].name, options.buttons[i]);}
+			{
+				this.addButton(options.buttons[i].name, options.buttons[i]);
+			}
 		}
 
-		// If(options.scroll == false)	this.content.style.overflow = "hidden";
-		if (options.scroll == true)
-		{this.content.style.overflow = "auto";}
+		if (options.scroll == true) {this.content.style.overflow = "auto";}
 
 		// Buttons *********************************
 		const close_button = panel.querySelector(".close-button");
 		if (close_button)
-		{close_button.addEventListener("click", this.close.bind(this));}
+		{
+			close_button.addEventListener("click", this.close.bind(this));
+		}
 
 		const maximize_button = panel.querySelector(".maximize-button");
 		if (maximize_button)
-		{maximize_button.addEventListener("click", this.maximize.bind(this));}
+		{
+			maximize_button.addEventListener("click", this.maximize.bind(this));
+		}
 
 		const minimize_button = panel.querySelector(".minimize-button");
 		if (minimize_button)
-		{minimize_button.addEventListener("click", this.minimize.bind(this));}
+		{
+			minimize_button.addEventListener("click", this.minimize.bind(this));
+		}
 
 		const hide_button = panel.querySelector(".hide-button");
 		if (hide_button)
-		{hide_button.addEventListener("click", this.hide.bind(this));}
+		{
+			hide_button.addEventListener("click", this.hide.bind(this));
+		}
 
 		const detach_button = panel.querySelector(".detach-button");
 		if (detach_button)
-		{detach_button.addEventListener("click", () => { that.detachWindow(); });}
+		{
+			detach_button.addEventListener("click", () => { that.detachWindow(); });
+		}
 
 		// Size, draggable, resizable, etc
 		this.enableProperties(options);
 
 		this.root.addEventListener("DOMNodeInsertedIntoDocument", ()=>
 		{
-			if (that.on_attached_to_DOM)
-			{that.on_attached_to_DOM();}
-			if (that.on_resize)
-			{that.on_resize();}
+			if (that.on_attached_to_DOM) {that.on_attached_to_DOM();}
+			if (that.on_resize) {that.on_resize();}
 		});
 		this.root.addEventListener("DOMNodeRemovedFromDocument", ()=>
 		{
 			if (that.on_detached_from_DOM)
-			{that.on_detached_from_DOM();}
+			{
+				that.on_detached_from_DOM();
+			}
 		});
 
 
@@ -143,11 +152,6 @@
 			parent.appendChild(this.root);
 			this.center();
 		}
-
-		/*
-		 * If(options.position) //not docked
-		 * 	this.setPosition( options.position[0], options.position[1] );
-		 */
 	};
 
 	/**
@@ -223,23 +227,19 @@
 		corner.className = "resizable-corner";
 		this.root.appendChild(corner);
 
-		footer.addEventListener("mousedown", inner_mouse);
-		corner.addEventListener("mousedown", inner_mouse, true);
-
 		const mouse = [0,0];
 		const that = this;
 
 		let is_corner = false;
 
-		function inner_mouse(e)
+		const inner_mouse = function(e)
 		{
-			// Console.log( getTime(), is_corner );
-
+			const el = e.target;
 			if (e.type == "mousedown")
 			{
 				document.body.addEventListener("mousemove", inner_mouse);
 				document.body.addEventListener("mouseup", inner_mouse);
-				is_corner = this == corner;
+				is_corner = el == corner;
 				mouse[0] = e.pageX;
 				mouse[1] = e.pageY;
 			}
@@ -252,8 +252,7 @@
 				const h = rect.height;
 				const newh = h - (mouse[1] - e.pageY);
 
-				if (is_corner)
-				{root.style.width = neww + "px";}
+				if (is_corner) {root.style.width = neww + "px";}
 				root.style.height = newh + "px";
 
 				mouse[0] = e.pageX;
@@ -261,7 +260,9 @@
 				that.content.style.height = "calc( 100% - 24px )";
 
 				if (that.on_resize && (w != neww || h != newh))
-				{that.on_resize(e,neww,newh);}
+				{
+					that.on_resize(e,neww,newh);
+				}
 			}
 			else if (e.type == "mouseup")
 			{
@@ -272,7 +273,10 @@
 			e.preventDefault();
 			e.stopPropagation();
 			return false;
-		}
+		};
+
+		footer.addEventListener("mousedown", inner_mouse);
+		corner.addEventListener("mousedown", inner_mouse, true);
 	};
 
 	Dialog.prototype.dockTo = function(parent, dock_type)
@@ -359,14 +363,19 @@
 
 		this.root.querySelector(".panel-footer").appendChild(button);
 
-		button.addEventListener("click", function(e)
+		const buttonCallback = function(e)
 		{
 			if (options.callback)
-			{options.callback(this);}
+			{
+				options.callback(button);
+			}
 
 			if (options.close)
-			{that.close();}
-		});
+			{
+				that.close();
+			}
+		};
+		button.addEventListener("click", buttonCallback.bind(button));
 
 		return button;
 	};
@@ -425,11 +434,13 @@
 
 		this.root.style.width = LiteGUI.Dialog.MINIMIZED_WIDTH + "px";
 
-		LiteGUI.bind(this, "closed", function()
+		const closeCallback = function(e)
 		{
-			LiteGUI.Dialog.minimized.splice(LiteGUI.Dialog.minimized.indexOf(this), 1);
+			const el = e.target;
+			LiteGUI.Dialog.minimized.splice(LiteGUI.Dialog.minimized.indexOf(el), 1);
 			LiteGUI.Dialog.arrangeMinimized();
-		});
+		};
+		LiteGUI.bind(this, "closed", closeCallback);
 
 		LiteGUI.Dialog.minimized.push(this);
 		LiteGUI.Dialog.arrangeMinimized();

@@ -203,12 +203,13 @@
 	Tabs.prototype.getTabIndex = function(id)
 	{
 		const tab = this.tabs[id];
-		if (!tab)
-		{return -1;}
+		if (!tab) {return -1;}
 		for (let i = 0; i < this.list.childNodes.length; i++)
 		{
 			if (this.list.childNodes[i] == tab.tab)
-			{return i;}
+			{
+				return i;
+			}
 		}
 		return -1;
 	};
@@ -294,17 +295,18 @@
 		if (this.options.autoswitch)
 		{
 			element.classList.add("autoswitch");
-			element.addEventListener("dragenter",function(e)
+			const dragEnterCallback = (e) =>
 			{
-				// Console.log("Enter",this.dataset["id"]);
+				const el = e.target;
 				if (that._timeout_mouseover)
 				{clearTimeout(that._timeout_mouseover);}
 				that._timeout_mouseover = setTimeout((()=>
 				{
-					LiteGUI.trigger(this,"click");
+					LiteGUI.trigger(el,"click");
 					that._timeout_mouseover = null;
 				}),500);
-			});
+			};
+			element.addEventListener("dragenter", dragEnterCallback);
 
 			element.addEventListener("dragleave",(e)=>
 			{
@@ -382,15 +384,17 @@
 
 		// When clicked
 		if (!options.button)
-		{element.addEventListener("click", Tabs.prototype.onTabClicked);}
+		{
+			element.addEventListener("click", Tabs.prototype.onTabClicked);
+		}
 		else
 		{
-			element.addEventListener("click", function(e)
+			const clickCallback = (e) =>
 			{
-				const tab_id = this.dataset["id"];
-				if (options.callback)
-				{options.callback(tab_id, e);}
-			});
+				const tab_id = e.target.dataset["id"];
+				if (options.callback) {options.callback(tab_id, e);}
+			};
+			element.addEventListener("click",clickCallback.bind(element));
 		}
 
 		element.options = options;
@@ -419,11 +423,9 @@
 		// Context menu
 		element.addEventListener("contextmenu", ((e) =>
 		{
-			if (e.button != 2) // Right button
-			{return false;}
+			if (e.button != 2) {return false;}// Right button
 			e.preventDefault();
-			if (options.callback_context)
-			{options.callback_context.call(tab_info);}
+			if (options.callback_context) {options.callback_context.call(tab_info);}
 			return false;
 		}));
 
@@ -472,11 +474,11 @@
 			that.current_tab[2].callback_leave)
 		{that.current_tab[2].callback_leave(that.current_tab[0], that.current_tab[1], that.current_tab[2]);}
 
-		var tab_id = this.dataset["id"];
+		const tab_id = this.dataset["id"];
 		let tab_content = null;
 
 		// Iterate tab labels
-		for (var i in that.tabs)
+		for (const i in that.tabs)
 		{
 			const tab_info = that.tabs[i];
 			if (i == tab_id)
@@ -493,8 +495,10 @@
 		}
 
 		const list = that.list.querySelectorAll("li.wtab");
-		for (var i = 0; i < list.length; ++i)
-		{list[i].classList.remove("selected");}
+		for (let i = 0; i < list.length; ++i)
+		{
+			list[i].classList.remove("selected");
+		}
 		this.classList.add("selected");
 
 		// Change tab
@@ -556,8 +560,11 @@
 			// Compute index
 			let index = 0;
 			let child = tab.tab;
-			while ((child = child.previousSibling) != null)
-			{index++;}
+			while (child != null)
+			{
+				index++;
+				child = child.previousSibling;
+			}
 
 			this.tabs_by_index[index] = tab;
 		}
@@ -587,10 +594,12 @@
 	Tabs.prototype.removeAllTabs = function(keep_plus)
 	{
 		const tabs = [];
-		for (var i in this.tabs)
-		{tabs.push(this.tabs[i]);}
+		for (const i in this.tabs)
+		{
+			tabs.push(this.tabs[i]);
+		}
 
-		for (var i in tabs)
+		for (const i in tabs)
 		{
 			const tab = tabs[i];
 			if (tab == this.plus_tab && keep_plus)
@@ -629,21 +638,24 @@
 		target_tabs.tabs[id] = tab;
 
 		if (index !== undefined)
-		{target_tabs.list.insertBefore(tab.tab, target_tabs.list.childNodes[index]);}
+		{
+			target_tabs.list.insertBefore(tab.tab, target_tabs.list.childNodes[index]);
+		}
 		else
-		{target_tabs.list.appendChild(tab.tab);}
+		{
+			target_tabs.list.appendChild(tab.tab);
+		}
 		target_tabs.root.appendChild(tab.content);
-		delete this.tabs[id];
+		this.tabs[id] = undefined;
 
 		let newtab = null;
 		for (const i in this.tabs)
 		{
 			newtab = i;
-			break;
+			if (newtab) {break;}
 		}
 
-		if (newtab)
-		{this.selectTab(newtab);}
+		if (newtab) {this.selectTab(newtab);}
 
 		tab.tab.classList.remove("selected");
 		target_tabs.selectTab(id);

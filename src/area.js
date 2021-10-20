@@ -201,7 +201,7 @@
 
 			if (sizes[0] == null)
 			{
-				var h = sizes[1];
+				let h = sizes[1];
 				if (typeof(h) == "number")
 				{h = sizes[1] + "px";}
 
@@ -214,7 +214,7 @@
 			}
 			else if (sizes[1] == null)
 			{
-				var h = sizes[0];
+				let h = sizes[0];
 				if (typeof(h) == "number")
 				{h = sizes[0] + "px";}
 
@@ -246,7 +246,7 @@
 
 			if (sizes[0] == null)
 			{
-				var w = sizes[1];
+				let w = sizes[1];
 				if (typeof(w) == "number")
 				{w = sizes[1] + "px";}
 				area1.root.style.width = "-moz-calc( 100% - " + w + splitinfo + " )";
@@ -258,7 +258,7 @@
 			}
 			else if (sizes[1] == null)
 			{
-				var w = sizes[0];
+				let w = sizes[0];
 				if (typeof(w) == "number")
 				{w = sizes[0] + "px";}
 
@@ -354,23 +354,25 @@
 
 	Area.prototype.showSection = function(num)
 	{
-		var section = this.sections[num];
+		let section = this.sections[num];
 		let size = 0;
 
-		if (section && section.root.style.display != "none")
-		{return;} // Already visible
+		if (section && section.root.style.display != "none") {return;} // Already visible
 
 		if (this.direction == "horizontal")
-		{size = section.root.style.width;}
+		{
+			size = section.root.style.width;
+		}
 		else
-		{size = section.root.style.height;}
+		{
+			size = section.root.style.height;
+		}
 
-		if (size.indexOf("calc") != -1)
-		{size = "50%";}
+		if (size.indexOf("calc") != -1) {size = "50%";}
 
 		for (const i in this.sections)
 		{
-			var section = this.sections[i];
+			section = this.sections[i];
 
 			if (i == num)
 			{section.root.style.display = "inline-block";}
@@ -383,8 +385,7 @@
 			}
 		}
 
-		if (this.splitbar)
-		{this.splitbar.style.display = "inline-block";}
+		if (this.splitbar) {this.splitbar.style.display = "inline-block";}
 
 		this.sendResizeEvent();
 	};
@@ -427,7 +428,7 @@
 
 			if (this.dynamic_section == area1)
 			{
-				var size = (area2.root.offsetWidth + delta);
+				let size = (area2.root.offsetWidth + delta);
 				if (size < min_size)
 				{size = min_size;}
 				area1.root.style.width = "-moz-calc( 100% - " + size + "px " + splitinfo + " )";
@@ -437,7 +438,7 @@
 			}
 			else
 			{
-				var size = (area1.root.offsetWidth - delta);
+				let size = (area1.root.offsetWidth - delta);
 				if (size < min_size)
 				{size = min_size;}
 				area2.root.style.width = "-moz-calc( 100% - " + size + "px " + splitinfo + " )";
@@ -450,7 +451,7 @@
 		{
 			if (this.dynamic_section == area1)
 			{
-				var size = (area2.root.offsetHeight - delta);
+				let size = (area2.root.offsetHeight - delta);
 				if (size < min_size)
 				{size = min_size;}
 				area1.root.style.height = "-moz-calc( 100% - " + size + "px " + splitinfo + " )";
@@ -460,7 +461,7 @@
 			}
 			else
 			{
-				var size = (area1.root.offsetHeight + delta);
+				let size = (area1.root.offsetHeight + delta);
 				if (size < min_size)
 				{size = min_size;}
 				area2.root.style.height = "-moz-calc( 100% - " + size + "px " + splitinfo + " )";
@@ -504,17 +505,6 @@
 		this.root.removeChild(this.sections[0].root);
 		this.root.removeChild(this.sections[1].root);
 
-		/*
-		 *While(main.childNodes.length > 0)
-		 *{
-		 *	var e = main.childNodes[0];
-		 *	this.root.appendChild(e);
-		 *}
-		 *
-		 *this.root.removeChild( this.sections[0].root );
-		 *this.root.removeChild( this.sections[1].root );
-		 */
-
 		this.sections = [];
 		this._computed_size = null;
 		this.onResize();
@@ -522,14 +512,15 @@
 
 	Area.prototype.add = function(v)
 	{
-		if (typeof(v) == "string")
+		let value = v;
+		if (typeof(value) == "string")
 		{
 			const element = document.createElement("div");
-			element.innerHTML = v;
-			v = element;
+			element.innerHTML = value;
+			value = element;
 		}
 
-		this.content.appendChild(v.root || v);
+		this.content.appendChild(value.root || value);
 	};
 
 	Area.prototype.query = function(v)
@@ -553,7 +544,7 @@
 
 		if (sections && sections.constructor === String)
 		{
-			var id = sections;
+			const id = sections;
 			sections = options;
 			options = legacy || {};
 			options.id = id;
@@ -590,9 +581,13 @@
 			{
 				if (sections[i].id) {section.id = sections[i].id;}
 				if (options.vertical)
-				{section.style.height = (typeof(sections[i].height) == "Number" ? sections[i].height.toFixed(1) + "%" : sections[i].height);}
+				{
+					section.style.height = (typeof(sections[i].height) == "number" ? sections[i].height.toFixed(1) + "%" : sections[i].height);
+				}
 				else
-				{section.style.width = (typeof(sections[i].width) == "Number" ? sections[i].width.toFixed(1) + "%" : sections[i].width);}
+				{
+					section.style.width = (typeof(sections[i].width) == "number" ? sections[i].width.toFixed(1) + "%" : sections[i].width);
+				}
 			}
 
 			section.add = function(element)

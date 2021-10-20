@@ -111,11 +111,10 @@
 		const tr = this.rows[ row ];
 		if (!tr)
 		{return;}
-		var cell = tr.childNodes[cell];
-		if (!cell)
-		{return;}
-		cell.innerHTML = data;
-		return cell;
+		const newCell = tr.childNodes[cell];
+		if (!newCell) {return;}
+		newCell.innerHTML = data;
+		return newCell;
 	};
 
 
@@ -168,7 +167,7 @@
 		if (this._must_update_header)
 		{
 			this.header = document.createElement("tr");
-			for (var i = 0; i < this.columns.length; ++i)
+			for (let i = 0; i < this.columns.length; ++i)
 			{
 				const column = this.columns[i];
 				const th = document.createElement("th");
@@ -190,7 +189,7 @@
 
 		if (reuse)
 		{
-			for (var i = 0; i < this.rows.length; ++i)
+			for (let i = 0; i < this.rows.length; ++i)
 			{
 				const data_row = this.data[i];
 				const tr = this.updateRow(i, data_row);
@@ -202,7 +201,7 @@
 			this.rows.length = 0;
 
 			// Create rows
-			for (var i = 0; i < this.data.length; ++i)
+			for (let i = 0; i < this.data.length; ++i)
 			{
 				const row = this.data[i];
 				this.addRow(row, true);

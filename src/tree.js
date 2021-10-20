@@ -1,42 +1,42 @@
-// enclose in a scope
+// Enclose in a scope
 (function()
 {
 
 
 	/**
- * To create interactive trees (useful for folders or hierarchies).<br>
- * Options are:<br>
- *	+ allow_multiselection: allow to select multiple elements using the shift key<br>
- *	+ allow_rename: double click to rename items in the tree<br>
- *	+ allow_drag: drag elements around<br>
- *	+ height<br>
- * Item data should be in the next format:<br>
- * {<br>
- *    id: unique_identifier,<br>
- *    content: what to show in the HTML (if omited id will be shown)<br>
- *	 children: []  array with another object with the same structure<br>
- *	 className: class<br>
- *    precontent: HTML inserted before the content<br>
- *	 visible: boolean, to hide it<br>
- *	 dataset: dataset for the element<br>
- *	 onDragData: callback in case the user drags this item somewhere else<br>
- * }<br>
- * To catch events use tree.root.addEventListener(...)<br>
- * item_selected : receive { item: node, data: node.data }<br>
- * item_dblclicked<br>
- * item_renamed<br>
- * item_moved<br>
- *
- * @class Tree
- * @constructor
- */
+	 * To create interactive trees (useful for folders or hierarchies).<br>
+	 * Options are:<br>
+	 *	+ allow_multiselection: allow to select multiple elements using the shift key<br>
+	 *	+ allow_rename: double click to rename items in the tree<br>
+	 *	+ allow_drag: drag elements around<br>
+	 *	+ height<br>
+	 * Item data should be in the next format:<br>
+	 * {<br>
+	 *    id: unique_identifier,<br>
+	 *    content: what to show in the HTML (if omited id will be shown)<br>
+	 *	 children: []  array with another object with the same structure<br>
+	 *	 className: class<br>
+	 *    precontent: HTML inserted before the content<br>
+	 *	 visible: boolean, to hide it<br>
+	 *	 dataset: dataset for the element<br>
+	 *	 onDragData: callback in case the user drags this item somewhere else<br>
+	 * }<br>
+	 * To catch events use tree.root.addEventListener(...)<br>
+	 * item_selected : receive { item: node, data: node.data }<br>
+	 * item_dblclicked<br>
+	 * item_renamed<br>
+	 * item_moved<br>
+	 *
+	 * @class Tree
+	 * @constructor
+	 */
 
 	/** ********* LiteTree *****************************/
 	function Tree(data, options, legacy)
 	{
 		if (legacy || (data && data.constructor === String))
 		{
-			let id = data;
+			const id = data;
 			data = options;
 			options = legacy || {};
 			options.id = id;
@@ -45,51 +45,49 @@
 
 		options = options || {};
 
-		let root = document.createElement("div");
+		const root = document.createElement("div");
 		this.root = root;
-		if (options.id)
-			{root.id = options.id;}
+		if (options.id) {root.id = options.id;}
 
 		root.className = "litetree";
 		this.tree = data;
-		let that = this;
+		const that = this;
 		options = options || {allow_rename: false, allow_drag: true, allow_multiselection: false};
 		this.options = options;
 		this.indent_offset = options.indent_offset || 0;
 
 		if (options.height)
-			{this.root.style.height = typeof(options.height) == "string" ? options.height : Math.round(options.height) + "px";}
+		{
+			this.root.style.height = typeof(options.height) == "string" ? options.height : Math.round(options.height) + "px";
+		}
 
 		this.collapsed_depth = 3;
-		if (options.collapsed_depth != null)
-			this.collapsed_depth = options.collapsed_depth;
+		if (options.collapsed_depth != null) { this.collapsed_depth = options.collapsed_depth; }
 
-		// bg click
-		root.addEventListener("click", (e)=> {
-			if (e.srcElement != that.root)
-				{return;}
-
-			if (that.onBackgroundClicked)
-				{that.onBackgroundClicked(e,that);}
+		// Bg click
+		root.addEventListener("click", (e)=>
+		{
+			if (e.target != that.root) {return;}
+			if (that.onBackgroundClicked) {that.onBackgroundClicked(e,that);}
 		});
 
-		// bg click right mouse
-		root.addEventListener("contextmenu", (e) => {
-			if (e.button != 2) // right button
-				{return false;}
+		// Bg click right mouse
+		root.addEventListener("contextmenu", (e) =>
+		{
+			if (e.button != 2) {return false;} // Right button
 
-			if (that.onContextMenu)
-				{that.onContextMenu(e);}
+			if (that.onContextMenu) {that.onContextMenu(e);}
 			e.preventDefault();
 			return false;
 		});
 
 
-		let root_item = this.createAndInsert(data, options, null);
+		const root_item = this.createAndInsert(data, options, null);
 		if (!root_item)
-			{throw("Error in LiteGUI.Tree, createAndInsert returned null");}
+		{
+			throw ("Error in LiteGUI.Tree, createAndInsert returned null");
+		}
 		root_item.className += " root_item";
-		// this.root.appendChild(root_item);
 		this.root_item = root_item;
 	}
 
@@ -104,14 +102,16 @@
 	Tree.prototype.updateTree = function(data)
 	{
 		this.root.innerHTML = "";
-		let root_item = this.createAndInsert(data, this.options, null);
+		const root_item = this.createAndInsert(data, this.options, null);
 		if (root_item)
 		{
 			root_item.className += " root_item";
 			this.root_item = root_item;
 		}
 		else
-			{this.root_item = null;}
+		{
+			this.root_item = null;
+		}
 	};
 
 	/**
@@ -127,63 +127,74 @@
 	{
 		if (!parent_id)
 		{
-			let root = this.root.childNodes[0];
+			const root = this.root.childNodes[0];
 			if (root)
-				{parent_id = root.dataset["item_id"];}
+			{
+				parent_id = root.dataset["item_id"];
+			}
 		}
 
-		let element = this.createAndInsert(data, options, parent_id, position);
+		const element = this.createAndInsert(data, options, parent_id, position);
 
-		// update parent collapse button
+		// Update parent collapse button
 		if (parent_id)
-			{this._updateListBox( this._findElement(parent_id) );} // no options here, this is the parent
-
+		{
+			this._updateListBox(this._findElement(parent_id)); // No options here, this is the parent
+		}
 
 		return element;
 	};
 
 	Tree.prototype.createAndInsert = function(data, options, parent_id, element_index)
 	{
-		// find parent
+		// Find parent
 		let parent_element_index = -1;
 		if (parent_id)
-			{parent_element_index = this._findElementIndex( parent_id );}
+		{
+			parent_element_index = this._findElementIndex(parent_id);
+		}
 		else if (parent_id === undefined)
-			{parent_element_index = 0;} // root
+		{
+			parent_element_index = 0; // Root
+		}
 
 		let parent = null;
 		let child_level = 0;
 
-		// find level
+		// Find level
 		if (parent_element_index != -1)
 		{
 			parent = this.root.childNodes[ parent_element_index ];
 			child_level = parseInt(parent.dataset["level"]) + 1;
 		}
 
-		// create
-		let element = this.createTreeItem(data, options, child_level);
-		if (!element) // error creating element
-			{return;}
+		// Create
+		const element = this.createTreeItem(data, options, child_level);
+		if (!element) {return;} // Error creating element
 
 		element.parent_id = parent_id;
 
-		// check
-		let existing_item = this.getItem(element.dataset["item_id"]);
-		if (existing_item)
-			{console.warn("There another item with the same ID in this tree");}
+		// Check
+		const existing_item = this.getItem(element.dataset["item_id"]);
+		if (existing_item) {console.warn("There another item with the same ID in this tree");}
 
-		// insert
+		// Insert
 		if (parent_element_index == -1)
-			{this.root.appendChild( element );}
+		{
+			this.root.appendChild(element);
+		}
 		else
-			{this._insertInside( element, parent_element_index, element_index );}
+		{
+			this._insertInside(element, parent_element_index, element_index);
+		}
 
-		// compute visibility according to parents
+		// Compute visibility according to parents
 		if (parent && !this._isNodeChildrenVisible(parent_id))
-			{element.classList.add("hidden");}
+		{
+			element.classList.add("hidden");
+		}
 
-		// children
+		// Children
 		if (data.children)
 		{
 			for (let i = 0; i < data.children.length; ++i)
@@ -192,38 +203,45 @@
 			}
 		}
 
-		// update collapse button
+		// Update collapse button
 		this._updateListBox(element, options, child_level);
 
 		if (options && options.selected)
-			{this.markAsSelected( element, true );}
+		{
+			this.markAsSelected(element, true);
+		}
 
 		return element;
 	};
 
-	// element to add, position of the parent node, position inside children, the depth level
+	// Element to add, position of the parent node, position inside children, the depth level
 	Tree.prototype._insertInside = function(element, parent_index, offset_index, level)
 	{
-		let parent = this.root.childNodes[ parent_index ];
+		const parent = this.root.childNodes[ parent_index ];
 		if (!parent)
-			{throw("No parent node found, index: " + parent_index +", nodes: " + this.root.childNodes.length );}
+		{
+			throw ("No parent node found, index: " + parent_index +", nodes: " + this.root.childNodes.length);
+		}
 
-		let parent_level = parseInt(parent.dataset["level"]);
-		let child_level = level !== undefined ? level : parent_level + 1;
+		const parent_level = parseInt(parent.dataset["level"]);
+		const child_level = level !== undefined ? level : parent_level + 1;
 
-		let indent = element.querySelector(".indentblock");
+		const indent = element.querySelector(".indentblock");
 		if (indent)
-			{indent.style.paddingLeft = ((child_level + this.indent_offset) * Tree.INDENT ) + "px";} // inner padding
-
+		{
+			indent.style.paddingLeft = ((child_level + this.indent_offset) * Tree.INDENT) + "px"; // Inner padding
+		}
 		element.dataset["level"] = child_level;
 
-		// under level nodes
-		for (var j = parent_index+1; j < this.root.childNodes.length; ++j)
+		// Under level nodes
+		for (let j = parent_index+1; j < this.root.childNodes.length; ++j)
 		{
-			let new_childNode = this.root.childNodes[j];
+			const new_childNode = this.root.childNodes[j];
 			if (!new_childNode.classList || !new_childNode.classList.contains("ltreeitem"))
-				{continue;}
-			let current_level = parseInt(new_childNode.dataset["level"]);
+			{
+				continue;
+			}
+			const current_level = parseInt(new_childNode.dataset["level"]);
 
 			if (current_level == child_level && offset_index)
 			{
@@ -231,7 +249,7 @@
 				continue;
 			}
 
-			// last position
+			// Last position
 			if (current_level < child_level || (offset_index === 0 && current_level === child_level))
 			{
 				this.root.insertBefore(element, new_childNode);
@@ -239,39 +257,41 @@
 			}
 		}
 
-		// ended
+		// Ended
 		this.root.appendChild(element);
 	};
 
 
 	Tree.prototype._isNodeChildrenVisible = function(id)
 	{
-		let node = this.getItem(id);
-		if (!node)
-			{return false;}
-		if (node.classList.contains("hidden"))
-			{return false;}
+		const node = this.getItem(id);
+		if (!node) {return false;}
+		if (node.classList.contains("hidden")) {return false;}
 
-		// check listbox
-		let listbox = node.querySelector(".listbox");
-		if (!listbox)
-			{return true;}
-		if (listbox.getValue() == "closed")
-			{return false;}
+		// Check listboxes
+		const listbox = node.querySelector(".listbox");
+		if (!listbox) {return true;}
+		if (listbox.getValue() == "closed") {return false;}
 		return true;
 	};
 
 	Tree.prototype._findElement = function(id)
 	{
 		if (!id || id.constructor !== String)
-			{throw("findElement param must be string with item id");}
+		{
+			throw ("findElement param must be string with item id");
+		}
 		for (let i = 0; i < this.root.childNodes.length; ++i)
 		{
-			let childNode = this.root.childNodes[i];
+			const childNode = this.root.childNodes[i];
 			if (!childNode.classList || !childNode.classList.contains("ltreeitem"))
-				{continue;}
+			{
+				continue;
+			}
 			if (childNode.classList.contains("ltreeitem-" + id))
-				{return childNode;}
+			{
+				return childNode;
+			}
 		}
 
 		return null;
@@ -281,17 +301,23 @@
 	{
 		for (let i = 0; i < this.root.childNodes.length; ++i)
 		{
-			let childNode = this.root.childNodes[i];
+			const childNode = this.root.childNodes[i];
 			if (!childNode.classList || !childNode.classList.contains("ltreeitem"))
-				{continue;}
+			{
+				continue;
+			}
 
 			if (typeof(id) === "string")
 			{
 				if (childNode.dataset["item_id"] === id)
-					{return i;}
+				{
+					return i;
+				}
 			}
 			else if (childNode === id)
-				{return i;}
+			{
+				return i;
+			}
 		}
 
 		return -1;
@@ -300,47 +326,55 @@
 	Tree.prototype._findElementLastChildIndex = function(start_index)
 	{
 		if (start_index == -1)
-			{return -1;}
+		{
+			return -1;
+		}
 
-		let level = parseInt(this.root.childNodes[ start_index ].dataset["level"]);
+		const level = parseInt(this.root.childNodes[ start_index ].dataset["level"]);
 
 		for (let i = start_index+1; i < this.root.childNodes.length; ++i)
 		{
-			let childNode = this.root.childNodes[i];
+			const childNode = this.root.childNodes[i];
 			if (!childNode.classList || !childNode.classList.contains("ltreeitem"))
-				{continue;}
+			{
+				continue;
+			}
 
-			let current_level = parseInt(childNode.dataset["level"]);
+			const current_level = parseInt(childNode.dataset["level"]);
 			if (current_level == level)
-				{return i;}
+			{
+				return i;
+			}
 		}
 
 		return -1;
 	};
 
-	// returns child elements (you can control levels)
+	// Returns child elements (you can control levels)
 	Tree.prototype._findChildElements = function(id, only_direct)
 	{
-		let parent_index = this._findElementIndex(id);
+		const parent_index = this._findElementIndex(id);
 		if (parent_index == -1)
-			{return;}
+		{
+			return;
+		}
 
-		let parent = this.root.childNodes[ parent_index ];
-		let parent_level = parseInt(parent.dataset["level"]);
+		const parent = this.root.childNodes[ parent_index ];
+		const parent_level = parseInt(parent.dataset["level"]);
 
-		let result = [];
+		const result = [];
 
 		for (let i = parent_index + 1; i < this.root.childNodes.length; ++i)
 		{
-			let childNode = this.root.childNodes[i];
+			const childNode = this.root.childNodes[i];
 			if (!childNode.classList || !childNode.classList.contains("ltreeitem"))
-				{continue;}
+			{
+				continue;
+			}
 
-			let current_level = parseInt(childNode.dataset["level"]);
-			if (only_direct && current_level > (parent_level + 1))
-				{continue;}
-			if (current_level <= parent_level)
-				{return result;}
+			const current_level = parseInt(childNode.dataset["level"]);
+			if (only_direct && current_level > (parent_level + 1)) {continue;}
+			if (current_level <= parent_level) {return result;}
 
 			result.push(childNode);
 		}
@@ -358,23 +392,27 @@
 
 		options = options || this.options;
 
-		let root = document.createElement("li");
+		const root = document.createElement("li");
 		root.className = "ltreeitem";
-		let that = this;
+		const that = this;
 
-		// ids are not used because they could collide, classes instead
+		// IDs are not used because they could collide, classes instead
 		if (data.id)
 		{
-			let safe_id = data.id.replace(/\s/g,"_");
+			const safe_id = data.id.replace(/\s/g,"_");
 			root.className += " ltreeitem-" + safe_id;
 			root.dataset["item_id"] = data.id;
 		}
 
 		if (data.dataset)
-			{for(var i in data.dataset)
-				root.dataset[i] = data.dataset[i];}
+		{
+			for (const i in data.dataset)
+			{
+				root.dataset[i] = data.dataset[i];
+			}
+		}
 
-		data.DOM = root; // double link
+		data.DOM = root; // Double link
 		root.data = data;
 
 		if (level !== undefined)
@@ -383,69 +421,52 @@
 			root.classList.add("ltree-level-" + level);
 		}
 
-		let title_element = document.createElement("div");
+		const title_element = document.createElement("div");
 		title_element.className = "ltreeitemtitle";
 		if (data.className)
-			{title_element.className += " " + data.className;}
+		{
+			title_element.className += " " + data.className;
+		}
 
 		title_element.innerHTML = "<span class='precontent'></span><span class='indentblock'></span><span class='collapsebox'></span><span class='incontent'></span><span class='postcontent'></span>";
 
-		let content = data.content || data.id || "";
+		const content = data.content || data.id || "";
 		title_element.querySelector(".incontent").innerHTML = content;
 
-		if (data.precontent)
-			{title_element.querySelector(".precontent").innerHTML = data.precontent;}
+		if (data.precontent) {title_element.querySelector(".precontent").innerHTML = data.precontent;}
 
-		if (data.postcontent)
-			{title_element.querySelector(".postcontent").innerHTML = data.postcontent;}
+		if (data.postcontent) {title_element.querySelector(".postcontent").innerHTML = data.postcontent;}
 
 		if (data.dataset)
-			{for(var i in data.dataset)
-				root.dataset[i] = data.dataset[i];}
+		{
+			for (const i in data.dataset)
+			{
+				root.dataset[i] = data.dataset[i];
+			}
+		}
 
 		root.appendChild(title_element);
 		root.title_element = title_element;
 
 		if (data.visible === false)
-			{root.style.display = "none";}
+		{
+			root.style.display = "none";
+		}
 
-		// var row = root.querySelector(".ltreeitemtitle .incontent");
-		let row = root;
-		row.addEventListener("click", onNodeSelected);
-		row.addEventListener("dblclick",onNodeDblClicked);
-		row.addEventListener("contextmenu", function(e) 
-{
-			let item = this;
-			e.preventDefault();
-			e.stopPropagation();
-
-			if (e.button != 2) // right button
-				{return;}
-
-			if (that.onItemContextMenu)
-				{return that.onItemContextMenu(e, { item: item, data: item.data} );}
-
-			return false;
-		});
-
-		function onNodeSelected(e)
+		const row = root;
+		const onNodeSelected = function(e)
 		{
 			e.preventDefault();
 			e.stopPropagation();
 
-			/*
-			 * var title = this.parentNode;
-			 * var item = title.parentNode;
-			 */
-			let node = this;
-			let title = node.title_element;
+			const node = row;
+			const title = node.title_element;
 
-			if (title._editing)
-				{return;}
+			if (title._editing) {return;}
 
 			if (e.ctrlKey && that.options.allow_multiselection)
 			{
-				// check if selected
+				// Check if selected
 				if (that.isNodeSelected(node))
 				{
 					node.classList.remove("selected");
@@ -454,42 +475,41 @@
 					return;
 				}
 
-				// mark as selected
+				// Mark as selected
 				that.markAsSelected(node, true);
 				LiteGUI.trigger(that, "item_add_to_selection", { item: node, data: node.data});
 				LiteGUI.trigger(that.root, "item_add_to_selection", { item: node, data: node.data}); // LEGACY
-				var r = false;
+				let r = false;
 				if (data.callback)
-					{r = data.callback.call(that,node);}
+				{
+					r = data.callback.call(that,node);
+				}
 
 				if (!r && that.onItemAddToSelection)
-					{that.onItemAddToSelection(node.data, node);}
+				{
+					that.onItemAddToSelection(node.data, node);
+				}
 			}
 			if (e.shiftKey && that.options.allow_multiselection)
 			{
 				/*
-				 * select from current selection till here
+				 * Select from current selection till here
 				 * current
 				 */
-				let last_item = that.getSelectedItem();
-				if (!last_item)
-					{return;}
+				const last_item = that.getSelectedItem();
+				if (!last_item) {return;}
 
-				if (last_item === node)
-					{return;}
+				if (last_item === node) {return;}
 
-				let nodeList = Array.prototype.slice.call(last_item.parentNode.children);
-				let last_index = nodeList.indexOf(last_item);
-				let current_index = nodeList.indexOf(node);
+				const nodeList = Array.prototype.slice.call(last_item.parentNode.children);
+				const last_index = nodeList.indexOf(last_item);
+				const current_index = nodeList.indexOf(node);
 
-				let items = current_index > last_index ? nodeList.slice(last_index, current_index) : nodeList.slice(current_index, last_index);
-				for (var i = 0; i < items.length; ++i)
+				const items = current_index > last_index ? nodeList.slice(last_index, current_index) : nodeList.slice(current_index, last_index);
+				for (let i = 0; i < items.length; ++i)
 				{
-					let item = items[i];
-					/*
-					 * console.log(item);
-					 * mark as selected
-					 */
+					const item = items[i];
+					// Mark as selected
 					that.markAsSelected(item, true);
 					LiteGUI.trigger(that, "item_add_to_selection", { item: item, data: item.data });
 					LiteGUI.trigger(that.root, "item_add_to_selection", { item: item, data: item.data }); // LEGACY
@@ -497,26 +517,30 @@
 			}
 			else
 			{
-				// mark as selected
+				// Mark as selected
 				that.markAsSelected(node);
 
-				that._skip_scroll = true; // avoid scrolling while user clicks something
+				that._skip_scroll = true; // Svoid scrolling while user clicks something
 				LiteGUI.trigger(that, "item_selected", { item: node, data: node.data });
 				LiteGUI.trigger(that.root, "item_selected", { item: node, data: node.data }); // LEGACY
-				var r = false;
+				let r = false;
 				if (data.callback)
-					{r = data.callback.call(that,node);}
+				{
+					r = data.callback.call(that,node);
+				}
 
 				if (!r && that.onItemSelected)
-					{that.onItemSelected(node.data, node);}
+				{
+					that.onItemSelected(node.data, node);
+				}
 				that._skip_scroll = false;
 			}
-		}
+		};
 
-		function onNodeDblClicked(e)
+		const onNodeDblClicked = function(e)
 		{
-			let node = this; // this.parentNode;
-			let title = node.title_element.querySelector(".incontent");
+			const node = row;
+			const title = node.title_element.querySelector(".incontent");
 
 			LiteGUI.trigger(that, "item_dblclicked", node);
 			LiteGUI.trigger(that.root, "item_dblclicked", node); // LEGACY
@@ -525,29 +549,28 @@
 			{
 				title._editing = true;
 				title._old_name = title.innerHTML;
-				let that2 = title;
+				const that2 = title;
 				title.innerHTML = "<input type='text' value='" + title.innerHTML + "' />";
-				let input = title.querySelector("input");
+				const input = title.querySelector("input");
 
-				// loose focus when renaming
-				input.addEventListener("blur",(e) => {
-					let new_name = e.target.value;
-					setTimeout(() => { that2.innerHTML = new_name; },1); // bug fix, if I destroy input inside the event, it produce a NotFoundError
-					// item.node_name = new_name;
+				// Loose focus when renaming
+				input.addEventListener("blur",(e) =>
+				{
+					const new_name = e.target.value;
+					setTimeout(() => { that2.innerHTML = new_name; },1); // Bug fix, if I destroy input inside the event, it produce a NotFoundError
 					delete that2._editing;
 					LiteGUI.trigger(that.root, "item_renamed", { old_name: that2._old_name, new_name: new_name, item: node, data: node.data });
 					delete that2._old_name;
 				});
 
-				// finishes renaming
-				input.addEventListener("keydown", function(e) 
-{
-					if (e.keyCode != 13)
-						{return;}
-					this.blur();
+				// Finishes renaming
+				input.addEventListener("keydown", (e) =>
+				{
+					if (e.keyCode != 13) {return;}
+					input.blur();
 				});
 
-				// set on focus
+				// Set on focus
 				input.focus();
 
 				e.preventDefault();
@@ -555,102 +578,105 @@
 
 			e.preventDefault();
 			e.stopPropagation();
-		}
+		};
+		row.addEventListener("click", onNodeSelected.bind(row));
+		row.addEventListener("dblclick",onNodeDblClicked.bind(row));
+		const contextMenuCallback = function(e)
+		{
+			const item = row;
+			e.preventDefault();
+			e.stopPropagation();
 
-		// dragging element on tree
-		let draggable_element = title_element;
+			if (e.button != 2) {return;} // Right button
+
+			if (that.onItemContextMenu)
+			{
+				return that.onItemContextMenu(e, { item: item, data: item.data});
+			}
+
+			return false;
+		};
+		row.addEventListener("contextmenu", contextMenuCallback);
+
+		// Dragging element on tree
+		const draggable_element = title_element;
 		if (this.options.allow_drag)
 		{
 			draggable_element.draggable = true;
 
-			// starts dragging this element
-			draggable_element.addEventListener("dragstart", function(ev) 
-{
-				/*
-				 * this.removeEventListener("dragover", on_drag_over ); //avoid being drag on top of himself
-				 * ev.dataTransfer.setData("node-id", this.parentNode.id);
-				 */
+			// Starts dragging this element
+			draggable_element.addEventListener("dragstart", (ev) =>
+			{
 				ev.dataTransfer.setData("item_id", this.parentNode.dataset["item_id"]);
-				if (!data.onDragData)
-					{return;}
+				if (!data.onDragData) {return;}
 
-				let drag_data =	data.onDragData();
+				const drag_data = data.onDragData();
 				if (drag_data)
 				{
-					for (let i in drag_data)
-						{ev.dataTransfer.setData(i,drag_data[i]);}
+					for (const i in drag_data)
+					{
+						ev.dataTransfer.setData(i,drag_data[i]);
+					}
 				}
 			});
 		}
 
 		let count = 0;
 
-		// something being dragged entered
-		draggable_element.addEventListener("dragenter", (ev)
-		=> {
+		// Something being dragged entered
+		draggable_element.addEventListener("dragenter", (ev) =>
+		{
 			ev.preventDefault();
-			if (data.skipdrag)
-				{return false;}
+			if (data.skipdrag) {return false;}
 
-			if (count == 0)
-				{title_element.classList.add("dragover");}
+			if (count == 0) {title_element.classList.add("dragover");}
 			count++;
 		});
 
-		draggable_element.addEventListener("dragleave", (ev)
-		=> {
+		draggable_element.addEventListener("dragleave", (ev) =>
+		{
 			ev.preventDefault();
-			// console.log(data.id);
 			count--;
 			if (count == 0)
-				{title_element.classList.remove("dragover");}
-			// if(ev.srcElement == this) return;
+			{
+				title_element.classList.remove("dragover");
+			}
 		});
 
-		// test if allows to drag stuff on top?
+		// Test if allows to drag stuff on top?
 		draggable_element.addEventListener("dragover", on_drag_over);
 		function on_drag_over(ev)
 		{
 			ev.preventDefault();
 		}
 
-		draggable_element.addEventListener("drop", function (ev)
+		draggable_element.addEventListener("drop", (ev) =>
 		{
+			const el = ev.target;
 			title_element.classList.remove("dragover");
 			ev.preventDefault();
-			if (data.skipdrag)
-				{return false;}
+			if (data.skipdrag) {return false;}
 
-			let item_id = ev.dataTransfer.getData("item_id");
+			const item_id = ev.dataTransfer.getData("item_id");
 
-			// var data = ev.dataTransfer.getData("Text");
 			if (!item_id)
 			{
-				LiteGUI.trigger(that.root, "drop_on_item", { item: this, event: ev });
-				if (that.onDropItem)
-					{that.onDropItem( ev, this.parentNode.data );}
+				LiteGUI.trigger(that.root, "drop_on_item", { item: el, event: ev });
+				if (that.onDropItem) {that.onDropItem(ev, el.parentNode.data);}
 				return;
 			}
 
-			// try
-			{
-				let parent_id = this.parentNode.dataset["item_id"];
+			const parent_id = el.parentNode.dataset["item_id"];
 
-				if (!that.onMoveItem || (that.onMoveItem && that.onMoveItem(that.getItem(item_id), that.getItem(parent_id)) != false))
+			if (!that.onMoveItem || (that.onMoveItem && that.onMoveItem(that.getItem(item_id), that.getItem(parent_id)) != false))
+			{
+				if (that.moveItem(item_id, parent_id))
 				{
-					if (that.moveItem(item_id, parent_id))
-						{LiteGUI.trigger( that.root, "item_moved", { item: that.getItem( item_id ), parent_item: that.getItem( parent_id ) } );}
+					LiteGUI.trigger(that.root, "item_moved", { item: that.getItem(item_id), parent_item: that.getItem(parent_id) });
 				}
 			}
-			/*
-			 *catch (err)
-			 *{
-			 *	console.error("Error: " + err );
-			 *}
-			 */
 
-			if (that.onDropItem)
-				{that.onDropItem( ev, this.parentNode.data );}
+			if (that.onDropItem) {that.onDropItem(ev, el.parentNode.data);}
 		});
 
 		return root;
@@ -666,27 +692,34 @@
 	{
 		for (let i = 0; i < this.root.childNodes.length; ++i)
 		{
-			let childNode = this.root.childNodes[i]; // ltreeitem
+			const childNode = this.root.childNodes[i]; // Ltreeitem
 			if (!childNode.classList || !childNode.classList.contains("ltreeitem"))
-				{continue;}
+			{
+				continue;
+			}
 
-			let content = childNode.querySelector(".incontent");
-			if (!content)
-				{continue;}
+			const content = childNode.querySelector(".incontent");
+			if (!content) {continue;}
 
-			let str = content.innerHTML.toLowerCase();
+			const str = content.innerHTML.toLowerCase();
 
 			if (!name || str.indexOf(name.toLowerCase()) != -1)
 			{
 				if (childNode.data && childNode.data.visible !== false)
-					{childNode.classList.remove("filtered");}
-				let indent = childNode.querySelector(".indentblock");
+				{
+					childNode.classList.remove("filtered");
+				}
+				const indent = childNode.querySelector(".indentblock");
 				if (indent)
 				{
 					if (name)
-						{indent.style.paddingLeft = 0;}
+					{
+						indent.style.paddingLeft = 0;
+					}
 					else
-						{indent.style.paddingLeft = paddingLeft = ( (parseInt(childNode.dataset["level"]) + this.indent_offset) * Tree.INDENT) + "px";}
+					{
+						indent.style.paddingLeft = paddingLeft = ((parseInt(childNode.dataset["level"]) + this.indent_offset) * Tree.INDENT) + "px";
+					}
 				}
 			}
 			else
@@ -694,38 +727,44 @@
 				childNode.classList.add("filtered");
 			}
 		}
-	};	
+	};
 
 	/**
 	 * Remove from the tree the items that do not have a name that matches the string
 	 * @method filterByName
 	 * @param {string} name
 	 */
-	Tree.prototype.filterByRule = function(callback_to_filter, param)
+	Tree.prototype.filterByRule = function(callback_to_filter, name)
 	{
-		if (!callback_to_filter)
-			{throw("filterByRule requires a callback");}
+		if (!callback_to_filter) {throw ("filterByRule requires a callback");}
 		for (let i = 0; i < this.root.childNodes.length; ++i)
 		{
-			let childNode = this.root.childNodes[i]; // ltreeitem
+			const childNode = this.root.childNodes[i]; // Ltreeitem
 			if (!childNode.classList || !childNode.classList.contains("ltreeitem"))
-				{continue;}
+			{
+				continue;
+			}
 
-			let content = childNode.querySelector(".incontent");
-			if (!content)
-				{continue;}
+			const content = childNode.querySelector(".incontent");
+			if (!content) {continue;}
 
-			if (callback_to_filter(childNode.data, content, param))
+			if (callback_to_filter(childNode.data, content, name))
 			{
 				if (childNode.data && childNode.data.visible !== false)
-					{childNode.classList.remove("filtered");}
-				let indent = childNode.querySelector(".indentblock");
+				{
+					childNode.classList.remove("filtered");
+				}
+				const indent = childNode.querySelector(".indentblock");
 				if (indent)
 				{
 					if (name)
-						{indent.style.paddingLeft = 0;}
+					{
+						indent.style.paddingLeft = 0;
+					}
 					else
-						{indent.style.paddingLeft = paddingLeft = ( (parseInt(childNode.dataset["level"]) + this.indent_offset) * LiteGUI.Tree.INDENT) + "px";}
+					{
+						indent.style.paddingLeft = paddingLeft = ((parseInt(childNode.dataset["level"]) + this.indent_offset) * LiteGUI.Tree.INDENT) + "px";
+					}
 				}
 			}
 			else
@@ -733,7 +772,7 @@
 				childNode.classList.add("filtered");
 			}
 		}
-	};	
+	};
 
 
 	/**
@@ -744,33 +783,25 @@
 	 */
 	Tree.prototype.getItem = function(id)
 	{
-		if (!id)
-			{return null;}
+		if (!id) {return null;}
 
-		if (id.classList) // if it is already a node
-			{return id;}
+		if (id.classList) {return id;} // If it is already a node
 
 		for (let i = 0; i < this.root.childNodes.length; ++i)
 		{
-			let childNode = this.root.childNodes[i];
+			const childNode = this.root.childNodes[i];
 			if (!childNode.classList || !childNode.classList.contains("ltreeitem"))
-				{continue;}
+			{
+				continue;
+			}
 
 			if (childNode.dataset["item_id"] === id)
-				{return childNode;}
+			{
+				return childNode;
+			}
 		}
 
 		return null;
-
-		/*
-		 *var safe_id = id.replace(/\s/g,"_");
-		 *var node = this.root.querySelector(".ltreeitem-"+safe_id);
-		 *if(!node)
-		 *	return null;
-		 *if( !node.classList.contains("ltreeitem") )
-		 *	throw("this node is not a tree item");
-		 *return node;
-		 */
 	};
 
 	/**
@@ -780,21 +811,17 @@
 	 */
 	Tree.prototype.expandItem = function(id, parents)
 	{
-		let item = this.getItem(id);
-		if (!item)
-			{return;}
+		const item = this.getItem(id);
+		if (!item) {return;}
 
-		if (!item.listbox)
-			{return;}
+		if (!item.listbox) {return;}
 
-		item.listbox.setValue(true); // this propagates changes
+		item.listbox.setValue(true); // This propagates changes
 
-		if (!parents)
-			{return;}
+		if (!parents) {return;}
 
-		let parent = this.getParent(item);
-		if (parent)
-			{this.expandItem(parent,parents);}
+		const parent = this.getParent(item);
+		if (parent) {this.expandItem(parent,parents);}
 	};
 
 	/**
@@ -804,14 +831,12 @@
 	 */
 	Tree.prototype.collapseItem = function(id)
 	{
-		let item = this.getItem(id);
-		if (!item)
-			{return;}
+		const item = this.getItem(id);
+		if (!item) {return;}
 
-		if (!item.listbox)
-			{return;}
+		if (!item.listbox) {return;}
 
-		listbox.setValue(false);  // this propagates changes
+		listbox.setValue(false);  // This propagates changes
 	};
 
 
@@ -822,19 +847,19 @@
 	 */
 	Tree.prototype.isInsideArea = function(id)
 	{
-		let item = id.constructor === String ? this.getItem(id) : id;
-		if (!item)
-			{return false;}
+		const item = id.constructor === String ? this.getItem(id) : id;
+		if (!item) {return false;}
 
-		let rects = this.root.getClientRects();
-		if (!rects.length)
-			{return false;}
-		let r = rects[0];
-		let h = r.height;
-		let y = item.offsetTop;
+		const rects = this.root.getClientRects();
+		if (!rects.length) {return false;}
+		const r = rects[0];
+		const h = r.height;
+		const y = item.offsetTop;
 
 		if (this.root.scrollTop < y && y < (this.root.scrollTop + h))
-			{return true;}
+		{
+			return true;
+		}
 		return false;
 	};
 
@@ -845,26 +870,26 @@
 	 */
 	Tree.prototype.scrollToItem = function(id)
 	{
-		let item = id.constructor === String ? this.getItem(id) : id;
-		if (!item)
-			{return;}
+		const item = id.constructor === String ? this.getItem(id) : id;
+		if (!item) {return;}
 
-		let container = this.root.parentNode;
+		const container = this.root.parentNode;
 
-		if (!container)
-			{return;}
+		if (!container) {return;}
 
-		let rect = container.getBoundingClientRect();
-		if (!rect)
-			{return;}
-		let h = rect.height;
-		let x = (parseInt(item.dataset["level"]) + this.indent_offset) * Tree.INDENT + 50;
+		const rect = container.getBoundingClientRect();
+		if (!rect) {return;}
+		const x = (parseInt(item.dataset["level"]) + this.indent_offset) * Tree.INDENT + 50;
 
 		container.scrollTop = item.offsetTop - (h * 0.5)|0;
 		if (rect.width * 0.75 < x)
-			{container.scrollLeft = x;}
+		{
+			container.scrollLeft = x;
+		}
 		else
-			{container.scrollLeft = 0;}
+		{
+			container.scrollLeft = 0;
+		}
 	};
 
 	/**
@@ -876,28 +901,24 @@
 	{
 		if (!id)
 		{
-			// clear selection
+			// Clear selection
 			this.unmarkAllAsSelected();
 			return;
 		}
 
-		let node = this.getItem(id);
-		if (!node) // not found
-			{return null;}
+		const node = this.getItem(id);
+		if (!node) {return null;}// Not found
 
-		// already selected
-		if (node.classList.contains("selected"))
-			{return;}
+		// Already selected
+		if (node.classList.contains("selected")) {return;}
 
 		this.markAsSelected(node);
-		if (scroll && !this._skip_scroll)
-			{this.scrollToItem(node);}
+		if (scroll && !this._skip_scroll) {this.scrollToItem(node);}
 
-		// expand parents
+		// Expand parents
 		this.expandItem(node, true);
 
-		if (send_event)
-			{LiteGUI.trigger( node, "click" );}
+		if (send_event) {LiteGUI.trigger(node, "click");}
 
 		return node;
 	};
@@ -909,12 +930,10 @@
 	 */
 	Tree.prototype.addItemToSelection = function(id)
 	{
-		if (!id)
-			{return;}
+		if (!id) {return;}
 
-		let node = this.getItem(id);
-		if (!node) // not found
-			{return null;}
+		const node = this.getItem(id);
+		if (!node) {return null;} // Not found
 
 		this.markAsSelected(node, true);
 		return node;
@@ -927,11 +946,9 @@
 	 */
 	Tree.prototype.removeItemFromSelection = function(id)
 	{
-		if (!id)
-			{return;}
-		let node = this.getItem(id);
-		if (!node) // not found
-			{return null;}
+		if (!id) {return;}
+		const node = this.getItem(id);
+		if (!node) {return null;} // Not found
 		node.classList.remove("selected");
 	};
 
@@ -963,9 +980,8 @@
 	 */
 	Tree.prototype.isItemSelected = function(id)
 	{
-		let node = this.getItem(id);
-		if (!node)
-			{return false;}
+		const node = this.getItem(id);
+		if (!node) {return false;}
 		return this.isNodeSelected(node);
 	};
 
@@ -979,7 +995,9 @@
 	Tree.prototype.getChildren = function(id, only_direct)
 	{
 		if (id && id.constructor !== String && id.dataset)
-			{id = id.dataset["item_id"];}
+		{
+			id = id.dataset["item_id"];
+		}
 		return this._findChildElements(id, only_direct);
 	};
 
@@ -991,9 +1009,8 @@
 	 */
 	Tree.prototype.getParent = function(id_or_node)
 	{
-		let element = this.getItem(id_or_node);
-		if (element)
-			{return this.getItem( element.parent_id );}
+		const element = this.getItem(id_or_node);
+		if (element) {return this.getItem(element.parent_id);}
 		return null;
 	};
 
@@ -1006,7 +1023,7 @@
 	Tree.prototype.getAncestors = function(id_or_node, result)
 	{
 		result = result || [];
-		let element = this.getItem(id_or_node);
+		const element = this.getItem(id_or_node);
 		if (element)
 		{
 			result.push(element);
@@ -1023,15 +1040,12 @@
 	 */
 	Tree.prototype.isAncestor = function(child, node)
 	{
-		let element = this.getItem(child);
-		if (!element)
-			{return false;}
-		let dest = this.getItem(node);
-		let parent = this.getItem(element.parent_id);
-		if (!parent)
-			{return false;}
-		if (parent == dest)
-			{return true;}
+		const element = this.getItem(child);
+		if (!element) {return false;}
+		const dest = this.getItem(node);
+		const parent = this.getItem(element.parent_id);
+		if (!parent) {return false;}
+		if (parent == dest) {return true;}
 		return this.isAncestor(parent, node);
 	};
 
@@ -1044,69 +1058,65 @@
 	 */
 	Tree.prototype.moveItem = function(id, parent_id)
 	{
-		if (id === parent_id)
-			{return false;}
+		if (id === parent_id) {return false;}
 
-		let node = this.getItem(id);
-		let parent = this.getItem(parent_id);
+		const node = this.getItem(id);
+		const parent = this.getItem(parent_id);
 
-		if (this.isAncestor(parent, node))
-			{return false;}
+		if (this.isAncestor(parent, node)) {return false;}
 
 		let parent_index = this._findElementIndex(parent);
-		let parent_level = parseInt(parent.dataset["level"]);
-		let old_parent = this.getParent(node);
+		const parent_level = parseInt(parent.dataset["level"]);
+		const old_parent = this.getParent(node);
 		if (!old_parent)
 		{
 			console.error("node parent not found by id, maybe id has changed");
 			return false;
 		}
-		let old_parent_level = parseInt(old_parent.dataset["level"]);
-		let level_offset = parent_level - old_parent_level;
+		const old_parent_level = parseInt(old_parent.dataset["level"]);
+		const level_offset = parent_level - old_parent_level;
 
-		if (!parent || !node)
-			{return false;}
+		if (!parent || !node) {return false;}
 
-		if (parent == old_parent)
-			{return false;}
+		if (parent == old_parent) {return false;}
 
-		// replace parent info
+		// Replace parent info
 		node.parent_id = parent_id;
 
-		// get all children and subchildren and reinsert them in the new level
-		let children = this.getChildren(node);
+		// Get all children and subchildren and reinsert them in the new level
+		const children = this.getChildren(node);
 		if (children)
 		{
-			children.unshift(node); // add the node at the beginning
+			children.unshift(node); // Add the node at the beginning
 
-			// remove all children
-			for (var i = 0; i < children.length; i++)
-				{children[i].parentNode.removeChild( children[i] );}
-
-			// update levels
-			for (var i = 0; i < children.length; i++)
+			// Remove all children
+			for (let i = 0; i < children.length; i++)
 			{
-				var child = children[i];
-				let new_level = parseInt(child.dataset["level"]) + level_offset;
+				children[i].parentNode.removeChild(children[i]);
+			}
+
+			// Update levels
+			for (let i = 0; i < children.length; i++)
+			{
+				const child = children[i];
+				const new_level = parseInt(child.dataset["level"]) + level_offset;
 				child.dataset["level"] = new_level;
 			}
 
-			// reinsert
-			parent_index = this._findElementIndex(parent); // update parent index
+			// Reinsert
+			parent_index = this._findElementIndex(parent); // Update parent index
 			let last_index = this._findElementLastChildIndex(parent_index);
-			if (last_index == -1)
-				{last_index = 0;}
-			for (var i = 0; i < children.length; i++)
+			if (last_index == -1) {last_index = 0;}
+			for (let i = 0; i < children.length; i++)
 			{
-				var child = children[i];
+				const child = children[i];
 				this._insertInside(child, parent_index, last_index + i - 1, parseInt(child.dataset["level"]));
 			}
 		}
 
-		// update collapse button
+		// Update collapse button
 		this._updateListBox(parent);
-		if (old_parent)
-			{this._updateListBox( old_parent );}
+		if (old_parent) {this._updateListBox(old_parent);}
 
 		return true;
 	};
@@ -1120,32 +1130,30 @@
 	Tree.prototype.removeItem = function(id_or_node, remove_children)
 	{
 		let node = id_or_node;
-		if (typeof(id_or_node) == "string")
-			{node = this.getItem( id_or_node );}
-		if (!node)
-			{return false;}
+		if (typeof(id_or_node) == "string") {node = this.getItem(id_or_node);}
+		if (!node) {return false;}
 
-		// get parent
-		let parent = this.getParent(node);
+		// Get parent
+		const parent = this.getParent(node);
 
-		// get all descendants
+		// Get all descendants
 		let child_nodes = null;
-		if (remove_children)
-			{child_nodes = this.getChildren( node );}
+		if (remove_children) {child_nodes = this.getChildren(node);}
 
-		// remove html element
+		// Remove html element
 		this.root.removeChild(node);
 
-		// remove all children
+		// Remove all children
 		if (child_nodes)
 		{
-			for (var i = 0; i < child_nodes.length; i++)
-				{this.root.removeChild( child_nodes[i] );}
+			for (let i = 0; i < child_nodes.length; i++)
+			{
+				this.root.removeChild(child_nodes[i]);
+			}
 		}
 
-		// update parent collapse button
-		if (parent)
-			{this._updateListBox( parent );}
+		// Update parent collapse button
+		if (parent) {this._updateListBox(parent);}
 		return true;
 	};
 
@@ -1157,17 +1165,14 @@
 	 */
 	Tree.prototype.updateItem = function(id, data)
 	{
-		let node = this.getItem(id);
-		if (!node)
-			{return false;}
+		const node = this.getItem(id);
+		if (!node) {return false;}
 
 		node.data = data;
-		if (data.id)
-			{node.id = data.id;} // this updateItemId ?
+		if (data.id) {node.id = data.id;}
 		if (data.content)
 		{
-			// node.title_element.innerHTML = "<span class='precontent'></span><span class='incontent'>" +  + "</span><span class='postcontent'></span>";
-			let incontent = node.title_element.querySelector(".incontent");
+			const incontent = node.title_element.querySelector(".incontent");
 			incontent.innerHTML = data.content;
 		}
 
@@ -1182,16 +1187,15 @@
 	 */
 	Tree.prototype.updateItemId = function(old_id, new_id)
 	{
-		let node = this.getItem(old_id);
-		if (!node)
-			{return false;}
+		const node = this.getItem(old_id);
+		if (!node) {return false;}
 
-		let children = this.getChildren(old_id, true);
+		const children = this.getChildren(old_id, true);
 		node.id = new_id;
 
 		for (let i = 0; i < children.length; ++i)
 		{
-			let child = children[i];
+			const child = children[i];
 			child.parent_id = new_id;
 		}
 
@@ -1212,10 +1216,10 @@
 			return;
 		}
 
-		let items = this.root.querySelectorAll(".ltreeitem");
+		const items = this.root.querySelectorAll(".ltreeitem");
 		for (let i = 1; i < items.length; i++)
 		{
-			let item = items[i];
+			const item = items[i];
 			this.root.removeChild(item);
 		}
 	};
@@ -1223,78 +1227,71 @@
 
 	Tree.prototype.getNodeByIndex = function(index)
 	{
-		let items = this.root.querySelectorAll(".ltreeitem");
+		const items = this.root.querySelectorAll(".ltreeitem");
 		return items[index];
 	};
 
-	// private ********************************
+	// Private
 
 	Tree.prototype.unmarkAllAsSelected = function()
 	{
 		this.root.classList.remove("selected");
-		let selected_array = this.root.querySelectorAll(".ltreeitem.selected");
+		const selected_array = this.root.querySelectorAll(".ltreeitem.selected");
 		if (selected_array)
 		{
-			for (var i = 0; i < selected_array.length; i++)
-				{selected_array[i].classList.remove("selected");}
+			for (let i = 0; i < selected_array.length; i++)
+			{
+				selected_array[i].classList.remove("selected");
+			}
 		}
-		let semiselected = this.root.querySelectorAll(".ltreeitem.semiselected");
-		for (var i = 0; i < semiselected.length; i++)
-			{semiselected[i].classList.remove("semiselected");}
+		const semiselected = this.root.querySelectorAll(".ltreeitem.semiselected");
+		for (let i = 0; i < semiselected.length; i++)
+		{
+			semiselected[i].classList.remove("semiselected");
+		}
 	};
 
 	Tree.prototype.isNodeSelected = function(node)
 	{
-		// already selected
-		if (node.classList.contains("selected"))
-			{return true;}
+		// Already selected
+		if (node.classList.contains("selected")) {return true;}
 		return false;
 	};
 
 	Tree.prototype.markAsSelected = function(node, add_to_existing_selection)
 	{
-		// already selected
-		if (node.classList.contains("selected"))
-			{return;}
+		// Already selected
+		if (node.classList.contains("selected")) {return;}
 
-		// clear old selection
-		if (!add_to_existing_selection)
-			{this.unmarkAllAsSelected();}
+		// Clear old selection
+		if (!add_to_existing_selection) {this.unmarkAllAsSelected();}
 
-		// mark as selected (it was node.title_element?)
+		// Mark as selected (it was node.title_element?)
 		node.classList.add("selected");
 
-		// go up and semiselect
+		// Go up and semiselect
 		let parent = this.getParent(node);
-		let visited = [];
+		const visited = [];
 		while (parent && visited.indexOf(parent) == -1)
 		{
 			parent.classList.add("semiselected");
 			visited.push(parent);
 			parent = this.getParent(parent);
 		}
-		/*
-		 *var parent = node.parentNode.parentNode; //two elements per level
-		 *while(parent && parent.classList.contains("ltreeitem"))
-		 *{
-		 *	parent.title_element.classList.add("semiselected");
-		 *	parent = parent.parentNode.parentNode;
-		 *}
-		 */
 	};
 
-	// updates the widget to collapse
+	// Updates the widget to collapse
 	Tree.prototype._updateListBox = function(node, options, current_level)
 	{
-		if (!node)
-			{return;}
+		if (!node) {return;}
 
-		let that = this;
+		const that = this;
 
 		if (!node.listbox)
 		{
-			let pre = node.title_element.querySelector(".collapsebox");
-			var box = LiteGUI.createLitebox(true, (e) => {
+			const pre = node.title_element.querySelector(".collapsebox");
+			const box = LiteGUI.createLitebox(true, (e) =>
+			{
 				that.onClickBox(e, node);
 				LiteGUI.trigger(that.root, "item_collapse_change", { item: node, data: box.getValue() });
 			});
@@ -1305,38 +1302,45 @@
 		}
 
 		if ((options && options.collapsed) || current_level >= this.collapsed_depth)
-			{node.listbox.collapse();}
+		{
+			node.listbox.collapse();
+		}
 
-		let child_elements = this.getChildren(node.dataset["item_id"]);
-		if (!child_elements)
-			{return;} // null
+		const child_elements = this.getChildren(node.dataset["item_id"]);
+		if (!child_elements) {return;}
 
 		if (child_elements.length)
-			{node.listbox.setEmpty(false);}
+		{
+			node.listbox.setEmpty(false);
+		}
 		else
-			{node.listbox.setEmpty(true);}
+		{
+			node.listbox.setEmpty(true);
+		}
 	};
 
 	Tree.prototype.onClickBox = function(e, node)
 	{
-		let children = this.getChildren(node);
+		const children = this.getChildren(node);
 
-		if (!children)
-			{return;}
+		if (!children) {return;}
 
-		// update children visibility
+		// Update children visibility
 		for (let i = 0; i < children.length; ++i)
 		{
-			let child = children[i];
+			const child = children[i];
 
-			let child_parent = this.getParent(child);
+			const child_parent = this.getParent(child);
 			let visible = true;
-			if (child_parent)
-				{visible = this._isNodeChildrenVisible(child_parent);}
+			if (child_parent) {visible = this._isNodeChildrenVisible(child_parent);}
 			if (visible)
-				{child.classList.remove("hidden");}
+			{
+				child.classList.remove("hidden");
+			}
 			else
-				{child.classList.add("hidden");}
+			{
+				child.classList.add("hidden");
+			}
 		}
 	};
 

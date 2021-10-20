@@ -282,32 +282,23 @@
 		}
 
 		this.root.appendChild(element);
-		if (!disabled)
-		{element.addEventListener("click", inner_onclick);}
-		if (options.autoopen)
-		{element.addEventListener("mouseenter", inner_over);}
-
-		function inner_over(e)
-		{
-			const value = this.value;
-			if (!value || !value.has_submenu)
-			{return;}
-			inner_onclick.call(this,e);
-		}
 
 		// Menu option clicked
-		function inner_onclick(e)
+		const inner_onclick = function(e)
 		{
-			const value = this.value;
+			const el =  e.target;
+			const value = el.value;
 			let close_parent = true;
 
 			if (that.current_submenu)
-			{that.current_submenu.close(e);}
+			{
+				that.current_submenu.close(e);
+			}
 
 			// global callback
 			if (options.callback)
 			{
-				var r = options.callback.call(that, value, options, e);
+				const r = options.callback.call(that, value, options, e);
 				if (r === true)
 				{close_parent = false;}
 			}
@@ -317,14 +308,15 @@
 			{
 				if (value.callback && !options.ignore_item_callbacks && value.disabled !== true)  // Item callback
 				{
-					var r = value.callback.call(this, value, options, e, that);
-					if (r === true)
-					{close_parent = false;}
+					const r = value.callback.call(el, value, options, e, that);
+					if (r === true) {close_parent = false;}
 				}
 				if (value.submenu)
 				{
 					if (!value.submenu.options)
-					{throw ("ContextMenu submenu needs options");}
+					{
+						throw ("ContextMenu submenu needs options");
+					}
 					const submenu = new LiteGUI.ContextMenu(value.submenu.options, {
 						callback: value.submenu.callback,
 						event: e,
@@ -337,8 +329,24 @@
 				}
 			}
 
-			if (close_parent && !that.lock)
-			{that.close();}
+			if (close_parent && !that.lock) {that.close();}
+		};
+		const inner_over = function(e)
+		{
+			const el =  e.target;
+			const value = el.value;
+			if (!value || !value.has_submenu)
+			{return;}
+			inner_onclick.call(el,e);
+		};
+
+		if (!disabled)
+		{
+			element.addEventListener("click", inner_onclick.bind(element));
+		}
+		if (options.autoopen)
+		{
+			element.addEventListener("mouseenter", inner_over.bind(element));
 		}
 
 		return element;
@@ -395,14 +403,13 @@
 		element.className = "fixed flag checkbox "+(value ? "on" : "off");
 		root.appendChild(element);
 
-		root.addEventListener("click", onClick.bind(this));
-
-		function onClick(e)
+		const onClick = (e) =>
 		{
 			this.setValue(this.root.dataset["value"] != "true");
 			e.preventDefault();
 			e.stopPropagation();
-		}
+		};
+		root.addEventListener("click", onClick);
 
 		this.setValue = function(v)
 		{
@@ -447,7 +454,14 @@
 		element.className = "listbox " + (state ? "listopen" : "listclosed");
 		element.innerHTML = state ? "&#9660;" : "&#9658;";
 		element.dataset["value"] = state ? "open" : "closed";
-		element.addEventListener("click", onClick);
+
+		element.onClick = function(e)
+		{
+			const box = e.target;
+			box.setValue(this.dataset["value"] == "open" ? false : true);
+			if (this.stopPropagation) {e.stopPropagation();}
+		};
+		element.addEventListener("click", onClick.bind(element));
 		element.on_change_callback = on_change;
 
 		element.setEmpty = function(v)
@@ -497,15 +511,6 @@
 			return this.dataset["value"];
 		};
 
-		function onClick(e)
-		{
-		// Console.log("CLICK");
-			const box = e.target;
-			box.setValue(this.dataset["value"] == "open" ? false : true);
-			if (this.stopPropagation)
-			{e.stopPropagation();}
-		}
-
 		return element;
 	}
 
@@ -532,6 +537,18 @@
 
 		this.callback = options.callback;
 
+		const onClickCallback = function(e)
+		{
+			const el = e.target;
+			const list = root.querySelectorAll(".list-item.selected");
+			for (let j = 0; j < list.length; ++j)
+			{
+				list[j].classList.remove("selected");
+			}
+			el.classList.add("selected");
+			LiteGUI.trigger(that.root, "wchanged", el);
+			if (that.callback) {that.callback(el.data);}
+		};
 		// Walk over every item in the list
 		for (const i in items)
 		{
@@ -551,17 +568,7 @@
 			}
 			item.innerHTML = content;
 
-			item.addEventListener("click", function()
-			{
-
-				const list = root.querySelectorAll(".list-item.selected");
-				for (let j = 0; j < list.length; ++j)
-				{list[j].classList.remove("selected");}
-				this.classList.add("selected");
-				LiteGUI.trigger(that.root, "wchanged", this);
-				if (that.callback)
-				{that.callback(this.data);}
-			});
+			item.addEventListener("click", onClickCallback.bind(item));
 
 			root.appendChild(item);
 		}
@@ -738,10 +745,10 @@
 			{return element.defaulty;}
 
 			let last = [ element.xrange[0], element.defaulty ];
-			let f = 0;
+			let f = 0, v;
 			for (let i = 0; i < element.value.length; i += 1)
 			{
-				var v = element.value[i];
+				v = element.value[i];
 				if (x == v[0]) {return v[1];}
 				if (x < v[0])
 				{
@@ -821,9 +828,9 @@
 			let pos = convert([element.xrange[0],element.defaulty]);
 			ctx.moveTo(pos[0], pos[1]);
 
-			for (var i in element.value)
+			for (const i in element.value)
 			{
-				var value = element.value[i];
+				const value = element.value[i];
 				pos = convert(value);
 				ctx.lineTo(pos[0], pos[1]);
 			}
@@ -833,9 +840,9 @@
 			ctx.stroke();
 
 			// Draw points
-			for (var i = 0; i < element.value.length; i += 1)
+			for (let i = 0; i < element.value.length; i += 1)
 			{
-				var value = element.value[i];
+				const value = element.value[i];
 				pos = convert(value);
 				if (selected == i)
 				{ctx.fillStyle = "white";}
@@ -850,9 +857,9 @@
 			{
 				const samples = element.resample(element.show_samples);
 				ctx.fillStyle = "#888";
-				for (var i = 0; i < samples.length; i += 1)
+				for (let i = 0; i < samples.length; i += 1)
 				{
-					var value = [ i * ((element.xrange[1] - element.xrange[0]) / element.show_samples) + element.xrange[0], samples[i] ];
+					const value = [ i * ((element.xrange[1] - element.xrange[0]) / element.show_samples) + element.xrange[0], samples[i] ];
 					pos = convert(value);
 					ctx.beginPath();
 					ctx.arc(pos[0], pos[1], 2, 0, Math.PI * 2);
@@ -990,8 +997,7 @@
 			if (selected != -1)
 			{v = element.value[selected];}
 			element.value.sort((a,b) => { return a[0] - b[0]; });
-			if (v)
-			{selected = element.value.indexOf(v);}
+			if (v) {selected = element.value.indexOf(v);}
 		}
 
 		element.redraw();
@@ -1011,7 +1017,9 @@
 		this.item_code = options.item_code || "<div class='listitem'><span class='tick'><span>"+LiteGUI.special_codes.tick+"</span></span><span class='title'></span><button class='trash'>"+LiteGUI.special_codes.close+"</button></div>";
 
 		if (options.height)
-		{this.root.style.height = LiteGUI.sizeToCSS(options.height);}
+		{
+			this.root.style.height = LiteGUI.sizeToCSS(options.height);
+		}
 
 		this.selected = null;
 		this.onItemSelected = null;
@@ -1029,8 +1037,7 @@
 	ComplexList.prototype.addHTML = function(html, on_click)
 	{
 		const elem = LiteGUI.createElement("div",".listtext", html);
-		if (on_click)
-		{elem.addEventListener("mousedown", on_click);}
+		if (on_click) {elem.addEventListener("mousedown", on_click);}
 		this.root.appendChild(elem);
 		return elem;
 	};
@@ -1046,26 +1053,28 @@
 		const elem = LiteGUI.createListItem(this.item_code, { ".title": title });
 		elem.item = item;
 
-		if (is_enabled)
-		{elem.classList.add("enabled");}
+		if (is_enabled) {elem.classList.add("enabled");}
 
-		if (!can_be_removed)
-		{elem.querySelector(".trash").style.display = "none";}
+		if (!can_be_removed) {elem.querySelector(".trash").style.display = "none";}
 
 		const that = this;
-		elem.addEventListener("mousedown", function(e)
+		elem.addEventListener("mousedown", (e) =>
 		{
 			e.preventDefault();
-			this.setSelected(true);
+			e.target.setSelected(true);
 			if (that.onItemSelected)
-			{that.onItemSelected(item, elem);}
+			{
+				that.onItemSelected(item, elem);
+			}
 		});
 		elem.querySelector(".tick").addEventListener("mousedown",  (e)=>
 		{
 			e.preventDefault();
 			elem.classList.toggle("enabled");
 			if (that.onItemToggled)
-			{that.onItemToggled(item, elem, elem.classList.contains("enabled"));}
+			{
+				that.onItemToggled(item, elem, elem.classList.contains("enabled"));
+			}
 		});
 
 		elem.querySelector(".trash").addEventListener("mousedown",(e)=>
@@ -1074,15 +1083,21 @@
 			e.stopPropagation();
 			e.stopImmediatePropagation();
 			if (that.onItemRemoved)
-			{that.onItemRemoved(item, elem);}
+			{
+				that.onItemRemoved(item, elem);
+			}
 		});
 
 		elem.setContent = function(v, is_html)
 		{
 			if (is_html)
-			{elem.querySelector(".title").innerHTML = v;}
+			{
+				elem.querySelector(".title").innerHTML = v;
+			}
 			else
-			{elem.querySelector(".title").innerText = v;}
+			{
+				elem.querySelector(".title").innerText = v;
+			}
 		};
 
 		elem.toggleEnabled = function(v)
@@ -1094,9 +1109,13 @@
 		{
 			LiteGUI.removeClass(that.root, "selected");
 			if (v)
-			{this.classList.add("selected");}
+			{
+				this.classList.add("selected");
+			}
 			else
-			{this.classList.remove("selected");}
+			{
+				this.classList.remove("selected");
+			}
 			that.selected = elem.item;
 		};
 

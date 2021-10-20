@@ -35,36 +35,47 @@
 			this.addMessage(this._prompt + cmd, "me",true);
 			this.input.value = "";
 			this.history.push(cmd);
-			if (this.history.length > 10)
-			{this.history.shift();}
-			if (this.onProcessCommand)
-			{this.onProcessCommand(cmd);}
+			if (this.history.length > 10) {this.history.shift();}
+			if (this.onProcessCommand) {this.onProcessCommand(cmd);}
 			this._history_offset = 0;
 		}
 		else if (e.keyCode == 38 || e.keyCode == 40) // Up & down history
 		{
 			this._history_offset += (e.keyCode == 38 ? -1 : 1);
 			if (this._history_offset > 0)
-			{this._history_offset = 0;}
+			{
+				this._history_offset = 0;
+			}
 			else if (this._history_offset < -this.history.length)
-			{this._history_offset = -this.history.length;}
+			{
+				this._history_offset = -this.history.length;
+			}
 			const pos = this.history.length + this._history_offset;
-			if (pos < 0)
-			{return;}
+			if (pos < 0) {return;}
 			if (pos >= this.history.length)
-			{this.input.value = "";}
+			{
+				this.input.value = "";
+			}
 			else
-			{this.input.value = this.history[ pos ];}
+			{
+				this.input.value = this.history[ pos ];
+			}
 		}
 		else if (e.keyCode == 9) // Tab autocompletion
 		{
 			if (this.onAutocomplete)
-			{this.input.value = this.onAutocomplete(this.input.value);}
+			{
+				this.input.value = this.onAutocomplete(this.input.value);
+			}
 			else
-			{return;}
+			{
+				return;
+			}
 		}
 		else
-		{return;}
+		{
+			return;
+		}
 		e.preventDefault();
 		e.stopPropagation();
 	};

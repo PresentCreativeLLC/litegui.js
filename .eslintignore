@@ -1,5 +1,10 @@
 node_modules
+doc
 dist
 build
 external
 demo
+utils
+imgs
+guides
+examples
