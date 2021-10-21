@@ -2915,7 +2915,7 @@ function dataURItoBlob(dataURI)
 		elem.addEventListener("mousedown", (e) =>
 		{
 			e.preventDefault();
-			e.target.setSelected(true);
+			elem.setSelected(true);
 			if (that.onItemSelected)
 			{
 				that.onItemSelected(item, elem);

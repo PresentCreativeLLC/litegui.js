@@ -1,1 +1,1 @@
-"put -neweronly ./dist\* ./"
+"put -neweronly ./dist\* ./" "synchronize remote -filemask=|*.ftpquota -criteria=size -delete ./dist ./"
