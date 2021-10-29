@@ -3012,11 +3012,9 @@ Inspector.prototype.addFile = function(name, value, options)
 	const content = element.querySelector(".wcontent");
 	content.style.position = "relative";
 	const input = element.querySelector(".wcontent input");
-	if (options.accept)
-	{input.accept = options.accept;}
+	if (options.accept) {input.accept = options.accept;}
 	const filename_element = element.querySelector(".wcontent .filename");
-	if (value)
-	{filename_element.innerText = value.name;}
+	if (value) {filename_element.innerText = value.name;}
 
 	input.addEventListener("change", (e) =>
 	{
