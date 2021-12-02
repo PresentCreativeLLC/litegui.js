@@ -307,10 +307,17 @@
 			{
 				that.showMenu(item, e, el, true);
 			}
+			else if (!item.data.keep_open)
+			{
+				that.is_open = false;
+				that.hidePanels();
+			}
 			else
 			{
 				that.is_open = false;
 				that.hidePanels();
+				that.is_open = true;
+				that.showMenu(menu, e, root, is_submenu);
 			}
 		};
 		for (const i in sorted_entries)

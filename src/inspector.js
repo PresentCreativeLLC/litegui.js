@@ -1082,9 +1082,17 @@ Inspector.prototype.addNumber = function(name, value, options)
 			const ret = options.callback.call(element, parseFloat(e.target.value));
 			if (typeof(ret) == "number") { el.value = ret; }
 		}
-		else if (options.finalCallback && !dragger.dragging)
+		else if ((options.callback || options.finalCallback) && !dragger.dragging)
 		{
-			const ret = options.finalCallback.call(element, parseFloat(e.target.value));
+			let ret = undefined;
+			if (options.finalCallback)
+			{
+				ret = options.finalCallback.call(element, parseFloat(e.target.value));
+			}
+			else if (options.callback)
+			{
+				ret = options.callback.call(element, parseFloat(e.target.value));
+			}
 			if (typeof(ret) == "number") {el.value = ret;}
 		}
 		LiteGUI.trigger(element, "wchange", e.target.value);
@@ -1193,9 +1201,30 @@ Inspector.prototype.addVector2 = function(name,value, options)
 
 		that.values[name] = r;
 
-		if (options.callback)
+		if (options.callback && (dragger1.dragging || dragger2.dragging))
 		{
 			const new_val = options.callback.call(element, r);
+
+			if (typeof(new_val) == "object" && new_val.length >= 2)
+			{
+				for (let j = 0; j < elems.length; j++)
+				{
+					elems[j].value = new_val[j];
+				}
+				r = new_val;
+			}
+		}
+		else if ((options.callback || options.finalCallback) && !(dragger1.dragging || dragger2.dragging))
+		{
+			let new_val = undefined;
+			if (options.finalCallback)
+			{
+				new_val = options.finalCallback.call(element, r);
+			}
+			else if (options.callback)
+			{
+				new_val = options.callback.call(element, r);
+			}
 
 			if (typeof(new_val) == "object" && new_val.length >= 2)
 			{
@@ -1308,11 +1337,32 @@ Inspector.prototype.addVector3 = function(name,value, options)
 
 		that.values[name] = r;
 
-		if (options.callback)
+		if (options.callback && (dragger1.dragging || dragger2.dragging || dragger3.dragging))
 		{
 			const new_val = options.callback.call(element, r);
 
-			if (typeof(new_val) == "object" && new_val.length >= 2)
+			if (typeof(new_val) == "object" && new_val.length >= 3)
+			{
+				for (let j = 0; j < elems.length; j++)
+				{
+					elems[j].value = new_val[j];
+				}
+				r = new_val;
+			}
+		}
+		else if ((options.callback || options.finalCallback) && !(dragger1.dragging || dragger2.dragging || dragger3.dragging))
+		{
+			let new_val = undefined;
+			if (options.finalCallback)
+			{
+				new_val = options.finalCallback.call(element, r);
+			}
+			else if (options.callback)
+			{
+				new_val = options.callback.call(element, r);
+			}
+
+			if (typeof(new_val) == "object" && new_val.length >= 3)
 			{
 				for (let j = 0; j < elems.length; j++)
 				{
@@ -1415,9 +1465,30 @@ Inspector.prototype.addVector4 = function(name,value, options)
 
 		that.values[name] = r;
 
-		if (options.callback)
+		if (options.callback && (draggers[0].dragging || draggers[1].dragging || draggers[2].dragging || draggers[3].dragging))
 		{
 			const new_val = options.callback.call(element, r);
+			if (typeof(new_val) == "object" && new_val.length >= 4)
+			{
+				for (let j = 0; j < elems.length; j++)
+				{
+					elems[j].value = new_val[j];
+				}
+				r = new_val;
+			}
+		}
+		else if ((options.callback || options.finalCallback) && !(draggers[0].dragging || draggers[1].dragging || draggers[2].dragging || draggers[3].dragging))
+		{
+			let new_val = undefined;
+			if (options.finalCallback)
+			{
+				new_val = options.finalCallback.call(element, r);
+			}
+			else if (options.callback)
+			{
+				new_val = options.callback.call(element, r);
+			}
+
 			if (typeof(new_val) == "object" && new_val.length >= 4)
 			{
 				for (let j = 0; j < elems.length; j++)
@@ -1647,10 +1718,8 @@ Inspector.prototype.addInfo = function(name, value, options)
 
 	element.setValue = function(v)
 	{
-		if (v === undefined)
-		{return;}
-		if (info)
-		{info.innerHTML = v;}
+		if (v === undefined) {return;}
+		if (info) {info.innerHTML = v;}
 	};
 
 	let content = element.querySelector("span.info_content");
@@ -2727,7 +2796,13 @@ Inspector.prototype.addColor = function(name, value, options)
 			input_element.focused = false;
 			const v = [ myColor.rgb[0] * myColor.rgb_intensity, myColor.rgb[1] * myColor.rgb_intensity, myColor.rgb[2] * myColor.rgb_intensity ];
 			if (options.finalCallback)
-			{options.finalCallback.call(element, v.concat(), "#" + myColor.toString(), myColor);}
+			{
+				options.finalCallback.call(element, v.concat(), "#" + myColor.toString(), myColor);
+			}
+			else if (options.callback)
+			{
+				options.callback.call(element, v.concat(), "#" + myColor.toString(), myColor);
+			}
 		});
 
 		if (options.add_dragger)
@@ -2740,9 +2815,20 @@ Inspector.prototype.addColor = function(name, value, options)
 				LiteGUI.trigger(element, "wbeforechange", event_data);
 				that.values[name] = v;
 				if (options.callback && dragging)
-				{options.callback.call(element, v.concat(), "#" + myColor.toString(), myColor);}
-				else if (options.finalCallback && !dragging)
-				{options.finalCallback.call(element, v.concat(), "#" + myColor.toString(), myColor);}
+				{
+					options.callback.call(element, v.concat(), "#" + myColor.toString(), myColor);
+				}
+				else if ((options.callback || options.finalCallback) && !dragging)
+				{
+					if (options.finalCallback)
+					{
+						options.finalCallback.call(element, v.concat(), "#" + myColor.toString(), myColor);
+					}
+					else if (options.callback)
+					{
+						options.callback.call(element, v.concat(), "#" + myColor.toString(), myColor);
+					}
+				}
 				LiteGUI.trigger(element, "wchange", event_data);
 				if (that.onchange) {that.onchange(name, v.concat(), element);}
 			};
@@ -2909,7 +2995,13 @@ Inspector.prototype.addColorPosition = function(name, value, options)
 		{
 			input_element.focused = false;
 			if (options.finalCallback)
-			{options.finalCallback.call(element, myColor.position, "#" + myColor.toString(), myColor);}
+			{
+				options.finalCallback.call(element, myColor.position, "#" + myColor.toString(), myColor);
+			}
+			else if (options.callback)
+			{
+				options.callback.call(element, myColor.position, "#" + myColor.toString(), myColor);
+			}
 		});
 
 		if (options.add_dragger)
@@ -2922,9 +3014,20 @@ Inspector.prototype.addColorPosition = function(name, value, options)
 				LiteGUI.trigger(element, "wbeforechange", event_data);
 				that.values[name] = v;
 				if (options.callback && dragging)
-				{options.callback.call(element, myColor.position, "#" + myColor.toString(), myColor);}
-				else if (options.finalCallback && !dragging)
-				{options.finalCallback.call(element, myColor.position, "#" + myColor.toString(), myColor);}
+				{
+					options.callback.call(element, myColor.position, "#" + myColor.toString(), myColor);
+				}
+				else if ((options.callback || options.finalCallback) && !dragging)
+				{
+					if (options.finalCallback)
+					{
+						options.finalCallback.call(element, myColor.position, "#" + myColor.toString(), myColor);
+					}
+					else if (options.callback)
+					{
+						options.callback.call(element, myColor.position, "#" + myColor.toString(), myColor);
+					}
+				}
 				LiteGUI.trigger(element, "wchange", event_data);
 				if (that.onchange) {that.onchange(name, v.concat(), element);}
 			};
@@ -3445,13 +3548,10 @@ Inspector.prototype.beginGroup = function(name, options)
 
 	const content = document.createElement("DIV");
 	content.className = "wgroupcontent";
-	if (options.collapsed)
-	{content.style.display = "none";}
+	if (options.collapsed) {content.style.display = "none";}
 
-	if (options.height)
-	{content.style.height = LiteGUI.sizeToCSS(options.height);}
-	if (options.scrollable)
-	{content.style.overflow = "auto";}
+	if (options.height) {content.style.height = LiteGUI.sizeToCSS(options.height);}
+	if (options.scrollable) {content.style.overflow = "auto";}
 
 	element.appendChild(content);
 
@@ -3522,8 +3622,7 @@ Inspector.prototype.addTitle = function(title,options)
 Inspector.prototype.scrollTo = function(id)
 {
 	const element = this.root.querySelector("#" + id);
-	if (!element)
-	{return;}
+	if (!element) {return;}
 	const top = this.root.offsetTop;
 	const delta = element.offsetTop - top;
 	this.root.parentNode.parentNode.scrollTop = delta;
@@ -3552,8 +3651,7 @@ Inspector.prototype.updateWidgets = function()
 	for (let i = 0; i < this.widgets.length; ++i)
 	{
 		const widget = this.widgets[i];
-		if (widget.on_update)
-		{widget.on_update(widget);}
+		if (widget.on_update) {widget.on_update(widget);}
 	}
 };
 

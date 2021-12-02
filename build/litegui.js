@@ -4070,10 +4070,17 @@ function dataURItoBlob(dataURI)
 			{
 				that.showMenu(item, e, el, true);
 			}
+			else if (!item.data.keep_open)
+			{
+				that.is_open = false;
+				that.hidePanels();
+			}
 			else
 			{
 				that.is_open = false;
 				that.hidePanels();
+				that.is_open = true;
+				that.showMenu(menu, e, root, is_submenu);
 			}
 		};
 		for (const i in sorted_entries)
@@ -9110,10 +9117,8 @@ Inspector.prototype.addInfo = function(name, value, options)
 
 	element.setValue = function(v)
 	{
-		if (v === undefined)
-		{return;}
-		if (info)
-		{info.innerHTML = v;}
+		if (v === undefined) {return;}
+		if (info) {info.innerHTML = v;}
 	};
 
 	let content = element.querySelector("span.info_content");
@@ -10475,11 +10480,9 @@ Inspector.prototype.addFile = function(name, value, options)
 	const content = element.querySelector(".wcontent");
 	content.style.position = "relative";
 	const input = element.querySelector(".wcontent input");
-	if (options.accept)
-	{input.accept = options.accept;}
+	if (options.accept) {input.accept = options.accept;}
 	const filename_element = element.querySelector(".wcontent .filename");
-	if (value)
-	{filename_element.innerText = value.name;}
+	if (value) {filename_element.innerText = value.name;}
 
 	input.addEventListener("change", (e) =>
 	{
@@ -10910,13 +10913,10 @@ Inspector.prototype.beginGroup = function(name, options)
 
 	const content = document.createElement("DIV");
 	content.className = "wgroupcontent";
-	if (options.collapsed)
-	{content.style.display = "none";}
+	if (options.collapsed) {content.style.display = "none";}
 
-	if (options.height)
-	{content.style.height = LiteGUI.sizeToCSS(options.height);}
-	if (options.scrollable)
-	{content.style.overflow = "auto";}
+	if (options.height) {content.style.height = LiteGUI.sizeToCSS(options.height);}
+	if (options.scrollable) {content.style.overflow = "auto";}
 
 	element.appendChild(content);
 
@@ -10987,8 +10987,7 @@ Inspector.prototype.addTitle = function(title,options)
 Inspector.prototype.scrollTo = function(id)
 {
 	const element = this.root.querySelector("#" + id);
-	if (!element)
-	{return;}
+	if (!element) {return;}
 	const top = this.root.offsetTop;
 	const delta = element.offsetTop - top;
 	this.root.parentNode.parentNode.scrollTop = delta;
@@ -11017,8 +11016,7 @@ Inspector.prototype.updateWidgets = function()
 	for (let i = 0; i < this.widgets.length; ++i)
 	{
 		const widget = this.widgets[i];
-		if (widget.on_update)
-		{widget.on_update(widget);}
+		if (widget.on_update) {widget.on_update(widget);}
 	}
 };
 
