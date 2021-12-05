@@ -3480,7 +3480,7 @@ Inspector.prototype.addSection = function(name, options)
 			seccont.style.display = seccont.style.display === "none" ? null : "none";
 			if (options.callback)
 			{
-				options.callback.call(element, !element.classList.contains("collapsed"));
+				options.callback.call(element, element.classList.contains("collapsed"));
 			}
 		});
 	}
