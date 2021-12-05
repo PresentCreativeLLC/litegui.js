@@ -32,15 +32,12 @@ const LiteGUI = {
 	{
 		options = options || {};
 
-		if (options.width && options.height)
-		{this.setWindowSize(options.width,options.height);}
+		if (options.width && options.height) {this.setWindowSize(options.width,options.height);}
 
 		// Choose main container
 		this.container = null;
-		if (options.container)
-		{this.container = document.getElementById(options.container);}
-		if (!this.container)
-		{this.container = document.body;}
+		if (options.container) {this.container = document.getElementById(options.container);}
+		if (!this.container) {this.container = document.body;}
 
 		if (options.wrapped)
 		{
@@ -8633,28 +8630,24 @@ Inspector.prototype.addVector2 = function(name,value, options)
 	options.full = true;
 	this.tab_index++;
 
-	const wcontent = element.querySelector(".wcontent");
-
-	const dragger1 = new LiteGUI.Dragger(value[0], options);
-	dragger1.root.style.marginLeft = 0;
-	dragger1.root.style.width = "calc( 50% - 1px )";
-	wcontent.appendChild(dragger1.root);
-
-	options.tab_index = this.tab_index;
-	this.tab_index++;
-
-	const dragger2 = new LiteGUI.Dragger(value[1], options);
-	dragger2.root.style.width = "calc( 50% - 1px )";
-	wcontent.appendChild(dragger2.root);
-	element.draggers = [dragger1,dragger2];
+	const draggers = element.draggers = [];
 
 	const inner_before_change = function(e)
 	{
 		if (options.callback_before) {options.callback_before(e);}
 	};
 
-	LiteGUI.bind(dragger1.root ,"start_dragging", inner_before_change);
-	LiteGUI.bind(dragger2.root, "start_dragging", inner_before_change);
+	for (let i = 0; i < 2; i++)
+	{
+		const dragger = new LiteGUI.Dragger(value[i], options);
+		dragger.root.style.marginLeft = 0;
+		dragger.root.style.width = "calc( 25% - 1px )";
+		element.querySelector(".wcontent").appendChild(dragger.root);
+		options.tab_index = this.tab_index;
+		this.tab_index++;
+		dragger.root.addEventListener("start_dragging", inner_before_change);
+		draggers.push(dragger);
+	}
 
 	const inputs = element.querySelectorAll("input");
 	const onChangeCallback = function(e)
@@ -8671,7 +8664,8 @@ Inspector.prototype.addVector2 = function(name,value, options)
 
 		that.values[name] = r;
 
-		if (options.callback && (dragger1.dragging || dragger2.dragging))
+		const dragger = e.target.dragger;
+		if (options.callback && dragger.dragging)
 		{
 			const new_val = options.callback.call(element, r);
 
@@ -8684,7 +8678,7 @@ Inspector.prototype.addVector2 = function(name,value, options)
 				r = new_val;
 			}
 		}
-		else if ((options.callback || options.finalCallback) && !(dragger1.dragging || dragger2.dragging))
+		else if ((options.callback || options.finalCallback) && !dragger.dragging)
 		{
 			let new_val = undefined;
 			if (options.finalCallback)
@@ -8709,9 +8703,17 @@ Inspector.prototype.addVector2 = function(name,value, options)
 		LiteGUI.trigger(element, "wchange", [r]);
 		if (that.onchange) {that.onchange(name,r,element);}
 	};
+	const onStopDragging = function(input, e)
+	{
+		LiteGUI.trigger(input, "change");
+	};
 	for (let i = 0; i < inputs.length; ++i)
 	{
-		inputs[i].addEventListener("change" , onChangeCallback);
+		const dragger = draggers[i];
+		const input = inputs[i];
+		input.dragger = dragger;
+		input.addEventListener("change" , onChangeCallback);
+		dragger.root.addEventListener("stop_dragging", onStopDragging.bind(undefined, input));
 	}
 
 	this.append(element,options);
@@ -8719,11 +8721,13 @@ Inspector.prototype.addVector2 = function(name,value, options)
 	element.setValue = function(v, skip_event)
 	{
 		if (!v) {return;}
-		if (dragger1.getValue() != v[0]) {dragger1.setValue(v[0],true);}
-		 // Last one triggers the event
-		if (dragger2.getValue() != v[1]) {dragger2.setValue(v[1],skip_event);}
+		for (let i = 0; i < draggers.length; i++)
+		{
+			draggers[i].setValue(v[i],skip_event || i < draggers.length - 1);
+		}
 	};
-	element.setRange = function(min,max) { dragger1.setRange(min,max); dragger2.setRange(min,max); };
+	element.setRange = function(min,max) { for (const i in draggers) { draggers[i].setRange(min,max); } };
+
 	this.processElement(element, options);
 	return element;
 };
@@ -8763,34 +8767,24 @@ Inspector.prototype.addVector3 = function(name,value, options)
 	options.full = true;
 	this.tab_index++;
 
-	const dragger1 = new LiteGUI.Dragger(value[0], options);
-	dragger1.root.style.marginLeft = 0;
-	dragger1.root.style.width = "calc( 33% - 1px )";
-	element.querySelector(".wcontent").appendChild(dragger1.root);
-
-	options.tab_index = this.tab_index;
-	this.tab_index++;
-
-	const dragger2 = new LiteGUI.Dragger(value[1], options);
-	dragger2.root.style.width = "calc( 33% - 1px )";
-	element.querySelector(".wcontent").appendChild(dragger2.root);
-
-	options.tab_index = this.tab_index;
-	this.tab_index++;
-
-	const dragger3 = new LiteGUI.Dragger(value[2], options);
-	dragger3.root.style.width = "calc( 33% - 1px )";
-	element.querySelector(".wcontent").appendChild(dragger3.root);
-	element.draggers = [dragger1,dragger2,dragger3];
+	const draggers = element.draggers = [];
 
 	const inner_before_change = function(e)
 	{
 		if (options.callback_before) {options.callback_before(e);}
 	};
 
-	dragger1.root.addEventListener("start_dragging", inner_before_change);
-	dragger2.root.addEventListener("start_dragging", inner_before_change);
-	dragger3.root.addEventListener("start_dragging", inner_before_change);
+	for (let i = 0; i < 3; i++)
+	{
+		const dragger = new LiteGUI.Dragger(value[i], options);
+		dragger.root.style.marginLeft = 0;
+		dragger.root.style.width = "calc( 25% - 1px )";
+		element.querySelector(".wcontent").appendChild(dragger.root);
+		options.tab_index = this.tab_index;
+		this.tab_index++;
+		dragger.root.addEventListener("start_dragging", inner_before_change);
+		draggers.push(dragger);
+	}
 
 	const inputs = element.querySelectorAll("input");
 	const onChangeCallback = function(e)
@@ -8807,11 +8801,12 @@ Inspector.prototype.addVector3 = function(name,value, options)
 
 		that.values[name] = r;
 
-		if (options.callback && (dragger1.dragging || dragger2.dragging || dragger3.dragging))
+		const dragger = e.target.dragger;
+		if (options.callback && dragger.dragging)
 		{
 			const new_val = options.callback.call(element, r);
 
-			if (typeof(new_val) == "object" && new_val.length >= 3)
+			if (typeof(new_val) == "object" && new_val.length >= 2)
 			{
 				for (let j = 0; j < elems.length; j++)
 				{
@@ -8820,7 +8815,7 @@ Inspector.prototype.addVector3 = function(name,value, options)
 				r = new_val;
 			}
 		}
-		else if ((options.callback || options.finalCallback) && !(dragger1.dragging || dragger2.dragging || dragger3.dragging))
+		else if ((options.callback || options.finalCallback) && !dragger.dragging)
 		{
 			let new_val = undefined;
 			if (options.finalCallback)
@@ -8832,7 +8827,7 @@ Inspector.prototype.addVector3 = function(name,value, options)
 				new_val = options.callback.call(element, r);
 			}
 
-			if (typeof(new_val) == "object" && new_val.length >= 3)
+			if (typeof(new_val) == "object" && new_val.length >= 2)
 			{
 				for (let j = 0; j < elems.length; j++)
 				{
@@ -8845,22 +8840,30 @@ Inspector.prototype.addVector3 = function(name,value, options)
 		LiteGUI.trigger(element, "wchange", [r]);
 		if (that.onchange) {that.onchange(name,r,element);}
 	};
+	const onStopDragging = function(input, e)
+	{
+		LiteGUI.trigger(input, "change");
+	};
 	for (let i = 0; i < inputs.length; ++i)
 	{
-		inputs[i].addEventListener("change", onChangeCallback);
+		const dragger = draggers[i];
+		const input = inputs[i];
+		input.dragger = dragger;
+		input.addEventListener("change" , onChangeCallback);
+		dragger.root.addEventListener("stop_dragging", onStopDragging.bind(undefined, input));
 	}
 
 	this.append(element,options);
 
 	element.setValue = function(v, skip_event)
 	{
-		if (!v)
-		{return;}
-		dragger1.setValue(v[0],true);
-		dragger2.setValue(v[1],true);
-		dragger3.setValue(v[2],skip_event); // Last triggers
+		if (!v) {return;}
+		for (let i = 0; i < draggers.length; i++)
+		{
+			draggers[i].setValue(v[i],skip_event || i < draggers.length - 1);
+		}
 	};
-	element.setRange = function(min,max) { dragger1.setRange(min,max); dragger2.setRange(min,max); dragger3.setRange(min,max); };
+	element.setRange = function(min,max) { for (const i in draggers) { draggers[i].setRange(min,max); } };
 
 	this.processElement(element, options);
 	return element;
@@ -8889,7 +8892,7 @@ Inspector.prototype.addVector4 = function(name,value, options)
 	if (!options.step)
 	{options.step = 0.1;}
 
-	value = value || [0,0,0];
+	value = value || [0,0,0,0];
 	const that = this;
 	this.values[name] = value;
 
@@ -8916,7 +8919,7 @@ Inspector.prototype.addVector4 = function(name,value, options)
 		element.querySelector(".wcontent").appendChild(dragger.root);
 		options.tab_index = this.tab_index;
 		this.tab_index++;
-		dragger.root.addEventListener("start_dragging", inner_before_change.bind(options));
+		dragger.root.addEventListener("start_dragging", inner_before_change);
 		draggers.push(dragger);
 	}
 
@@ -8935,7 +8938,8 @@ Inspector.prototype.addVector4 = function(name,value, options)
 
 		that.values[name] = r;
 
-		if (options.callback && (draggers[0].dragging || draggers[1].dragging || draggers[2].dragging || draggers[3].dragging))
+		const dragger = e.target.dragger;
+		if (options.callback && dragger.dragging)
 		{
 			const new_val = options.callback.call(element, r);
 			if (typeof(new_val) == "object" && new_val.length >= 4)
@@ -8947,7 +8951,7 @@ Inspector.prototype.addVector4 = function(name,value, options)
 				r = new_val;
 			}
 		}
-		else if ((options.callback || options.finalCallback) && !(draggers[0].dragging || draggers[1].dragging || draggers[2].dragging || draggers[3].dragging))
+		else if ((options.callback || options.finalCallback) && !dragger.dragging)
 		{
 			let new_val = undefined;
 			if (options.finalCallback)
@@ -8970,22 +8974,30 @@ Inspector.prototype.addVector4 = function(name,value, options)
 		}
 
 		LiteGUI.trigger(element, "wchange",[r]);
-		if (that.onchange)
-		{that.onchange(name,r,element);}
+		if (that.onchange) {that.onchange(name,r,element);}
+	};
+	const onStopDragging = function(input, e)
+	{
+		LiteGUI.trigger(input, "change");
 	};
 	for (let i = 0; i < inputs.length; ++i)
 	{
-		inputs[i].addEventListener("change", onChangeCallback);
+		const dragger = draggers[i];
+		const input = inputs[i];
+		input.dragger = dragger;
+		input.addEventListener("change" , onChangeCallback);
+		dragger.root.addEventListener("stop_dragging", onStopDragging.bind(undefined, input));
 	}
 
 	this.append(element,options);
 
 	element.setValue = function(v, skip_event)
 	{
-		if (!v)
-		{return;}
+		if (!v) {return;}
 		for (let i = 0; i < draggers.length; i++)
-		{draggers[i].setValue(v[i],skip_event);}
+		{
+			draggers[i].setValue(v[i],skip_event || i < draggers.length - 1);
+		}
 	};
 	element.setRange = function(min,max) { for (const i in draggers) { draggers[i].setRange(min,max); } };
 
@@ -10898,26 +10910,22 @@ Inspector.prototype.addSection = function(name, options)
 	options = this.processOptions(options);
 	const that = this;
 
-	if (this.current_section)
-	{this.current_section.end();}
+	if (this.current_section) {this.current_section.end();}
 
 	const element = document.createElement("DIV");
 	element.className = "wsection";
-	if (!name)
-	{element.className += " notitle";}
-	if (options.className)
-	{element.className += " " + options.className;}
-	if (options.collapsed)
-	{element.className += " collapsed";}
+	if (!name) {element.className += " notitle";}
+	if (options.className) {element.className += " " + options.className;}
+	if (options.collapsed && !options.no_collapse) {element.className += " collapsed";}
 
-	if (options.id)
-	{element.id = options.id;}
-	if (options.instance)
-	{element.instance = options.instance;}
+	if (options.id) {element.id = options.id;}
+	if (options.instance) {element.instance = options.instance;}
 
 	let code = "";
 	if (name)
-	{code += "<div class='wsectiontitle'>"+(options.no_collapse ? "" : "<span class='switch-section-button'></span>")+name+"</div>";}
+	{
+		code += "<div class='wsectiontitle'>"+(options.no_collapse ? "" : "<span class='switch-section-button'></span>")+name+"</div>";
+	}
 	code += "<div class='wsectioncontent'></div>";
 	element.innerHTML = code;
 
@@ -10929,7 +10937,7 @@ Inspector.prototype.addSection = function(name, options)
 
 	element.sectiontitle = element.querySelector(".wsectiontitle");
 
-	if (name)
+	if (name && !options.no_collapse)
 	{
 		element.sectiontitle.addEventListener("click",(e) =>
 		{
@@ -10944,13 +10952,17 @@ Inspector.prototype.addSection = function(name, options)
 		});
 	}
 
-	if (options.collapsed)
-	{element.querySelector(".wsectioncontent").style.display = "none";}
+	if (options.collapsed && !options.no_collapse)
+	{
+		element.querySelector(".wsectioncontent").style.display = "none";
+	}
 
 	this.setCurrentSection(element);
 
 	if (options.widgets_per_row)
-	{this.widgets_per_row = options.widgets_per_row;}
+	{
+		this.widgets_per_row = options.widgets_per_row;
+	}
 
 	element.refresh = function()
 	{

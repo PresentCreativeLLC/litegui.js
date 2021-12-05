@@ -32,15 +32,12 @@ const LiteGUI = {
 	{
 		options = options || {};
 
-		if (options.width && options.height)
-		{this.setWindowSize(options.width,options.height);}
+		if (options.width && options.height) {this.setWindowSize(options.width,options.height);}
 
 		// Choose main container
 		this.container = null;
-		if (options.container)
-		{this.container = document.getElementById(options.container);}
-		if (!this.container)
-		{this.container = document.body;}
+		if (options.container) {this.container = document.getElementById(options.container);}
+		if (!this.container) {this.container = document.body;}
 
 		if (options.wrapped)
 		{
