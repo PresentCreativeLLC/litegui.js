@@ -59,7 +59,18 @@ module.exports = (_env) =>
 					test: /\.css$/i,
 					use: [MiniCssExtractPlugin.loader, "css-loader"],
 				},
+				{
+					test: /\.ts?$/,
+					use: 'ts-loader',
+					exclude: /node_modules/,
+				}
 			],
+		},
+		resolve: {
+			extensions: ['.ts', '.tsx', '.js'],
+			alias: {
+				stun: path.resolve(__dirname, 'src')
+			}
 		}
 	};
 
