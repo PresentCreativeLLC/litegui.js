@@ -32,7 +32,12 @@ export interface EventTargetPlus extends EventTarget
     setValue: Function;
 }
 
-export class HTMLLIElementPlus extends HTMLLIElement
+export interface HTMLLIElementPlus extends HTMLLIElement
+{
+    data: any;
+}
+
+export interface HTMLParagraphElementPlus extends HTMLParagraphElement
 {
     data: any;
 }
