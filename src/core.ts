@@ -1,1456 +1,1467 @@
 
-/**
- * Core namespace of LiteGUI library, it holds some useful functions
- *
- * @class LiteGUI
- * @constructor
- */
+declare let escapeHtmlEntities: any | undefined;
 
-
-export class LiteGUI
+export module LiteGUI
 {
-	root: HTMLElement | null = null;
-	content: HTMLElement | null = null;
-	container: HTMLElement | null = null;
-
-	panels: {};
-	windows: []; // Windows opened by the GUI (we need to know about them to close them once the app closes)
-
-	// Undo
-	undo_steps: [];
-
-	// Used for blacken when a modal dialog is shown
-	modalbg_div: HTMLElement | null = null;
-
-	// The top menu
-	mainmenu: null;
+	// Those useful HTML unicode codes that I never remeber but I always need
+	enum special_codes {
+		close = "&#10005;",
+		navicon = "&#9776;",
+		refresh = "&#8634;",
+		gear = "&#9881;",
+		open_folder = "&#128194;",
+		download = "&#11123;",
+		tick = "&#10003;",
+		trash ="&#128465;"
+	};
 
 	/**
-	 * Initializes the lib, must be called
-	 * @method init
-	 * @param {object} options some options are container, menubar,
+	 * Core namespace of LiteGUI library, it holds some useful functions
+	 *
+	 * @class LiteGUI
+	 * @constructor
 	 */
-	init(options:
-		{
-			width: number,
-			height: number,
-			container: string,
-			wrapped: boolean,
-			menubar: boolean,
-			gui_callback: () => void
-		}): void
+	export class LiteGUI
 	{
-		options = options || {};
+		root: HTMLElement | null = null;
+		content: HTMLElement | null = null;
+		container: HTMLElement | null = null;
 
-		if (options.width && options.height) {
-			this.setWindowSize(options.width, options.height);
-		}
+		panels: any = {};
+		windows: Array<any> = []; // Windows opened by the GUI (we need to know about them to close them once the app closes)
 
-		// Choose main container
-		this.container = null;
-		if (options.container) {
-			this.container = document.getElementById(options.container);
-		}
-		if (!this.container) {this.container = document.body;}
+		// Undo
+		undo_steps: Array<any> = [];
 
-		if (options.wrapped)
-		{
-			// Create litegui root element
-			const root: HTMLElement = document.createElement("div");
-			root.style.position = "relative";
-			root.style.overflow = "hidden";
-			this.root = root;
-			this.container.appendChild(root);
+		// Used for blacken when a modal dialog is shown
+		modalbg_div: HTMLElement | null = null;
 
-			// Content: the main container for everything
-			const content: HTMLElement = document.createElement("div");
-			this.content = content;
-			this.root.appendChild(content);
+		// The top menu
+		mainmenu: any = null;
 
-			// Maximize
-			if (this.root.classList.contains("fullscreen"))
+		_safe_cliboard : any;
+		menubar : any;
+
+		/**
+		 * Initializes the lib, must be called
+		 * @method init
+		 * @param {object} options some options are container, menubar,
+		 */
+		init(options:
 			{
-				window.addEventListener("resize", (e) =>
+				width: number,
+				height: number,
+				container: string,
+				wrapped: boolean,
+				menubar: boolean,
+				gui_callback: () => void
+			}): void
+		{
+			options = options || {};
+
+			if (options.width && options.height) {
+				this.setWindowSize(options.width, options.height);
+			}
+
+			// Choose main container
+			this.container = null;
+			if (options.container) {
+				this.container = document.getElementById(options.container);
+			}
+			if (!this.container) {this.container = document.body;}
+
+			if (options.wrapped)
+			{
+				// Create litegui root element
+				const root: HTMLElement = document.createElement("div");
+				root.style.position = "relative";
+				root.style.overflow = "hidden";
+				this.root = root;
+				this.container.appendChild(root);
+
+				// Content: the main container for everything
+				const content: HTMLElement = document.createElement("div");
+				this.content = content;
+				this.root.appendChild(content);
+
+				// Maximize
+				if (this.root.classList.contains("fullscreen"))
 				{
-					this.maximizeWindow();
-				});
+					window.addEventListener("resize", (e) =>
+					{
+						this.maximizeWindow();
+					});
+				}
 			}
-		}
-		else
-		{
-			this.root = this.content = this.container;
-		}
-
-		this.root.className = "litegui-wrap fullscreen";
-		this.content.className = "litegui-maincontent";
-
-		// Create modal dialogs container
-		const modalbg = this.modalbg_div = document.createElement("div");
-		this.modalbg_div.className = "litemodalbg";
-		this.root.appendChild(this.modalbg_div);
-		modalbg.style.display = "none";
-
-		// Create menubar
-		if (options.menubar)
-		{
-			this.createMenubar();
-		}
-
-		// Called before anything
-		if (options.gui_callback)
-		{
-			options.gui_callback();
-		}
-
-		// External windows
-		window.addEventListener("beforeunload", (e) =>
-		{
-			for (let i = 0; i < this.windows.length; ++i)
+			else
 			{
-				this.windows[i].close();
+				this.root = this.content = this.container;
 			}
-			this.windows = [];
-		});
-	}
 
-	/**
-	 * Triggers a simple event in an object (similar to jQuery.trigger)
-	 * @method trigger
-	 * @param {Object} element could be an HTMLEntity or a regular object
-	 * @param {String} event_name the type of the event
-	 * @param {*} params it will be stored in e.detail
-	 * @param {*} origin it will be stored in e.srcElement
-	 */
-	trigger(element: HTMLElement, event_name: string, params: any, origin): CustomEvent<any>
-	{
-		// TODO: fix the deprecated elements
-		const evt: CustomEvent<any> = document.createEvent('CustomEvent');
-		evt.initCustomEvent(event_name, true, true, params); // CanBubble, cancelable, detail
-		evt.target = origin;
-		
-		if (element.dispatchEvent)
-		{
-			element.dispatchEvent(evt);
-		}
-		else if (element.__events)
-		{
-			element.__events.dispatchEvent(evt);
-		}
+			this.root.className = "litegui-wrap fullscreen";
+			this.content.className = "litegui-maincontent";
 
-		// Else nothing seems binded here so nothing to do
-		return evt;
-	}
+			// Create modal dialogs container
+			const modalbg = this.modalbg_div = document.createElement("div");
+			this.modalbg_div.className = "litemodalbg";
+			this.root.appendChild(this.modalbg_div);
+			modalbg.style.display = "none";
 
-	/**
-	 * Binds an event in an object (similar to jQuery.bind)
-	 * If the element is not an HTML entity a new one is created, attached to the object (as non-enumerable, called __events) and used
-	 * @method trigger
-	 * @param {Object} element could be an HTMLEntity, a regular object, a query string or a regular Array of entities
-	 * @param {String} event the string defining the event
-	 * @param {Function} callback where to call
-	 */
-	bind(element, event, callback): void
-	{
-		if (!element) {
-			throw ("Cannot bind to null");
-		}
-		if (!event) {
-			throw ("Event bind missing");
-		}
-		if (!callback) {
-			throw ("Bind callback missing");
-		}
-
-		if (element.constructor === String)
-		{
-			element = document.querySelectorAll(element);
-		}
-
-		if (element.constructor === NodeList || element.constructor === Array)
-		{
-			for (let i = 0; i < element.length; ++i)
+			// Create menubar
+			if (options.menubar)
 			{
-				inner(element[i]);
+				this.createMenubar();
 			}
-		}
-		else
-		{
-			inner(element);
+
+			// Called before anything
+			if (options.gui_callback)
+			{
+				options.gui_callback();
+			}
+
+			// External windows
+			window.addEventListener("beforeunload", (e) =>
+			{
+				for (let i = 0; i < this.windows.length; ++i)
+				{
+					this.windows[i].close();
+				}
+				this.windows = [];
+			});
 		}
 
-		function inner(element)
+		/**
+		 * Triggers a simple event in an object (similar to jQuery.trigger)
+		 * @method trigger
+		 * @param {Object} element could be an HTMLEntity or a regular object
+		 * @param {String} event_name the type of the event
+		 * @param {*} params it will be stored in e.detail
+		 * @param {*} origin it will be stored in e.srcElement
+		 */
+		trigger(element: any, event_name: string, params: any, origin : any): CustomEvent<any>
 		{
-			if (element.addEventListener)
+			// TODO: fix the deprecated elements
+			const evt = document.createEvent('CustomEvent') as any;
+			evt.initCustomEvent(event_name, true, true, params); // CanBubble, cancelable, detail
+			evt.target = origin;
+			
+			if (element.dispatchEvent)
 			{
-				element.addEventListener(event, callback);
+				element.dispatchEvent(evt);
 			}
 			else if (element.__events)
 			{
-				element.__events.addEventListener(event, callback);
+				element.__events.dispatchEvent(evt);
+			}
+
+			// Else nothing seems binded here so nothing to do
+			return evt;
+		}
+
+		/**
+		 * Binds an event in an object (similar to jQuery.bind)
+		 * If the element is not an HTML entity a new one is created, attached to the object (as non-enumerable, called __events) and used
+		 * @method trigger
+		 * @param {Object} element could be an HTMLEntity, a regular object, a query string or a regular Array of entities
+		 * @param {String} event the string defining the event
+		 * @param {Function} callback where to call
+		 */
+		bind(element : any, event : string, callback : Function): void
+		{
+			if (!element) {
+				throw ("Cannot bind to null");
+			}
+			if (!event) {
+				throw ("Event bind missing");
+			}
+			if (!callback) {
+				throw ("Bind callback missing");
+			}
+
+			if (element.constructor === String)
+			{
+				element = document.querySelectorAll(element as any);
+			}
+
+			if (element.constructor === NodeList || element.constructor === Array)
+			{
+				for (let i = 0; i < element.length; ++i)
+				{
+					inner(element[i]);
+				}
 			}
 			else
 			{
-				// Create a dummy HTMLentity so we can use it to bind HTML events
-				const dummy = document.createElement("span");
-				dummy.widget = element; // Double link
-				Object.defineProperty(element, "__events", {
-					enumerable: false,
-					configurable: false,
-					writable: false,
-					value: dummy
-				});
-				element.__events.addEventListener(event, callback);
+				inner(element);
 			}
-		}
-	}
 
-	/**
-	 * Unbinds an event in an object (similar to jQuery.unbind)
-	 * @method unbind
-	 * @param {Object} element could be an HTMLEntity or a regular object
-	 * @param {String} event the string defining the event
-	 * @param {Function} callback where to call
-	 */
-	unbind(element, event, callback): void
-	{
-		if (element.removeEventListener)
-		{element.removeEventListener(event, callback);}
-		else if (element.__events && element.__events.removeEventListener)
-		{element.__events.removeEventListener(event, callback);}
-	}
-
-	/**
-	 * Removes a class
-	 * @method removeClass
-	 * @param {HTMLElement} root
-	 * @param {String} selector
-	 * @param {String} class_name
-	 */
-	removeClass(elem, selector, class_name): void
-	{
-		if (!class_name)
-		{
-			class_name = selector;
-			selector = "." + selector;
-		}
-		const list = (elem || document).querySelectorAll(selector);
-		for (let i = 0; i < list.length; ++i)
-		{list[i].classList.remove(class_name);}
-	}
-
-	/**
-	 * Appends litegui widget to the global interface
-	 * @method add
-	 * @param {Object} litegui_element
-	 */
-	add(litegui_element): void
-	{
-		this.content?.appendChild(litegui_element.root || litegui_element);
-	}
-
-	/**
-	 * Remove from the interface, it is is an HTML element it is removed from its parent, if it is a widget the same.
-	 * @method remove
-	 * @param {Object} litegui_element it also supports HTMLentity, selector string or Array of elements
-	 */
-	remove(litegui_element): void
-	{
-		if (!litegui_element) {return;}
-
-		if (litegui_element.constructor === String) // Selector
-		{
-			const elements = document.querySelectorAll(litegui_element);
-			for (let i = 0; i < elements.length; ++i)
+			function inner(element : any)
 			{
-				const element = elements[i];
-				if (element && element.parentNode)
+				if (element.addEventListener)
 				{
-					element.parentNode.removeChild(element);
+					element.addEventListener(event, callback);
+				}
+				else if (element.__events)
+				{
+					element.__events.addEventListener(event, callback);
+				}
+				else
+				{
+					// Create a dummy HTMLentity so we can use it to bind HTML events
+					const dummy = document.createElement("span") as any;
+					dummy.widget = element; // Double link
+					Object.defineProperty(element, "__events", {
+						enumerable: false,
+						configurable: false,
+						writable: false,
+						value: dummy
+					});
+					element.__events.addEventListener(event, callback);
 				}
 			}
 		}
-		if (litegui_element.constructor === Array || litegui_element.constructor === NodeList)
+
+		/**
+		 * Unbinds an event in an object (similar to jQuery.unbind)
+		 * @method unbind
+		 * @param {Object} element could be an HTMLEntity or a regular object
+		 * @param {String} event the string defining the event
+		 * @param {Function} callback where to call
+		 */
+		unbind(element : any, event : string, callback : Function): void
 		{
-			for (let i = 0; i < litegui_element.length; ++i)
+			if (element.removeEventListener)
+			{element.removeEventListener(event, callback);}
+			else if (element.__events && element.__events.removeEventListener)
+			{element.__events.removeEventListener(event, callback);}
+		}
+
+		/**
+		 * Removes a class
+		 * @method removeClass
+		 * @param {HTMLElement} root
+		 * @param {String} selector
+		 * @param {String} class_name
+		 */
+		removeClass(elem : any, selector : string, class_name : string): void
+		{
+			if (!class_name)
 			{
-				this.remove(litegui_element[i]);
+				class_name = selector;
+				selector = "." + selector;
+			}
+			const list = (elem || document).querySelectorAll(selector);
+			for (let i = 0; i < list.length; ++i)
+			{list[i].classList.remove(class_name);}
+		}
+
+		/**
+		 * Appends litegui widget to the global interface
+		 * @method add
+		 * @param {Object} litegui_element
+		 */
+		add(litegui_element : any): void
+		{
+			this.content?.appendChild(litegui_element.root || litegui_element);
+		}
+
+		/**
+		 * Remove from the interface, it is is an HTML element it is removed from its parent, if it is a widget the same.
+		 * @method remove
+		 * @param {Object} litegui_element it also supports HTMLentity, selector string or Array of elements
+		 */
+		remove(litegui_element : any): void
+		{
+			if (!litegui_element) {return;}
+
+			if (litegui_element.constructor === String) // Selector
+			{
+				const elements = document.querySelectorAll(litegui_element as any);
+				for (let i = 0; i < elements.length; ++i)
+				{
+					const element = elements[i];
+					if (element && element.parentNode)
+					{
+						element.parentNode.removeChild(element);
+					}
+				}
+			}
+			if (litegui_element.constructor === Array || litegui_element.constructor === NodeList)
+			{
+				for (let i = 0; i < litegui_element.length; ++i)
+				{
+					this.remove(litegui_element[i]);
+				}
+			}
+			else if (litegui_element.root && litegui_element.root.parentNode) // Ltiegui widget
+			{
+				litegui_element.root.parentNode.removeChild(litegui_element.root);
+			}
+			else if (litegui_element.parentNode) // Regular HTML entity
+			{
+				litegui_element.parentNode.removeChild(litegui_element);
 			}
 		}
-		else if (litegui_element.root && litegui_element.root.parentNode) // Ltiegui widget
+
+		/**
+		 * Wrapper of document.getElementById
+		 * @method getById
+		 * @param {String} id
+		 * return {HTMLEntity}
+		 *
+		 */
+		getById(id: string):  HTMLElement | null
 		{
-			litegui_element.root.parentNode.removeChild(litegui_element.root);
+			return document.getElementById(id);
 		}
-		else if (litegui_element.parentNode) // Regular HTML entity
+
+		createMenubar(): void
 		{
-			litegui_element.parentNode.removeChild(litegui_element);
+			this.menubar = new LiteGUI.Menubar("mainmenubar");
+			this.add(this.menubar);
 		}
-	}
 
-	/**
-	 * Wrapper of document.getElementById
-	 * @method getById
-	 * @param {String} id
-	 * return {HTMLEntity}
-	 *
-	 */
-	getById(id: string):  HTMLElement | null
-	{
-		return document.getElementById(id);
-	}
-
-	createMenubar(): void
-	{
-		this.menubar = new LiteGUI.Menubar("mainmenubar");
-		this.add(this.menubar);
-	}
-
-	setWindowSize(w: number, h: number) : void
-	{
-		const style = this.root?.style;
-
-		if (w && h)
+		setWindowSize(w: number | undefined, h: number | undefined) : void
 		{
-			style.width = w+"px";
-			style.height = h + "px";
-			style.boxShadow = "0 0 4px black";
-			this.root.classList.remove("fullscreen");
+			const style = this.root?.style;
+
+			if (w && h)
+			{
+				style!.width = w+"px";
+				style!.height = h + "px";
+				style!.boxShadow = "0 0 4px black";
+				this.root?.classList.remove("fullscreen");
+			}
+			else
+			{
+				if (this.root?.classList.contains("fullscreen"))
+				{return;}
+				this.root?.classList.add("fullscreen");
+				style!.width = "100%";
+				style!.height = "100%";
+				style!.boxShadow = "0 0 0";
+			}
+			LiteGUI.trigger(LiteGUI, "resized", undefined, undefined);
 		}
-		else
+
+		maximizeWindow(): void
 		{
-			if (this.root.classList.contains("fullscreen"))
-			{return;}
-			this.root.classList.add("fullscreen");
-			style.width = "100%";
-			style.height = "100%";
-			style.boxShadow = "0 0 0";
+			this.setWindowSize(undefined, undefined);
 		}
-		LiteGUI.trigger(LiteGUI, "resized");
-	}
 
-	maximizeWindow(): void
-	{
-		this.setWindowSize();
-	}
-
-	/**
-	 * Change cursor
-	 * @method setCursor
-	 * @param {String} cursor
-	 *
-	 */
-	setCursor(name: string): void
-	{
-		this.root.style.cursor = name;
-	}
-
-	/**
-	 * Test if the cursor is inside an element
-	 * @method setCursor
-	 * @param {String} cursor
-	 *
-	 */
-	isCursorOverElement(event, element): boolean
-	{
-		const left = event.pageX;
-		const top = event.pageY;
-		const rect = element.getBoundingClientRect();
-		if (!rect)
-		{return false;}
-		if (top > rect.top && top < (rect.top + rect.height) &&
-			left > rect.left && left < (rect.left + rect.width))
-		{return true;}
-		return false;
-	}
-
-	getRect(element: HTMLElement): DOMRect
-	{
-		return element.getBoundingClientRect();
-	}
-
-	/**
-	 * Copy a string to the clipboard (it needs to be invoqued from a click event)
-	 * @method toClipboard
-	 * @param {String} data
-	 * @param {Boolean} force_local force to store the data in the browser clipboard (this one can be read back)
-	 *
-	 */
-	toClipboard(object, force_local): void
-	{
-		if (object && object.constructor !== String)
-		{object = JSON.stringify(object);}
-
-		let input = null;
-		let in_clipboard = false;
-		if (!force_local)
+		/**
+		 * Change cursor
+		 * @method setCursor
+		 * @param {String} cursor
+		 *
+		 */
+		setCursor(name: string): void
 		{
+			this.root!.style.cursor = name;
+		}
+
+		/**
+		 * Test if the cursor is inside an element
+		 * @method setCursor
+		 * @param {String} cursor
+		 *
+		 */
+		isCursorOverElement(event : any, element : any): boolean
+		{
+			const left = event.pageX;
+			const top = event.pageY;
+			const rect = element.getBoundingClientRect();
+			if (!rect)
+			{return false;}
+			if (top > rect.top && top < (rect.top + rect.height) &&
+				left > rect.left && left < (rect.left + rect.width))
+			{return true;}
+			return false;
+		}
+
+		getRect(element: HTMLElement): DOMRect
+		{
+			return element.getBoundingClientRect();
+		}
+
+		/**
+		 * Copy a string to the clipboard (it needs to be invoqued from a click event)
+		 * @method toClipboard
+		 * @param {String} data
+		 * @param {Boolean} force_local force to store the data in the browser clipboard (this one can be read back)
+		 *
+		 */
+		toClipboard(object : any, force_local : boolean): void
+		{
+			if (object && object.constructor !== String)
+			{object = JSON.stringify(object);}
+
+			let input = null;
+			let in_clipboard = false;
+			if (!force_local)
+			{
+				try
+				{
+					const copySupported = document.queryCommandSupported('copy');
+					input = document.createElement("input");
+					input.type = "text";
+					input.style.opacity = (0).toString();
+					input.value = object;
+					document.body.appendChild(input);
+					input.select();
+					in_clipboard = document.execCommand('copy');
+					console.log(in_clipboard ? "saved to clipboard" : "problem saving to clipboard");
+					document.body.removeChild(input);
+				}
+				catch (err)
+				{
+					if (input)
+					{document.body.removeChild(input);}
+					console.warn('Oops, unable to copy using the true clipboard');
+				}
+			}
+
+			// Old system
 			try
 			{
-				const copySupported = document.queryCommandSupported('copy');
-				input = document.createElement("input");
-				input.type = "text";
-				input.style.opacity = 0;
-				input.value = object;
-				document.body.appendChild(input);
-				input.select();
-				in_clipboard = document.execCommand('copy');
-				console.log(in_clipboard ? "saved to clipboard" : "problem saving to clipboard");
-				document.body.removeChild(input);
+				this._safe_cliboard = null;
+				localStorage.setItem("litegui_clipboard", object);
 			}
 			catch (err)
 			{
-				if (input)
-				{document.body.removeChild(input);}
-				console.warn('Oops, unable to copy using the true clipboard');
+				this._safe_cliboard = object;
+				console.warn("cliboard quota excedeed");
 			}
 		}
 
-		// Old system
-		try
+		/**
+		 * Reads from the secondary clipboard (only can read if the data was stored using the toClipboard)
+		 * @method getLocalClipboard
+		 * @return {String} clipboard
+		 *
+		 */
+		getLocalClipboard()
 		{
-			this._safe_cliboard = null;
-			localStorage.setItem("litegui_clipboard", object);
-		}
-		catch (err)
-		{
-			this._safe_cliboard = object;
-			console.warn("cliboard quota excedeed");
-		}
-	}
-
-	/**
-	 * Reads from the secondary clipboard (only can read if the data was stored using the toClipboard)
-	 * @method getLocalClipboard
-	 * @return {String} clipboard
-	 *
-	 */
-	getLocalClipboard: function()
-	{
-		let data = localStorage.getItem("litegui_clipboard");
-		if (!data && this._safe_cliboard)
-		{data = this._safe_cliboard;}
-		if (!data)
-		{return null;}
-		if (data[0] == "{")
-		{return JSON.parse(data);}
-		return data;
-	},
-
-	/**
-	 * Insert some CSS code to the website
-	 * @method addCSS
-	 * @param {String|Object} code it could be a string with CSS rules, or an object with the style syntax.
-	 *
-	 */
-	addCSS: function(code)
-	{
-		if (!code)
-		{return;}
-
-		if (code.constructor === String)
-		{
-			const style = document.createElement('style');
-			style.type = 'text/css';
-			style.innerHTML = code;
-			document.getElementsByTagName('head')[0].appendChild(style);
-			return;
+			let data = localStorage.getItem("litegui_clipboard");
+			if (!data && this._safe_cliboard)
+			{data = this._safe_cliboard;}
+			if (!data)
+			{return null;}
+			if (data[0] == "{")
+			{return JSON.parse(data);}
+			return data;
 		}
 
-		for (const i in code)
-		{document.body.style[i] = code[i];}
-
-	},
-
-	/**
-	 * Requires a new CSS
-	 * @method requireCSS
-	 * @param {String} url string with url or an array with several urls
-	 * @param {Function} on_complete
-	 *
-	 */
-	requireCSS: function(url, on_complete)
-	{
-		if (typeof(url)=="string")
-		{url = [url];}
-
-		while (url.length)
+		/**
+		 * Insert some CSS code to the website
+		 * @method addCSS
+		 * @param {String|Object} code it could be a string with CSS rules, or an object with the style syntax.
+		 *
+		 */
+		addCSS(code : string | any)
 		{
-			const link  = document.createElement('link');
-			// Link.id   = cssId;
-			link.rel  = 'stylesheet';
-			link.type = 'text/css';
-			link.href = url.shift(1);
-			link.media = 'all';
-			const head = document.getElementsByTagName('head')[0];
-			head.appendChild(link);
-			if (url.length == 0)
-			{link.onload = on_complete;}
-		}
-	},
+			if (!code)
+			{return;}
 
-	/**
-	 * Request file from url (it could be a binary, text, etc.). If you want a simplied version use
-	 * @method request
-	 * @param {Object} request object with all the parameters like data (for sending forms), dataType, success, error
-	 * @param {Function} on_complete
-	 *
-	 */
-	request: function(request)
-	{
-		let dataType = request.dataType || "text";
-		if (dataType == "json") // Parse it locally
-		{dataType = "text";}
-		else if (dataType == "xml") // Parse it locally
-		{dataType = "text";}
-		else if (dataType == "binary")
-		{
-			// Request.mimeType = "text/plain; charset=x-user-defined";
-			dataType = "arraybuffer";
-			request.mimeType = "application/octet-stream";
-		}
-
-		// Regular case, use AJAX call
-		const xhr = new XMLHttpRequest();
-		xhr.open(request.data ? 'POST' : 'GET', request.url, true);
-		if (dataType)
-		{xhr.responseType = dataType;}
-		if (request.mimeType)
-		{xhr.overrideMimeType(request.mimeType);}
-		if (request.nocache)
-		{xhr.setRequestHeader('Cache-Control', 'no-cache');}
-
-		xhr.onload = function(load)
-		{
-			let response = this.response;
-			if (this.status != 200)
+			if (code.constructor === String)
 			{
-				const err = "Error " + this.status;
-				if (request.error)
-				{request.error(err);}
-				LEvent.trigger(xhr,"fail", this.status);
+				const style = document.createElement('style') as any;
+				style.type = 'text/css';
+				style.innerHTML = code;
+				document.getElementsByTagName('head')[0].appendChild(style);
 				return;
 			}
 
-			if (request.dataType == "json") // Chrome doesnt support json format
-			{
-				try
-				{
-					response = JSON.parse(response);
-				}
-				catch (err)
-				{
-					if (request.error)
-					{request.error(err);}
-					else
-					{throw err;}
-				}
-			}
-			else if (request.dataType == "xml")
-			{
-				try
-				{
-					const xmlparser = new DOMParser();
-					response = xmlparser.parseFromString(response,"text/xml");
-				}
-				catch (err)
-				{
-					if (request.error)
-					{request.error(err);}
-					else
-					{throw err;}
-				}
-			}
-			if (request.success)
-			{request.success.call(this, response, this);}
-		};
-		xhr.onerror = function(err)
-		{
-			if (request.error)
-			{request.error(err);}
-		};
+			for (const i in code)
+			{document.body.style[parseInt(i)] = code[i];}
 
-		const data = new FormData();
-		if (request.data)
-		{
-			for (const i in request.data)
-			{data.append(i,request.data[i]);}
 		}
 
-		xhr.send(data);
-		return xhr;
-	},
-
-	/**
-	 * Request file from url
-	 * @method requestText
-	 * @param {String} url
-	 * @param {Function} on_complete
-	 * @param {Function} on_error
-	 *
-	 */
-	requestText: function(url, on_complete, on_error)
-	{
-		return this.request({ url: url, dataType: "text", success: on_complete, error: on_error });
-	},
-
-	/**
-	 * Request file from url
-	 * @method requestJSON
-	 * @param {String} url
-	 * @param {Function} on_complete
-	 * @param {Function} on_error
-	 *
-	 */
-	requestJSON: function(url, on_complete, on_error)
-	{
-		return this.request({ url: url, dataType: "json", success: on_complete, error: on_error });
-	},
-
-	/**
-	 * Request binary file from url
-	 * @method requestBinary
-	 * @param {String} url
-	 * @param {Function} on_complete
-	 * @param {Function} on_error
-	 *
-	 */
-	requestBinary: function(url, on_complete, on_error)
-	{
-		return this.request({ url: url, dataType: "binary", success: on_complete, error: on_error });
-	},
-
-
-	/**
-	 * Request script and inserts it in the DOM
-	 * @method requireScript
-	 * @param {String|Array} url the url of the script or an array containing several urls
-	 * @param {Function} on_complete
-	 * @param {Function} on_error
-	 * @param {Function} on_progress (if several files are required, on_progress is called after every file is added to the DOM)
-	 *
-	 */
-	requireScript: function(url, on_complete, on_error, on_progress, version)
-	{
-		if (!url) {throw ("invalid URL");}
-
-		if (url.constructor === String) {url = [url];}
-
-		let total = url.length;
-		const size = total;
-		const loaded_scripts = [];
-		const onload = function(script, e)
+		/**
+		 * Requires a new CSS
+		 * @method requireCSS
+		 * @param {String} url string with url or an array with several urls
+		 * @param {Function} on_complete
+		 *
+		 */
+		requireCSS(url : any, on_complete : Function)
 		{
-			total--;
-			loaded_scripts.push(script);
-			if (total)
-			{
-				if (on_progress) {on_progress(script.original_src, script.num);}
-			}
-			else if (on_complete)
-			{
-				on_complete(loaded_scripts);
-			}
-		};
+			if (typeof(url)=="string")
+			{url = [url];}
 
-		for (const i in url)
-		{
-			const script = document.createElement('script');
-			script.num = i;
-			script.type = 'text/javascript';
-			script.src = url[i] + (version ? "?version=" + version : "");
-			script.original_src = url[i];
-			script.async = false;
-			script.onload = onload.bind(undefined, script);
-			if (on_error)
+			while (url.length)
 			{
-				script.onerror = function(err)
-				{
-					on_error(err, this.original_src, this.num);
-				};
+				const link  = document.createElement('link') as any;
+				// Link.id   = cssId;
+				link.rel  = 'stylesheet';
+				link.type = 'text/css';
+				link.href = url.shift(1);
+				link.media = 'all';
+				const head = document.getElementsByTagName('head')[0];
+				head.appendChild(link);
+				if (url.length == 0)
+				{link.onload = on_complete;}
 			}
-			document.getElementsByTagName('head')[0].appendChild(script);
 		}
-	},
 
-
-	// Old version, it loads one by one, so it is slower
-	requireScriptSerial: function(url, on_complete, on_progress)
-	{
-		if (typeof(url)=="string")
-		{url = [url];}
-
-		const loaded_scripts = [];
-		function addScript()
+		/**
+		 * Request file from url (it could be a binary, text, etc.). If you want a simplied version use
+		 * @method request
+		 * @param {Object} request object with all the parameters like data (for sending forms), dataType, success, error
+		 * @param {Function} on_complete
+		 *
+		 */
+		request(request : any)
 		{
-			const script = document.createElement('script');
-			script.type = 'text/javascript';
-			script.src = url.shift(1);
-			script.onload = function(e)
+			let dataType = request.dataType || "text";
+			if (dataType == "json") // Parse it locally
+			{dataType = "text";}
+			else if (dataType == "xml") // Parse it locally
+			{dataType = "text";}
+			else if (dataType == "binary")
 			{
-				if (url.length)
-				{
-					if (on_progress)
-					{on_progress(url[0], url.length);}
+				// Request.mimeType = "text/plain; charset=x-user-defined";
+				dataType = "arraybuffer";
+				request.mimeType = "application/octet-stream";
+			}
 
-					addScript();
+			// Regular case, use AJAX call
+			const xhr = new XMLHttpRequest();
+			xhr.open(request.data ? 'POST' : 'GET', request.url, true);
+			if (dataType)
+			{xhr.responseType = dataType;}
+			if (request.mimeType)
+			{xhr.overrideMimeType(request.mimeType);}
+			if (request.nocache)
+			{xhr.setRequestHeader('Cache-Control', 'no-cache');}
+
+			xhr.onload = function(load)
+			{
+				let response = this.response;
+				if (this.status != 200)
+				{
+					const err = "Error " + this.status;
+					if (request.error)
+					{request.error(err);}
+					LEvent.trigger(xhr,"fail", this.status);
 					return;
 				}
 
-				loaded_scripts.push(this);
-
-				if (on_complete)
-				{on_complete(loaded_scripts);}
+				if (request.dataType == "json") // Chrome doesnt support json format
+				{
+					try
+					{
+						response = JSON.parse(response);
+					}
+					catch (err)
+					{
+						if (request.error)
+						{request.error(err);}
+						else
+						{throw err;}
+					}
+				}
+				else if (request.dataType == "xml")
+				{
+					try
+					{
+						const xmlparser = new DOMParser();
+						response = xmlparser.parseFromString(response,"text/xml");
+					}
+					catch (err)
+					{
+						if (request.error)
+						{request.error(err);}
+						else
+						{throw err;}
+					}
+				}
+				if (request.success)
+				{request.success.call(this, response, this);}
 			};
-			document.getElementsByTagName('head')[0].appendChild(script);
+			xhr.onerror = function(err)
+			{
+				if (request.error)
+				{request.error(err);}
+			};
+
+			const data = new FormData();
+			if (request.data)
+			{
+				for (const i in request.data)
+				{data.append(i,request.data[i]);}
+			}
+
+			xhr.send(data);
+			return xhr;
 		}
 
-		addScript();
-	},
-
-	newDiv: function(id, code)
-	{
-		return this.createElement("div",id,code);
-	},
-
-	/**
-	 * Request script and inserts it in the DOM
-	 * @method createElement
-	 * @param {String} tag
-	 * @param {String} id_class string containing id and classes, example: "myid .someclass .anotherclass"
-	 * @param {String} content
-	 * @param {Object} style
-	 *
-	 */
-	createElement: function(tag, id_class, content, style, events)
-	{
-		const elem = document.createElement(tag);
-		if (id_class)
+		/**
+		 * Request file from url
+		 * @method requestText
+		 * @param {String} url
+		 * @param {Function} on_complete
+		 * @param {Function} on_error
+		 *
+		 */
+		requestText(url : string, on_complete : Function, on_error : Function)
 		{
-			const t = id_class.split(" ");
-			for (let i = 0; i < t.length; i++)
+			return this.request({ url: url, dataType: "text", success: on_complete, error: on_error });
+		}
+
+		/**
+		 * Request file from url
+		 * @method requestJSON
+		 * @param {String} url
+		 * @param {Function} on_complete
+		 * @param {Function} on_error
+		 *
+		 */
+		requestJSON(url : String, on_complete : Function, on_error : Function)
+		{
+			return this.request({ url: url, dataType: "json", success: on_complete, error: on_error });
+		}
+
+		/**
+		 * Request binary file from url
+		 * @method requestBinary
+		 * @param {String} url
+		 * @param {Function} on_complete
+		 * @param {Function} on_error
+		 *
+		 */
+		requestBinary(url : string, on_complete : Function, on_error : Function)
+		{
+			return this.request({ url: url, dataType: "binary", success: on_complete, error: on_error });
+		}
+
+
+		/**
+		 * Request script and inserts it in the DOM
+		 * @method requireScript
+		 * @param {String|Array} url the url of the script or an array containing several urls
+		 * @param {Function} on_complete
+		 * @param {Function} on_error
+		 * @param {Function} on_progress (if several files are required, on_progress is called after every file is added to the DOM)
+		 *
+		 */
+		requireScript(url : string | Array<string>, on_complete : Function, on_error : Function, on_progress : Function, version : Number)
+		{
+			if (!url) {throw ("invalid URL");}
+
+			if (url.constructor === String) {url = [url];}
+
+			let total = url.length;
+			const size = total;
+			const loaded_scripts : Array<any> = [];
+			const onload = function(script : any, e : any)
 			{
-				if (t[i][0] == ".")
+				total--;
+				loaded_scripts.push(script);
+				if (total)
 				{
-					elem.classList.add(t[i].substr(1));
+					if (on_progress) {on_progress(script.original_src, script.num);}
 				}
-				else if (t[i][0] == "#")
+				else if (on_complete)
 				{
-					elem.id = t[i].substr(1);
+					on_complete(loaded_scripts);
 				}
-				else
+			};
+
+			for (const i in url as any)
+			{
+				const script = document.createElement('script') as any;
+				script.num = i;
+				script.type = 'text/javascript';
+				script.src = url[parseInt(i)] + (version ? "?version=" + version : "");
+				script.original_src = url[parseInt(i)];
+				script.async = false;
+				script.onload = onload.bind(undefined, script);
+				if (on_error)
 				{
-					elem.id = t[i];
+					script.onerror = function(err : any)
+					{
+						on_error(err, this.original_src, this.num);
+					};
 				}
+				document.getElementsByTagName('head')[0].appendChild(script);
 			}
 		}
-		elem.root = elem;
-		if (content)
-		{elem.innerHTML = content;}
-		elem.add = function(v) { this.appendChild(v.root || v); };
 
-		if (style)
+
+		// Old version, it loads one by one, so it is slower
+		requireScriptSerial(url : any, on_complete : Function, on_progress : Function)
 		{
-			if (style.constructor === String)
-			{elem.setAttribute("style",style);}
-			else
+			if (typeof(url)=="string")
+			{url = [url];}
+
+			const loaded_scripts : Array<any> = [];
+			function addScript()
+			{
+				const script = document.createElement('script');
+				script.type = 'text/javascript';
+				script.src = url.shift(1);
+				script.onload = function(e)
+				{
+					if (url.length)
+					{
+						if (on_progress)
+						{on_progress(url[0], url.length);}
+
+						addScript();
+						return;
+					}
+
+					loaded_scripts.push(this);
+
+					if (on_complete)
+					{on_complete(loaded_scripts);}
+				};
+				document.getElementsByTagName('head')[0].appendChild(script);
+			}
+
+			addScript();
+		}
+
+		newDiv(id : any, code : any)
+		{
+			return this.createElement("div",id,code, undefined, undefined);
+		}
+
+		/**
+		 * Request script and inserts it in the DOM
+		 * @method createElement
+		 * @param {String} tag
+		 * @param {String} id_class string containing id and classes, example: "myid .someclass .anotherclass"
+		 * @param {String} content
+		 * @param {Object} style
+		 *
+		 */
+		createElement(tag : string, id_class : string, content : string, style : any, events : any)
+		{
+			const elem = document.createElement(tag) as any;
+			if (id_class)
+			{
+				const t = id_class.split(" ");
+				for (let i = 0; i < t.length; i++)
+				{
+					if (t[i][0] == ".")
+					{
+						elem.classList.add(t[i].substr(1));
+					}
+					else if (t[i][0] == "#")
+					{
+						elem.id = t[i].substr(1);
+					}
+					else
+					{
+						elem.id = t[i];
+					}
+				}
+			}
+			elem.root = elem;
+			if (content)
+			{elem.innerHTML = content;}
+			elem.add = function(v : any) { this.appendChild(v.root || v); };
+
+			if (style)
+			{
+				if (style.constructor === String)
+				{elem.setAttribute("style",style);}
+				else
+				{
+					for (const i in style)
+					{
+						elem.style[i] = style[parseInt(i)];
+					}
+				}
+			}
+
+			if (events)
+			{
+				for (const i in events)
+				{
+					elem.addEventListener(i, events[i]);
+				}
+			}
+			return elem;
+		}
+
+		/**
+		 * Useful to create elements from a text like '<div><span class="title"></span></div>' and an object like { ".title":"mytitle" }
+		 * @method createListItem
+		 * @param {String} code
+		 * @param {Object} values it will use innerText in the elements that matches that selector
+		 * @param {Object} style
+		 * @return {HTMLElement}
+		 *
+		 */
+		createListItem(code : string, values : any, style : any)
+		{
+			let elem = document.createElement("span") as any;
+			elem.innerHTML = code;
+			elem = elem.childNodes[0]; // To get the node
+			if (values)
+			{
+				for (const i in values)
+				{
+					const subelem = elem.querySelector(i);
+					if (subelem) {subelem.innerText = values[i];}
+				}
+			}
+			if (style)
 			{
 				for (const i in style)
 				{
 					elem.style[i] = style[i];
 				}
 			}
+			return elem;
 		}
 
-		if (events)
+		/**
+		 * Request script and inserts it in the DOM
+		 * @method createButton
+		 * @param {String} id
+		 * @param {String} content
+		 * @param {Function} callback when the button is pressed
+		 * @param {Object|String} style
+		 *
+		 */
+		createButton(id_class : string, content : string, callback : Function, style : any)
 		{
-			for (const i in events)
+			const elem = document.createElement("button") as any;
+			elem.className = "litegui litebutton button";
+			if (id_class)
 			{
-				elem.addEventListener(i, events[i]);
-			}
-		}
-		return elem;
-	},
-
-	/**
-	 * Useful to create elements from a text like '<div><span class="title"></span></div>' and an object like { ".title":"mytitle" }
-	 * @method createListItem
-	 * @param {String} code
-	 * @param {Object} values it will use innerText in the elements that matches that selector
-	 * @param {Object} style
-	 * @return {HTMLElement}
-	 *
-	 */
-	createListItem: function(code, values, style)
-	{
-		let elem = document.createElement("span");
-		elem.innerHTML = code;
-		elem = elem.childNodes[0]; // To get the node
-		if (values)
-		{
-			for (const i in values)
-			{
-				const subelem = elem.querySelector(i);
-				if (subelem) {subelem.innerText = values[i];}
-			}
-		}
-		if (style)
-		{
-			for (const i in style)
-			{
-				elem.style[i] = style[i];
-			}
-		}
-		return elem;
-	},
-
-	/**
-	 * Request script and inserts it in the DOM
-	 * @method createButton
-	 * @param {String} id
-	 * @param {String} content
-	 * @param {Function} callback when the button is pressed
-	 * @param {Object|String} style
-	 *
-	 */
-	createButton: function(id_class, content, callback, style)
-	{
-		const elem = document.createElement("button");
-		elem.className = "litegui litebutton button";
-		if (id_class)
-		{
-			const t = id_class.split(" ");
-			for (let i = 0; i < t.length; i++)
-			{
-				if (t[i][0] == ".")
-				{elem.classList.add(t[i].substr(1));}
-				else if (t[i][0] == "#")
-				{elem.id = t[i].substr(1);}
-				else
-				{elem.id = t[i];}
-			}
-		}
-		elem.root = elem;
-		if (content !== undefined)
-		{elem.innerHTML = content;}
-		if (callback)
-		{elem.addEventListener("click", callback);}
-		if (style)
-		{
-			if (style.constructor === String)
-			{elem.setAttribute("style",style);}
-			else
-			{
-				for (const i in style)
+				const t = id_class.split(" ");
+				for (let i = 0; i < t.length; i++)
 				{
-					elem.style[i] = style[i];
+					if (t[i][0] == ".")
+					{elem.classList.add(t[i].substr(1));}
+					else if (t[i][0] == "#")
+					{elem.id = t[i].substr(1);}
+					else
+					{elem.id = t[i];}
 				}
 			}
-		}
-		return elem;
-	},
-
-	getParents: function(element)
-	{
-		const elements = [];
-		let curElement = element.parentElement;
-		while (curElement !== null)
-		{
-			if (element.nodeType !== Node.ELEMENT_NODE)
-			{
-				continue;
-			}
-			elements.push(elem);
-			curElement = curElement.parentElement;
-		}
-		return elements;
-	},
-
-	// Used to create a window that retains all the CSS info or the scripts.
-	newWindow: function(title, width, height, options)
-	{
-		options = options || {};
-		const new_window = window.open("","","width="+width+", height="+height+", location=no, status=no, menubar=no, titlebar=no, fullscreen=yes");
-		new_window.document.write("<html><head><title>"+title+"</title>");
-
-		// Transfer style
-		const styles = document.querySelectorAll("link[rel='stylesheet'],style");
-		for (let i = 0; i < styles.length; i++)
-		{
-			new_window.document.write(styles[i].outerHTML);
-		}
-
-		// Transfer scripts (optional because it can produce some errors)
-		if (options.scripts)
-		{
-			const scripts = document.querySelectorAll("script");
-			for (let i = 0; i < scripts.length; i++)
-			{
-				if (scripts[i].src) // Avoid inline scripts, otherwise a cloned website would be created
-				{
-					new_window.document.write(scripts[i].outerHTML);
-				}
-			}
-		}
-
-		const content = options.content || "";
-		new_window.document.write("</head><body>"+content+"</body></html>");
-		new_window.document.close();
-		return new_window;
-	},
-
-	//* DIALOGS *******************
-	showModalBackground: function(v)
-	{
-		if (LiteGUI.modalbg_div)
-		{LiteGUI.modalbg_div.style.display = v ? "block" : "none";}
-	},
-
-	showMessage: function(content, options)
-	{
-		options = options || {};
-
-		options.title = options.title || "Attention";
-		options.content = content;
-		options.close = 'fade';
-		const dialog = new LiteGUI.Dialog(options);
-		if (!options.noclose)
-		{dialog.addButton("Close",{ close: true });}
-		dialog.makeModal('fade');
-		return dialog;
-	},
-
-	/**
-	 * Shows a dialog with a message
-	 * @method popup
-	 * @param {String} content
-	 * @param {Object} options ( min_height, content, noclose )
-	 *
-	 */
-	popup: function(content, options)
-	{
-		options = options || {};
-
-		options.min_height = 140;
-		if (typeof(content) == "string")
-		{content = "<p>" + content + "</p>";}
-
-		options.content = content;
-		options.close = 'fade';
-
-		const dialog = new LiteGUI.Dialog(options);
-		if (!options.noclose)
-		{dialog.addButton("Close",{ close: true });}
-		dialog.show();
-		return dialog;
-	},
-
-
-	/**
-	 * Shows an alert dialog with a message
-	 * @method alert
-	 * @param {String} content
-	 * @param {Object} options ( title, width, height, content, noclose )
-	 *
-	 */
-	alert: function(content, options)
-	{
-		options = options || {};
-
-
-		options.className = "alert";
-		options.title = options.title || "Alert";
-		options.width = options.width || 280;
-		options.height = options.height || 140;
-		if (typeof(content) == "string")
-		{content = "<p>" + content + "</p>";}
-		LiteGUI.remove(".litepanel.alert"); // Kill other panels
-		return LiteGUI.showMessage(content,options);
-	},
-
-	/**
-	 * Shows a confirm dialog with a message
-	 * @method confirm
-	 * @param {String} content
-	 * @param {Function} callback
-	 * @param {Object} options ( title, width, height, content, noclose )
-	 *
-	 */
-	confirm: function(content, callback, options)
-	{
-		options = options || {};
-		options.className = "alert";
-		options.title = options.title || "Confirm";
-		options.width = options.width || 280;
-		// Options.height = 100;
-		if (typeof(content) == "string")
-		{content = "<p>" + content + "</p>";}
-
-		content +="<button class='litebutton' data-value='yes' style='width:45%; margin-left: 10px'>Yes</button><button class='litebutton' data-value='no' style='width:45%'>No</button>";
-		options.noclose = true;
-
-		const dialog = this.showMessage(content,options);
-		dialog.content.style.paddingBottom = "10px";
-		const buttons = dialog.content.querySelectorAll("button");
-
-		const inner = (v) =>
-		{
-			const button = v.target;
-			const value = button.dataset["value"] == "yes";
-			dialog.close(); // Close before callback
+			elem.root = elem;
+			if (content !== undefined)
+			{elem.innerHTML = content;}
 			if (callback)
+			{elem.addEventListener("click", callback);}
+			if (style)
 			{
-				callback(value);
-			}
-		};
-		for (let i = 0; i < buttons.length; i++)
-		{
-			const button = buttons[i];
-			button.addEventListener("click", inner);
-		}
-		buttons[0].focus();
-
-		return dialog;
-	},
-
-	/**
-	 * Shows a prompt dialog with a message
-	 * @method prompt
-	 * @param {String} content
-	 * @param {Function} callback
-	 * @param {Object} options ( title, width, height, content, noclose )
-	 *
-	 */
-	prompt: function(content, callback, options)
-	{
-		options = options || {};
-		options.className = "alert";
-		options.title = options.title || "Prompt";
-		options.width = options.width || 280;
-
-		// Options.height = 140 + (options.textarea ? 40 : 0);
-		if (typeof(content) == "string")
-		{content = "<p>" + content + "</p>";}
-
-		const value = options.value || "";
-		let textinput = "<input type='text' value='"+value+"'/>";
-		if (options.textarea)
-		{textinput = "<textarea class='textfield' style='width:95%'>"+value+"</textarea>";}
-
-		content +="<p>"+textinput+"</p><button class='litebutton' data-value='accept' style='width:45%; margin-left: 10px; margin-bottom: 10px'>Accept</button><button class='litebutton' data-value='cancel' style='width:45%'>Cancel</button>";
-		options.noclose = true;
-		const dialog = this.showMessage(content, options);
-
-		const inner = function(e)
-		{
-			const button = e.target;
-			let value = input.value;
-			if (button.dataset && button.dataset["value"] == "cancel")
-			{
-				value = null;
-			}
-			dialog.close(); // Close before callback
-			if (callback) {callback(value);}
-		};
-
-		const inner_key = function(e)
-		{
-			if (!e) {e = window.event;}
-			const keyCode = e.keyCode || e.which;
-			if (keyCode == '13')
-			{
-				inner(e);
-				return false;
-			}
-			if (keyCode == '29') {dialog.close();}
-		};
-
-		const buttons = dialog.content.querySelectorAll("button");
-		for (let i = 0; i < buttons.length; i++)
-		{
-			buttons[i].addEventListener("click", inner);
-		}
-
-		const input = dialog.content.querySelector("input,textarea");
-		input.addEventListener("keydown", inner_key, true);
-
-		input.focus();
-		return dialog;
-	},
-
-	/**
-	 * Shows a choice dialog with a message
-	 * @method choice
-	 * @param {String} content
-	 * @param {Function} callback
-	 * @param {Object} options ( title, width, height, content, noclose )
-	 *
-	 */
-	choice: function(content, choices, callback, options)
-	{
-		options = options || {};
-		options.className = "alert";
-		options.title = options.title || "Select one option";
-		options.width = options.width || 280;
-		// Options.height = 100;
-		if (typeof(content) == "string")
-		{
-			content = "<p>" + content + "</p>";
-		}
-
-		for (const i in choices)
-		{
-			content +="<button class='litebutton' data-value='"+i+"' style='width:45%; margin-left: 10px'>"+(choices[i].content || choices[i])+"</button>";
-		}
-		options.noclose = true;
-
-		const dialog = this.showMessage(content,options);
-		dialog.content.style.paddingBottom = "10px";
-		const buttons = dialog.content.querySelectorAll("button");
-
-		const inner = (v) =>
-		{
-			const button = v.target;
-			const value = choices[ button.dataset["value"] ];
-			dialog.close(); // Close before callback
-			if (callback) {callback(value);}
-		};
-		for (let i = 0; i < buttons.length; i++)
-		{
-			buttons[i].addEventListener("click", inner);
-		}
-
-		return dialog;
-	},
-
-	downloadURL: function(url, filename)
-	{
-		const link = document.createElement('a');
-		link.href = url;
-		link.download = filename;
-		document.body.appendChild(link);
-		link.click();
-		document.body.removeChild(link);
-	},
-
-	downloadFile: function(filename, data, dataType)
-	{
-		if (!data)
-		{
-			console.warn("No file provided to download");
-			return;
-		}
-
-		if (!dataType)
-		{
-			if (data.constructor === String)
-			{dataType = 'text/plain';}
-			else
-			{dataType = 'application/octet-stream';}
-		}
-
-		let file = null;
-		if (data.constructor !== File && data.constructor !== Blob)
-		{file = new Blob([ data ], {type: dataType});}
-		else
-		{file = data;}
-
-		const url = URL.createObjectURL(file);
-		const element = document.createElement("a");
-		element.setAttribute('href', url);
-		element.setAttribute('download', filename);
-		element.style.display = 'none';
-		document.body.appendChild(element);
-		element.click();
-		document.body.removeChild(element);
-		setTimeout(()=> { URL.revokeObjectURL(url); }, 1000*60); // Wait one minute to revoke url
-	},
-
-	/**
-	 * Returns the URL vars ( ?foo=faa&foo2=etc )
-	 * @method getUrlVars
-	 *
-	 */
-	getUrlVars: function()
-	{
-		const vars = [];
-		let hash;
-		const hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
-		for (let i = 0; i < hashes.length; i++)
-		{
-		  hash = hashes[i].split('=');
-		  vars.push(hash[0]);
-		  vars[hash[0]] = hash[1];
-		}
-		return vars;
-	},
-
-	getUrlVar: function(name)
-	{
-		return LiteGUI.getUrlVars()[name];
-	},
-
-	focus: function(element)
-	{
-		element.focus();
-	},
-
-	blur: function(element)
-	{
-		element.blur();
-	},
-
-	/**
-	 * Makes one element draggable
-	 * @method draggable
-	 * @param {HTMLEntity} container the element that will be dragged
-	 * @param {HTMLEntity} dragger the area to start the dragging
-	 *
-	 */
-	draggable: function(container, dragger, on_start, on_finish, on_is_draggable)
-	{
-		dragger = dragger || container;
-		dragger.addEventListener("mousedown", inner_mouse);
-		dragger.style.cursor = "move";
-		let prev_x = 0;
-		let prev_y = 0;
-
-		let rect = container.getClientRects()[0];
-		let x = rect ? rect.left : 0;
-		let y = rect ? rect.top : 0;
-
-		container.style.position = "absolute";
-		container.style.left = x + "px";
-		container.style.top = y + "px";
-
-		function inner_mouse(e)
-		{
-			if (e.type == "mousedown")
-			{
-				if (!rect)
+				if (style.constructor === String)
+				{elem.setAttribute("style",style);}
+				else
 				{
-					rect = container.getClientRects()[0];
-					x = rect ? rect.left : 0;
-					y = rect ? rect.top : 0;
+					for (const i in style)
+					{
+						elem.style[i] = style[i];
+					}
 				}
+			}
+			return elem;
+		}
 
-				if (on_is_draggable && on_is_draggable(container,e) == false)
+		getParents(element : any)
+		{
+			const elements = [];
+			let curElement = element.parentElement;
+			while (curElement !== null)
+			{
+				if (element.nodeType !== Node.ELEMENT_NODE)
 				{
+					continue;
+				}
+				elements.push(elem);
+				curElement = curElement.parentElement;
+			}
+			return elements;
+		}
+
+		// Used to create a window that retains all the CSS info or the scripts.
+		newWindow(title : string, width : number, height : number, options : any)
+		{
+			options = options || {};
+			const new_window = window.open("","","width="+width+", height="+height+", location=no, status=no, menubar=no, titlebar=no, fullscreen=yes") as any;
+			new_window.document.write("<html><head><title>"+title+"</title>");
+
+			// Transfer style
+			const styles = document.querySelectorAll("link[rel='stylesheet'],style");
+			for (let i = 0; i < styles.length; i++)
+			{
+				new_window.document.write(styles[i].outerHTML);
+			}
+
+			// Transfer scripts (optional because it can produce some errors)
+			if (options.scripts)
+			{
+				const scripts = document.querySelectorAll("script");
+				for (let i = 0; i < scripts.length; i++)
+				{
+					if (scripts[i].src) // Avoid inline scripts, otherwise a cloned website would be created
+					{
+						new_window.document.write(scripts[i].outerHTML);
+					}
+				}
+			}
+
+			const content = options.content || "";
+			new_window.document.write("</head><body>"+content+"</body></html>");
+			new_window.document.close();
+			return new_window;
+		}
+
+		//* DIALOGS *******************
+		showModalBackground(v : any)
+		{
+			if (this.modalbg_div)
+			{this.modalbg_div.style.display = v ? "block" : "none";}
+		}
+
+		showMessage(content : any, options : any)
+		{
+			options = options || {};
+
+			options.title = options.title || "Attention";
+			options.content = content;
+			options.close = 'fade';
+			const dialog = new LiteGUI.Dialog(options);
+			if (!options.noclose)
+			{dialog.addButton("Close",{ close: true });}
+			dialog.makeModal('fade');
+			return dialog;
+		}
+
+		/**
+		 * Shows a dialog with a message
+		 * @method popup
+		 * @param {String} content
+		 * @param {Object} options ( min_height, content, noclose )
+		 *
+		 */
+		popup(content : string, options : any)
+		{
+			options = options || {};
+
+			options.min_height = 140;
+			if (typeof(content) == "string")
+			{content = "<p>" + content + "</p>";}
+
+			options.content = content;
+			options.close = 'fade';
+
+			const dialog = new LiteGUI.Dialog(options);
+			if (!options.noclose)
+			{dialog.addButton("Close",{ close: true });}
+			dialog.show();
+			return dialog;
+		}
+
+
+		/**
+		 * Shows an alert dialog with a message
+		 * @method alert
+		 * @param {String} content
+		 * @param {Object} options ( title, width, height, content, noclose )
+		 *
+		 */
+		alert(content : string, options : any)
+		{
+			options = options || {};
+
+
+			options.className = "alert";
+			options.title = options.title || "Alert";
+			options.width = options.width || 280;
+			options.height = options.height || 140;
+			if (typeof(content) == "string")
+			{content = "<p>" + content + "</p>";}
+			LiteGUI.remove(".litepanel.alert"); // Kill other panels
+			return LiteGUI.showMessage(content,options);
+		}
+
+		/**
+		 * Shows a confirm dialog with a message
+		 * @method confirm
+		 * @param {String} content
+		 * @param {Function} callback
+		 * @param {Object} options ( title, width, height, content, noclose )
+		 *
+		 */
+		confirm(content : string, callback : Function, options : any)
+		{
+			options = options || {};
+			options.className = "alert";
+			options.title = options.title || "Confirm";
+			options.width = options.width || 280;
+			// Options.height = 100;
+			if (typeof(content) == "string")
+			{content = "<p>" + content + "</p>";}
+
+			content +="<button class='litebutton' data-value='yes' style='width:45%; margin-left: 10px'>Yes</button><button class='litebutton' data-value='no' style='width:45%'>No</button>";
+			options.noclose = true;
+
+			const dialog = this.showMessage(content,options);
+			dialog.content.style.paddingBottom = "10px";
+			const buttons = dialog.content.querySelectorAll("button");
+
+			const inner = (v : any) =>
+			{
+				const button = v.target;
+				const value = button.dataset["value"] == "yes";
+				dialog.close(); // Close before callback
+				if (callback)
+				{
+					callback(value);
+				}
+			};
+			for (let i = 0; i < buttons.length; i++)
+			{
+				const button = buttons[i];
+				button.addEventListener("click", inner);
+			}
+			buttons[0].focus();
+
+			return dialog;
+		}
+
+		/**
+		 * Shows a prompt dialog with a message
+		 * @method prompt
+		 * @param {String} content
+		 * @param {Function} callback
+		 * @param {Object} options ( title, width, height, content, noclose )
+		 *
+		 */
+		prompt(content : string, callback : Function, options : any)
+		{
+			options = options || {};
+			options.className = "alert";
+			options.title = options.title || "Prompt";
+			options.width = options.width || 280;
+
+			// Options.height = 140 + (options.textarea ? 40 : 0);
+			if (typeof(content) == "string")
+			{content = "<p>" + content + "</p>";}
+
+			const value = options.value || "";
+			let textinput = "<input type='text' value='"+value+"'/>";
+			if (options.textarea)
+			{textinput = "<textarea class='textfield' style='width:95%'>"+value+"</textarea>";}
+
+			content +="<p>"+textinput+"</p><button class='litebutton' data-value='accept' style='width:45%; margin-left: 10px; margin-bottom: 10px'>Accept</button><button class='litebutton' data-value='cancel' style='width:45%'>Cancel</button>";
+			options.noclose = true;
+			const dialog = this.showMessage(content, options);
+
+			const inner = function(e : any)
+			{
+				const button = e.target;
+				let value = input.value;
+				if (button.dataset && button.dataset["value"] == "cancel")
+				{
+					value = null;
+				}
+				dialog.close(); // Close before callback
+				if (callback) {callback(value);}
+			};
+
+			const inner_key = function(e : any)
+			{
+				if (!e) {e = window.event;}
+				const keyCode = e.keyCode || e.which;
+				if (keyCode == '13')
+				{
+					inner(e);
+					return false;
+				}
+				if (keyCode == '29') {dialog.close();}
+				return;
+			};
+
+			const buttons = dialog.content.querySelectorAll("button");
+			for (let i = 0; i < buttons.length; i++)
+			{
+				buttons[i].addEventListener("click", inner);
+			}
+
+			const input = dialog.content.querySelector("input,textarea");
+			input.addEventListener("keydown", inner_key, true);
+
+			input.focus();
+			return dialog;
+		}
+
+		/**
+		 * Shows a choice dialog with a message
+		 * @method choice
+		 * @param {String} content
+		 * @param {Function} callback
+		 * @param {Object} options ( title, width, height, content, noclose )
+		 *
+		 */
+		choice(content : string, choices : any, callback : Function, options : any)
+		{
+			options = options || {};
+			options.className = "alert";
+			options.title = options.title || "Select one option";
+			options.width = options.width || 280;
+			// Options.height = 100;
+			if (typeof(content) == "string")
+			{
+				content = "<p>" + content + "</p>";
+			}
+
+			for (const i in choices)
+			{
+				content +="<button class='litebutton' data-value='"+i+"' style='width:45%; margin-left: 10px'>"+(choices[i].content || choices[i])+"</button>";
+			}
+			options.noclose = true;
+
+			const dialog = this.showMessage(content,options);
+			dialog.content.style.paddingBottom = "10px";
+			const buttons = dialog.content.querySelectorAll("button");
+
+			const inner = (v : any) =>
+			{
+				const button = v.target;
+				const value = choices[ button.dataset["value"] ];
+				dialog.close(); // Close before callback
+				if (callback) {callback(value);}
+			};
+			for (let i = 0; i < buttons.length; i++)
+			{
+				buttons[i].addEventListener("click", inner);
+			}
+
+			return dialog;
+		}
+
+		downloadURL(url : string, filename : string)
+		{
+			const link = document.createElement('a');
+			link.href = url;
+			link.download = filename;
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+		}
+
+		downloadFile(filename : string, data : any, dataType : any)
+		{
+			if (!data)
+			{
+				console.warn("No file provided to download");
+				return;
+			}
+
+			if (!dataType)
+			{
+				if (data.constructor === String)
+				{dataType = 'text/plain';}
+				else
+				{dataType = 'application/octet-stream';}
+			}
+
+			let file = null;
+			if (data.constructor !== File && data.constructor !== Blob)
+			{file = new Blob([ data ], {type: dataType});}
+			else
+			{file = data;}
+
+			const url = URL.createObjectURL(file);
+			const element = document.createElement("a");
+			element.setAttribute('href', url);
+			element.setAttribute('download', filename);
+			element.style.display = 'none';
+			document.body.appendChild(element);
+			element.click();
+			document.body.removeChild(element);
+			setTimeout(()=> { URL.revokeObjectURL(url); }, 1000*60); // Wait one minute to revoke url
+		}
+
+		/**
+		 * Returns the URL vars ( ?foo=faa&foo2=etc )
+		 * @method getUrlVars
+		 *
+		 */
+		getUrlVars()
+		{
+			const vars = [];
+			let hash;
+			const hashes : string | Array<any> = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+			for (let i = 0; i < hashes.length; i++)
+			{
+			hash = hashes[i].split('=');
+			vars.push(hash[0]);
+			vars[hash[0]] = hash[1];
+			}
+			return vars;
+		}
+
+		getUrlVar(name : any)
+		{
+			return LiteGUI.getUrlVars()[name];
+		}
+
+		focus(element : any)
+		{
+			element.focus();
+		}
+
+		blur(element : any)
+		{
+			element.blur();
+		}
+
+		/**
+		 * Makes one element draggable
+		 * @method draggable
+		 * @param {HTMLEntity} container the element that will be dragged
+		 * @param {HTMLEntity} dragger the area to start the dragging
+		 *
+		 */
+		draggable(container : any, dragger : any, on_start : Function, on_finish : Function, on_is_draggable : any)
+		{
+			dragger = dragger || container;
+			dragger.addEventListener("mousedown", inner_mouse);
+			dragger.style.cursor = "move";
+			let prev_x = 0;
+			let prev_y = 0;
+
+			let rect = container.getClientRects()[0];
+			let x = rect ? rect.left : 0;
+			let y = rect ? rect.top : 0;
+
+			container.style.position = "absolute";
+			container.style.left = x + "px";
+			container.style.top = y + "px";
+
+			function inner_mouse(e : any)
+			{
+				if (e.type == "mousedown")
+				{
+					if (!rect)
+					{
+						rect = container.getClientRects()[0];
+						x = rect ? rect.left : 0;
+						y = rect ? rect.top : 0;
+					}
+
+					if (on_is_draggable && on_is_draggable(container,e) == false)
+					{
+						e.stopPropagation();
+						e.preventDefault();
+						return false;
+					}
+
+					prev_x = e.clientX;
+					prev_y = e.clientY;
+					document.addEventListener("mousemove",inner_mouse);
+					document.addEventListener("mouseup",inner_mouse);
+					if (on_start)
+					{on_start(container, e);}
 					e.stopPropagation();
 					e.preventDefault();
 					return false;
 				}
 
-				prev_x = e.clientX;
-				prev_y = e.clientY;
-				document.addEventListener("mousemove",inner_mouse);
-				document.addEventListener("mouseup",inner_mouse);
-				if (on_start)
-				{on_start(container, e);}
-				e.stopPropagation();
-				e.preventDefault();
-				return false;
-			}
+				if (e.type == "mouseup")
+				{
+					document.removeEventListener("mousemove",inner_mouse);
+					document.removeEventListener("mouseup",inner_mouse);
 
-			if (e.type == "mouseup")
-			{
-				document.removeEventListener("mousemove",inner_mouse);
-				document.removeEventListener("mouseup",inner_mouse);
+					if (on_finish)
+					{on_finish(container, e);}
+					return;
+				}
 
-				if (on_finish)
-				{on_finish(container, e);}
+				if (e.type == "mousemove")
+				{
+					const deltax = e.clientX - prev_x;
+					const deltay = e.clientY - prev_y;
+					prev_x = e.clientX;
+					prev_y = e.clientY;
+					x += deltax;
+					y += deltay;
+					container.style.left = x + "px";
+					container.style.top = y + "px";
+				}
 				return;
 			}
-
-			if (e.type == "mousemove")
-			{
-				const deltax = e.clientX - prev_x;
-				const deltay = e.clientY - prev_y;
-				prev_x = e.clientX;
-				prev_y = e.clientY;
-				x += deltax;
-				y += deltay;
-				container.style.left = x + "px";
-				container.style.top = y + "px";
-			}
-		}
-	},
-
-	/**
-	 * Clones object content
-	 * @method cloneObject
-	 * @param {Object} object
-	 * @param {Object} target
-	 *
-	 */
-	cloneObject: function(object, target)
-	{
-		const o = target || {};
-		for (const i in object)
-		{
-			if (i[0] == "_" || i.substr(0,6) == "jQuery") // Skip vars with _ (they are private)
-			{continue;}
-
-			const v = object[i];
-			if (v == null)
-			{
-				o[i] = null;
-			}
-			else if (isFunction(v))
-			{
-				continue;
-			}
-			else if (typeof(v) == "number" || typeof(v) == "string")
-			{
-				o[i] = v;
-			}
-			else if (v.constructor == Float32Array) // Typed arrays are ugly when serialized
-			{
-				o[i] = Array.apply([], v); // Clone
-			}
-			else if (isArray(v))
-			{
-				if (o[i] && o[i].constructor == Float32Array) // Reuse old container
-				{
-					o[i].set(v);
-				}
-				else // Not safe using slice because it doesn't clone content, only container
-				{
-					o[i] = JSON.parse(JSON.stringify(v));
-				}
-			}
-			else // Slow but safe
-			{
-				try
-				{
-					// Prevent circular recursions
-					o[i] = JSON.parse(JSON.stringify(v));
-				}
-				catch (err)
-				{
-					console.error(err);
-				}
-			}
-		}
-		return o;
-	},
-
-	safeName: function(str)
-	{
-		return String(str).replace(/[\s.]/g, '');
-	},
-
-	// Those useful HTML unicode codes that I never remeber but I always need
-	special_codes: {
-		close: "&#10005;",
-		navicon: "&#9776;",
-		refresh: "&#8634;",
-		gear: "&#9881;",
-		open_folder: "&#128194;",
-		download: "&#11123;",
-		tick: "&#10003;",
-		trash: "&#128465;"
-	},
-
-	// Given a html entity string it returns the equivalent unicode character
-	htmlEncode: function(html_code)
-	{
-		const e = document.createElement("div");
-		e.innerHTML = html_code;
-		return e.innerText;
-	},
-
-	// Given a unicode character it returns the equivalent html encoded string
-	htmlDecode: function(unicode_character)
-	{
-		const e = document.createElement("div");
-		e.innerText = unicode_character;
-		return e.innerHTML;
-	},
-
-	/**
-	 * Convert sizes in any format to a valid CSS format (number to string, negative number to calc( 100% - number px )
-	 * @method sizeToCSS
-	 * @param {String||Number} size
-	 * @return {String} valid css size string
-	 *
-	 */
-	sizeToCSS: function(v)
-	{
-		const value = v;
-		if (value ===  undefined || value === null) {return null;}
-		if (value.constructor === String) {return value;}
-		if (value >= 0) {return (value|0) + "px";}
-		return "calc( 100% - " + Math.abs(value|0) + "px )";
-	},
-
-	/**
-	 * Returns the window where this element is attached (used in multi window applications)
-	 * @method getElementWindow
-	 * @param {HTMLElement} v
-	 * @return {Window} the window element
-	 *
-	 */
-	getElementWindow: function(v)
-	{
-		const doc = v.ownerDocument;
-		return doc.defaultView || doc.parentWindow;
-	},
-
-	/**
-	 * Helper, makes drag and drop easier by enabling drag and drop in a given element
-	 * @method createDropArea
-	 * @param {HTMLElement} element the element where users could drop items
-	 * @param {Function} callback_drop function to call when the user drops the item
-	 * @param {Function} callback_enter [optional] function to call when the user drags something inside
-	 *
-	 */
-	createDropArea: function(element, callback_drop, callback_enter, callback_exit)
-	{
-		element.addEventListener("dragenter", onDragEvent);
-
-		function onDragEvent(evt)
-		{
-			element.addEventListener("dragexit", onDragEvent);
-			element.addEventListener("dragover", onDragEvent);
-			element.addEventListener("drop", onDrop);
-			evt.stopPropagation();
-			evt.preventDefault();
-			if (evt.type == "dragenter" && callback_enter)
-			{
-				callback_enter(evt, element);
-			}
-			if (evt.type == "dragexit" && callback_exit)
-			{
-				callback_exit(evt, element);
-			}
 		}
 
-		function onDrop(evt)
+		/**
+		 * Clones object content
+		 * @method cloneObject
+		 * @param {Object} object
+		 * @param {Object} target
+		 *
+		 */
+		cloneObject(object : any, target : object)
 		{
-			evt.stopPropagation();
-			evt.preventDefault();
-
-			element.removeEventListener("dragexit", onDragEvent);
-			element.removeEventListener("dragover", onDragEvent);
-			element.removeEventListener("drop", onDrop);
-
-			let r = undefined;
-			if (callback_drop)
+			const o : any = target || {};
+			for (const i in object)
 			{
-				r = callback_drop(evt);
+				if (i[0] == "_" || i.substr(0,6) == "jQuery") // Skip vars with _ (they are private)
+				{continue;}
+
+				const v = object[i];
+				if (v == null)
+				{
+					o[i] = null;
+				}
+				else if (isFunction(v))
+				{
+					continue;
+				}
+				else if (typeof(v) == "number" || typeof(v) == "string")
+				{
+					o[i] = v;
+				}
+				else if (v.constructor == Float32Array) // Typed arrays are ugly when serialized
+				{
+					o[i] = Array.apply([], v as any); // Clone
+				}
+				else if (isArray(v))
+				{
+					if (o[i] && o[i].constructor == Float32Array) // Reuse old container
+					{
+						o[i].set(v);
+					}
+					else // Not safe using slice because it doesn't clone content, only container
+					{
+						o[i] = JSON.parse(JSON.stringify(v));
+					}
+				}
+				else // Slow but safe
+				{
+					try
+					{
+						// Prevent circular recursions
+						o[i] = JSON.parse(JSON.stringify(v));
+					}
+					catch (err)
+					{
+						console.error(err);
+					}
+				}
 			}
-			if (r)
+			return o;
+		}
+
+		safeName(str : string)
+		{
+			return String(str).replace(/[\s.]/g, '');
+		}
+
+		// Given a html entity string it returns the equivalent unicode character
+		htmlEncode(html_code : any)
+		{
+			const e = document.createElement("div");
+			e.innerHTML = html_code;
+			return e.innerText;
+		}
+
+		// Given a unicode character it returns the equivalent html encoded string
+		htmlDecode(unicode_character : string)
+		{
+			const e = document.createElement("div");
+			e.innerText = unicode_character;
+			return e.innerHTML;
+		}
+
+		/**
+		 * Convert sizes in any format to a valid CSS format (number to string, negative number to calc( 100% - number px )
+		 * @method sizeToCSS
+		 * @param {String||Number} size
+		 * @return {String} valid css size string
+		 *
+		 */
+		sizeToCSS(v : any)
+		{
+			const value = v;
+			if (value ===  undefined || value === null) {return null;}
+			if (value.constructor === String) {return value;}
+			if (value >= 0) {return (value|0) + "px";}
+			return "calc( 100% - " + Math.abs(value|0) + "px )";
+		}
+
+		/**
+		 * Returns the window where this element is attached (used in multi window applications)
+		 * @method getElementWindow
+		 * @param {HTMLElement} v
+		 * @return {Window} the window element
+		 *
+		 */
+		getElementWindow(v : any)
+		{
+			const doc = v.ownerDocument;
+			return doc.defaultView || doc.parentWindow;
+		}
+
+		/**
+		 * Helper, makes drag and drop easier by enabling drag and drop in a given element
+		 * @method createDropArea
+		 * @param {HTMLElement} element the element where users could drop items
+		 * @param {Function} callback_drop function to call when the user drops the item
+		 * @param {Function} callback_enter [optional] function to call when the user drags something inside
+		 *
+		 */
+		createDropArea(element : any, callback_drop : Function, callback_enter : Function, callback_exit : Function)
+		{
+			element.addEventListener("dragenter", onDragEvent);
+
+			function onDragEvent(evt : any)
+			{
+				element.addEventListener("dragexit", onDragEvent);
+				element.addEventListener("dragover", onDragEvent);
+				element.addEventListener("drop", onDrop);
+				evt.stopPropagation();
+				evt.preventDefault();
+				if (evt.type == "dragenter" && callback_enter)
+				{
+					callback_enter(evt, element);
+				}
+				if (evt.type == "dragexit" && callback_exit)
+				{
+					callback_exit(evt, element);
+				}
+			}
+
+			function onDrop(evt : any)
 			{
 				evt.stopPropagation();
-				evt.stopImmediatePropagation();
-				return true;
+				evt.preventDefault();
+
+				element.removeEventListener("dragexit", onDragEvent);
+				element.removeEventListener("dragover", onDragEvent);
+				element.removeEventListener("drop", onDrop);
+
+				let r = undefined;
+				if (callback_drop)
+				{
+					r = callback_drop(evt);
+				}
+				if (r)
+				{
+					evt.stopPropagation();
+					evt.stopImmediatePropagation();
+					return true;
+				}
+				return;
 			}
 		}
-	}
-};
+	};
+
+}
+
 
 // Low quality templating system
 Object.defineProperty(String.prototype, "template", {
-	value: function(data, eval_code)
+	value: function(data : any, eval_code : string)
 	{
 		let tpl = this;
 		const re = /{{([^}}]+)?}}/g;
@@ -1467,7 +1478,7 @@ Object.defineProperty(String.prototype, "template", {
 });
 
 
-function purgeElement(d, skip)
+function purgeElement(d : any, skip : any)
 {
 	let a = d.attributes, i, l, n;
 
@@ -1489,7 +1500,7 @@ function purgeElement(d, skip)
 		l = a.length;
 		for (i = 0; i < l; i += 1)
 		{
-			purgeElement(d.childNodes[i]);
+			purgeElement(d.childNodes[i], undefined);
 		}
 	}
 }
@@ -1500,7 +1511,7 @@ function purgeElement(d, skip)
 
 if (typeof escapeHtmlEntities == 'undefined')
 {
-	const escapeHtmlEntities = function (text)
+	escapeHtmlEntities = function (text : string)
 	{
 		return text.replace(/[\u00A0-\u2666<>&]/g, (c) =>
 		{
@@ -1770,7 +1781,7 @@ if (typeof escapeHtmlEntities == 'undefined')
 	};
 }
 
-function beautifyCode(code, reserved, skip_css)
+function beautifyCode(code : string, reserved : any, skip_css : boolean)
 {
 	reserved = reserved || ["abstract", "else", "instanceof", "super", "boolean", "enum", "int", "switch", "break", "export", "interface", "synchronized", "byte", "extends", "let", "this", "case", "false", "long", "throw", "catch", "final", "native", "throws", "char", "finally", "new", "transient", "class", "float", "null", "true", "const", "for", "package", "try", "continue", "function", "private", "typeof", "debugger", "goto", "protected", "var", "default", "if", "public", "void", "delete", "implements", "return", "volatile", "do", "import", "short", "while", "double", "in", "static", "with"];
 
@@ -1820,7 +1831,7 @@ function beautifyCode(code, reserved, skip_css)
 	return code;
 }
 
-function beautifyJSON(code, skip_css)
+function beautifyJSON(code : string, skip_css : boolean)
 {
 	if (typeof(code) == "object")
 	{code = JSON.stringify(code);}
@@ -1867,7 +1878,7 @@ function beautifyJSON(code, skip_css)
 	return code;
 }
 
-function dataURItoBlob(dataURI)
+function dataURItoBlob(dataURI : string)
 {
 	const pos = dataURI.indexOf(",");
 	// Convert to binary
