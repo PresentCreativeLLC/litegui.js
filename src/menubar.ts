@@ -1,7 +1,7 @@
 import { LiteGUI } from "./core";
 import { HTMLDivElementPlus, HTMLLIElementPlus, HTMLParagraphElementPlus } from "./@types/globals/index"
 /** ************ MENUBAR ************************/
-class Menubar
+export class Menubar
 {
 	closing_time: number;
 	options: any;
@@ -15,7 +15,7 @@ class Menubar
 	data: any;
 	closing_by_leave?: number | null;
 
-	constructor(id: string, options: any)
+	constructor(id: string, options?: any)
 	{
 		this.options = options || {};
 

@@ -58,6 +58,8 @@
         ],                             /* List of folders to include type definitions from. */
       "types": [
           "./src/@types/css-font-loading-module",
+          "@types/jest",
+          "node",
           "gapi",
           "gapi.client.sheets",
           "gapi.auth2"

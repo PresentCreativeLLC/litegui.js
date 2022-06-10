@@ -1,8 +1,7 @@
-
+import { isArray, isFunction } from "util";
+import {Area, Split} from "./area";
+import { Menubar} from "./menubar";
 declare let escapeHtmlEntities: any | undefined;
-
-export module LiteGUI
-{
 	// Those useful HTML unicode codes that I never remeber but I always need
 	enum special_codes {
 		close = "&#10005;",
@@ -21,7 +20,7 @@ export module LiteGUI
 	 * @class LiteGUI
 	 * @constructor
 	 */
-	export class LiteGUI
+	export class Core
 	{
 		root: HTMLElement | null = null;
 		content: HTMLElement | null = null;
@@ -40,7 +39,12 @@ export module LiteGUI
 		mainmenu: any = null;
 
 		_safe_cliboard : any;
-		menubar : any;
+		menubar : Menubar | undefined;
+        
+        Area: typeof Area = Area;
+        Split: typeof Split = Split;
+        Menubar: typeof Menubar = Menubar;
+        special_codes: any;
 
 		/**
 		 * Initializes the lib, must be called
@@ -138,7 +142,7 @@ export module LiteGUI
 		 * @param {*} params it will be stored in e.detail
 		 * @param {*} origin it will be stored in e.srcElement
 		 */
-		trigger(element: any, event_name: string, params: any, origin : any): CustomEvent<any>
+		trigger(element: any, event_name: string, params?: any, origin? : any): CustomEvent<any>
 		{
 			// TODO: fix the deprecated elements
 			const evt = document.createEvent('CustomEvent') as any;
@@ -243,7 +247,7 @@ export module LiteGUI
 		 * @param {String} selector
 		 * @param {String} class_name
 		 */
-		removeClass(elem : any, selector : string, class_name : string): void
+		removeClass(elem : any, selector : string, class_name?: string): void
 		{
 			if (!class_name)
 			{
@@ -737,7 +741,7 @@ export module LiteGUI
 		 * @param {Object} style
 		 *
 		 */
-		createElement(tag : string, id_class : string, content : string, style : any, events : any)
+		createElement(tag : string, id_class : string, content : string, style?: any, events?: any)
 		{
 			const elem = document.createElement(tag) as any;
 			if (id_class)
@@ -796,7 +800,7 @@ export module LiteGUI
 		 * @return {HTMLElement}
 		 *
 		 */
-		createListItem(code : string, values : any, style : any)
+		createListItem(code : string, values : any, style?: any)
 		{
 			let elem = document.createElement("span") as any;
 			elem.innerHTML = code;
@@ -875,7 +879,7 @@ export module LiteGUI
 				{
 					continue;
 				}
-				elements.push(elem);
+				elements.push(element);
 				curElement = curElement.parentElement;
 			}
 			return elements;
@@ -1305,7 +1309,7 @@ export module LiteGUI
 			const o : any = target || {};
 			for (const i in object)
 			{
-				if (i[0] == "_" || i.substr(0,6) == "jQuery") // Skip vars with _ (they are private)
+				if (i[0] == "_" || i.substring(0, 5) == "jQuery") // Skip vars with _ (they are private)
 				{continue;}
 
 				const v = object[i];
@@ -1313,7 +1317,7 @@ export module LiteGUI
 				{
 					o[i] = null;
 				}
-				else if (isFunction(v))
+				else if (typeof (v) === 'function')
 				{
 					continue;
 				}
@@ -1325,7 +1329,7 @@ export module LiteGUI
 				{
 					o[i] = Array.apply([], v as any); // Clone
 				}
-				else if (isArray(v))
+				else if (Array.isArray(v))
 				{
 					if (o[i] && o[i].constructor == Float32Array) // Reuse old container
 					{
@@ -1380,7 +1384,7 @@ export module LiteGUI
 		 * @return {String} valid css size string
 		 *
 		 */
-		sizeToCSS(v : any)
+		sizeToCSS(v?: any)
 		{
 			const value = v;
 			if (value ===  undefined || value === null) {return null;}
@@ -1456,7 +1460,6 @@ export module LiteGUI
 		}
 	};
 
-}
 
 
 // Low quality templating system
@@ -1896,3 +1899,5 @@ function dataURItoBlob(dataURI : string)
 	mime = mime.substr(0, mime.length - 7); // Strip ";base64"
 	return new Blob([ab], { type: mime });
 }
+
+export const LiteGUI = new Core();
