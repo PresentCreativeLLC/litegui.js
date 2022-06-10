@@ -1,10 +1,12 @@
+import { tabs } from "./tabs"
 export interface HTMLDivElementPlus extends HTMLDivElement
 {
     closingTimer: number;
     stServiceCtr: stServiceController;
     value: number;
     valuesArray: number[number[]];
-
+    data: any;
+    tabs: any;
     bgcolor: string;
     pointscolor: string;
     linecolor: string;
@@ -35,6 +37,9 @@ export interface EventTargetPlus extends EventTarget
 export interface HTMLLIElementPlus extends HTMLLIElement
 {
     data: any;
+    options: any;
+    tabs: tabs;
+    selected: boolean;
 }
 
 export interface HTMLParagraphElementPlus extends HTMLParagraphElement

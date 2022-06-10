@@ -21,39 +21,39 @@ class widget {
 
 	createButton(value: string, options: any)
 	{
-		const newButton: Button = new Button(value, options);
+		return new Button(value, options);
 	}
 	createSearchBox(value: string, options: any)
 	{
-		const newSearchBox: SearchBox = new SearchBox(value, options);
+		return new SearchBox(value, options);
 	}
 	createContextMenu(valuesArray: any[], options: any)
 	{
-		const newContextMenu: ContextMenu = new ContextMenu(valuesArray, options);
+		return new ContextMenu(valuesArray, options);
 	}
 	createCheckbox(value: boolean, on_change: CallableFunction)
 	{
-		const newCheckbox: Checkbox = new Checkbox(value, on_change);
+		return new Checkbox(value, on_change);
 	}
 	createLitebox(state: boolean, on_change: CallableFunction)
 	{
-		const newLitebox: Litebox = new Litebox(state, on_change);
+		return new Litebox(state, on_change);
 	}
 	createList(id: string, items: any[], options: any)
 	{
-		const newList: List = new List(id, items, options);
+		return new List(id, items, options);
 	}
 	createSlider(value: number, options: any)
 	{
-		const newSlider: Slider = new Slider(value, options);
+		return new Slider(value, options);
 	}
 	createLineEditor(valuesArray: any, options: any)
 	{
-		const newLineEditor: LineEditor = new LineEditor(valuesArray, options);
+		return new LineEditor(valuesArray, options);
 	}
 	createComplexList(valuesArray: any[], options: any)
 	{
-		const newComplexList: ComplexList = new ComplexList(options);
+		return new ComplexList(options);
 	}
 }
 
