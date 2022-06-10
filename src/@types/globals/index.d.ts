@@ -42,6 +42,11 @@ export interface HTMLLIElementPlus extends HTMLLIElement
     selected: boolean;
 }
 
+export interface HTMLElementPlus extends HTMLElement
+{
+    update?: Function;
+}
+
 export interface HTMLParagraphElementPlus extends HTMLParagraphElement
 {
     data: any;

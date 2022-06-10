@@ -1,5 +1,5 @@
 import { LiteGUI } from "./core";
-import { HTMLDivElementPlus, HTMLLIElementPlus, HTMLParagraphElementPlus } from "./@types/globals/index" 
+import { HTMLDivElementPlus, HTMLLIElementPlus, HTMLParagraphElementPlus } from "./@types/globals/index"
 /**
  * Widget that contains several tabs and their content
  * Options:
