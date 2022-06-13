@@ -24,7 +24,7 @@ export class Tabs
 	selected: string | null;
 	onchange: CallableFunction;
 	plus_tab: any;
-	_timeout_mouseover?: number | null;
+	_timeout_mouseover?: NodeJS.Timeout | null;
 	static tabs_width: number = 64;
 	static tabs_height: number = 26;
     
@@ -626,6 +626,11 @@ export class Tabs
 		if (on_complete) { on_complete(); }
 
 		return tab_window;
+	}
+
+	destroy(id: string)
+	{
+		this.removeTab(id);
 	}
 }
 

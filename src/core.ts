@@ -47,6 +47,7 @@ declare let escapeHtmlEntities: any | undefined;
 
 		_safe_cliboard : any;
 		menubar : Menubar | undefined;
+		tabs: Tabs | undefined;
         
         Area: typeof Area = Area;
         Split: typeof Split = Split;
@@ -953,7 +954,7 @@ declare let escapeHtmlEntities: any | undefined;
 			const dialog = new LiteGUI.Dialog(options);
 			if (!options.noclose)
 			{dialog.addButton("Close",{ close: true });}
-			dialog.makeModal(/* 'fade' */);
+			dialog.makeModal();
 			return dialog;
 		}
 
