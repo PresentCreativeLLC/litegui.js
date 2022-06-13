@@ -1,6 +1,9 @@
 import { isArray, isFunction } from "util";
 import {Area, Split} from "./area";
 import { Menubar} from "./menubar";
+import { Panel } from "./panel";
+import { widget, ContextMenu } from "./widgets"
+
 declare let escapeHtmlEntities: any | undefined;
 	// Those useful HTML unicode codes that I never remeber but I always need
 	enum special_codes {
@@ -44,6 +47,8 @@ declare let escapeHtmlEntities: any | undefined;
         Area: typeof Area = Area;
         Split: typeof Split = Split;
         Menubar: typeof Menubar = Menubar;
+		Panel: typeof Panel = Panel;
+		widget: typeof widget = widget;
         special_codes: any;
 
 		/**
@@ -323,6 +328,11 @@ declare let escapeHtmlEntities: any | undefined;
 		{
 			this.menubar = new LiteGUI.Menubar("mainmenubar");
 			this.add(this.menubar);
+		}
+
+		ContextMenu(options: any, values: any): ContextMenu
+		{
+			return new ContextMenu(values, options);
 		}
 
 		setWindowSize(w: number | undefined, h: number | undefined) : void
