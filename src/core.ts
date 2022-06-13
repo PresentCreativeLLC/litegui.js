@@ -3,6 +3,7 @@ import {Area, Split} from "./area";
 import { Menubar} from "./menubar";
 import { Panel } from "./panel";
 import { widget, ContextMenu } from "./widgets"
+import { Console } from "./console";
 
 declare let escapeHtmlEntities: any | undefined;
 	// Those useful HTML unicode codes that I never remeber but I always need
@@ -49,6 +50,7 @@ declare let escapeHtmlEntities: any | undefined;
         Menubar: typeof Menubar = Menubar;
 		Panel: typeof Panel = Panel;
 		widget: typeof widget = widget;
+		Console: typeof Console = Console;
         special_codes: any;
 
 		/**

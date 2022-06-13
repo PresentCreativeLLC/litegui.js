@@ -1,5 +1,5 @@
 import { HTMLElementPlus } from "./@types/globals/index"
-class Console
+export class Console
 {
 	options: any;
 	root: HTMLDivElement;
