@@ -1,4 +1,5 @@
-import { tabs } from "./tabs"
+import { Tabs } from "./tabs"
+
 export interface HTMLDivElementPlus extends HTMLDivElement
 {
     closingTimer: number;
@@ -53,6 +54,10 @@ export interface HTMLParagraphElementPlus extends HTMLParagraphElement
 }
 declare global
 {
+    interface Window
+    {
+        tabs: Tabs;
+    }
     //declare const PubSub: any;
     //declare const Playzido: any;
 

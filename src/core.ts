@@ -46,6 +46,7 @@ declare let escapeHtmlEntities: any | undefined;
 
 		_safe_cliboard : any;
 		menubar : Menubar | undefined;
+		tabs: Tabs | undefined;
         
         Area: typeof Area = Area;
         Split: typeof Split = Split;
