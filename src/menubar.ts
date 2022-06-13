@@ -13,7 +13,7 @@ export class Menubar
 	auto_open: boolean;
 	sort_entries: boolean;
 	data: any;
-	closing_by_leave?: number | null;
+	closing_by_leave?: NodeJS.Timeout | null;
 
 	constructor(id: string, options?: any)
 	{
@@ -394,7 +394,8 @@ export class Menubar
 			{
 				that.is_open = false;
 				that.hidePanels();
-			},LiteGUI.Menubar.closing_time);
+			});
+			//},LiteGUI.Menubar.closing_time);
 		});
 
 		element.addEventListener("mouseenter",(e) =>
