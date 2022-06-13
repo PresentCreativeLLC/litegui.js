@@ -2,7 +2,7 @@ import { HTMLDivElementPlus } from "./@types/globals";
 import { LiteGUI } from "./core";
 
 /** **************** PANEL **************/
-class Panel
+export class Panel
 {
 	root?: HTMLDivElementPlus;
 	title_height: string;

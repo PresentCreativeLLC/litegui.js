@@ -9,13 +9,13 @@ export class Tree
 	_skip_scroll : boolean = false;
 	indent_offset : number;
 	collapsed_depth : number;
-	onItemSelected : Function | undefined;
-	onItemContextMenu : Function | undefined;
-	onBackgroundClicked : Function | undefined;
-	onContextMenu : Function | undefined;
-	onItemAddToSelection : Function | undefined;
-	onMoveItem : Function | undefined;
-	onDropItem : Function | undefined;
+	onItemSelected? : Function;
+	onItemContextMenu? : Function;
+	onBackgroundClicked? : Function;
+	onContextMenu? : Function;
+	onItemAddToSelection? : Function;
+	onMoveItem? : Function;
+	onDropItem? : Function;
 
 	static INDENT = 20;
 

@@ -1,6 +1,8 @@
 import { isArray, isFunction } from "util";
 import {Area, Split} from "./area";
+import { Dialog } from "./dialog";
 import { Menubar} from "./menubar";
+import { Panel } from "./panel";
 declare let escapeHtmlEntities: any | undefined;
 	// Those useful HTML unicode codes that I never remeber but I always need
 	enum special_codes {
@@ -44,6 +46,8 @@ declare let escapeHtmlEntities: any | undefined;
         Area: typeof Area = Area;
         Split: typeof Split = Split;
         Menubar: typeof Menubar = Menubar;
+		Dialog: typeof Dialog = Dialog;
+		Panel: typeof Panel = Panel;
         special_codes: any;
 
 		/**
@@ -1227,7 +1231,8 @@ declare let escapeHtmlEntities: any | undefined;
 		 * @param {HTMLEntity} dragger the area to start the dragging
 		 *
 		 */
-		draggable(container : any, dragger : any, on_start : Function, on_finish : Function, on_is_draggable : any)
+		draggable(container : any, dragger : any = undefined, on_start : Function | undefined = undefined, 
+			on_finish : Function | undefined = undefined, on_is_draggable : any = undefined)
 		{
 			dragger = dragger || container;
 			dragger.addEventListener("mousedown", inner_mouse);
