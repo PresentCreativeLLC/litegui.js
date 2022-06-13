@@ -5,7 +5,7 @@ import { LiteGUI } from "./core";
 export class Panel
 {
 	root?: HTMLDivElementPlus;
-	title_height: string;
+	static title_height: string;
 	options: any;
 	content: any;
 	header?: Element;
@@ -57,7 +57,7 @@ export class Panel
 		// If(options.scroll == false)	this.content.style.overflow = "hidden";
 		if (options.scroll == true)
 		{this.content.style.overflow = "auto";}
-		this.title_height = "20px";
+		Panel.title_height = "20px";
 	}
 
 	add(litegui_item: any)

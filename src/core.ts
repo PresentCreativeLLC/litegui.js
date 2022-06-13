@@ -952,7 +952,7 @@ declare let escapeHtmlEntities: any | undefined;
 			const dialog = new LiteGUI.Dialog(options);
 			if (!options.noclose)
 			{dialog.addButton("Close",{ close: true });}
-			dialog.makeModal('fade');
+			dialog.makeModal();
 			return dialog;
 		}
 
