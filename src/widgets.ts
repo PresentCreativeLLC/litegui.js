@@ -1,7 +1,7 @@
 import { LiteGUI } from "./core";
 import { HTMLDivElementPlus, HTMLSpanElementPlus, EventTargetPlus, HTMLLIElementPlus } from "./@types/globals/index"
 // Enclose in a scope
-class widget {
+export class widget {
 
 	constructor()
 	{
@@ -147,7 +147,7 @@ class SearchBox
 	* - ignore_item_callbacks: ignores the callback inside the item, it just calls the options.callback
 	* - event: you can pass a MouseEvent, this way the ContextMenu appears in that position
 	*/
-class ContextMenu
+export class ContextMenu
 {
 	root: HTMLDivElementPlus;
 	options: any;
@@ -372,7 +372,7 @@ class ContextMenu
 					if (!value.submenu.options) {
 						throw ("ContextMenu submenu needs options");
 					}
-					const submenu = new LiteGUI.ContextMenu(value.submenu.options, {
+					const submenu = LiteGUI.ContextMenu(value.submenu.options, {
 						callback: value.submenu.callback,
 						event: e,
 						parentMenu: that,
@@ -1007,7 +1007,7 @@ class ComplexList
 		this.item_code = options.item_code || "<div class='listitem'><span class='tick'><span>" + LiteGUI.special_codes.tick + "</span></span><span class='title'></span><button class='trash'>" + LiteGUI.special_codes.close + "</button></div>";
 
 		if (options.height) {
-			this.root.style.height = LiteGUI.sizeToCSS(options.height);
+			this.root.style.height = LiteGUI.sizeToCSS(options.height) as string;
 		}
 
 		this.selected = null;

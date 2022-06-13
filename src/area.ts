@@ -6,13 +6,24 @@ import { LiteGUI } from "./core";
 interface AreaOptions
 {
     minSplitSize: number;
-    immediateResize: any;
-    id: any,
+    immediateResize: boolean;
+    id: string,
     className: string,
     width: any,
     height: any,
     content_id: string,
     autoresize: boolean
+}
+
+interface AreaRoot
+{
+    offsetWidth: number,
+    offsetHeight: number,
+    className: string,
+    id: string,
+    litearea: Area,
+    style: any,
+
 }
 
 /**
@@ -27,14 +38,15 @@ export class Area
 {
     root: any;
     options: AreaOptions;
-    content: any;
-    _computed_size: any
+    content: HTMLDivElement;
+    _computed_size: number[];
     split_direction: string;
-    sections: any;
+    sections: Area[];
     direction: string | undefined;
     splitbar: HTMLDivElement | undefined;
-    dynamic_section: any;
+    dynamic_section: Area | undefined;
     size: any;
+    onresize: any; // Internal onResize event, currently is not being used
     public static VERTICAL = "vertical";
 	public static HORIZONTAL = "horizontal";
 	public static splitbar_size = 4;
@@ -52,7 +64,7 @@ export class Area
 
         options = options! || {};
         /* The root element containing all sections */
-        const root = document.createElement("div");
+        const root: HTMLElement = document.createElement("div");
         root.className = "litearea";
         if (options.id)
         {root.id = options.id;}
@@ -76,7 +88,7 @@ export class Area
         this.options = options;
 
         const thisArea = this;
-        this._computed_size = [ this.root.offsetWidth, this.root.offserHeight ];
+        this._computed_size = [ this.root.offsetWidth, this.root.offsetHeight ];
 
         const content = document.createElement("div");
         if (options.content_id)
@@ -176,7 +188,7 @@ export class Area
         this.root.style.height = "calc( 100% - " + y + "px )";
     }
 
-    split(direction: string, sizes: any, editable: any)
+    split(direction: string, sizes: any[], editable: any)
     {
         if (!direction || direction.constructor !== String)
         {throw ("First parameter must be a string: 'vertical' or 'horizontal'");}
@@ -198,7 +210,7 @@ export class Area
 
         let splitinfo = "";
         let splitbar = null;
-        let dynamic_section = null;
+        let dynamic_section;
         if (editable)
         {
             splitinfo = " - " + (Area.splitbar_size + 2) +"px"; // 2 px margin �?
@@ -526,7 +538,7 @@ export class Area
         this.root.removeChild(this.sections[1].root);
 
         this.sections = [];
-        this._computed_size = null;
+        this._computed_size = [];
         this.onResize();
     };
 

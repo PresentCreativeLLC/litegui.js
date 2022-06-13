@@ -3,6 +3,10 @@ import {Area, Split} from "./area";
 import { Dialog } from "./dialog";
 import { Menubar} from "./menubar";
 import { Panel } from "./panel";
+import { Tabs } from "./tabs";
+import { widget, ContextMenu } from "./widgets"
+import { Console } from "./console";
+
 declare let escapeHtmlEntities: any | undefined;
 	// Those useful HTML unicode codes that I never remeber but I always need
 	enum special_codes {
@@ -48,6 +52,9 @@ declare let escapeHtmlEntities: any | undefined;
         Menubar: typeof Menubar = Menubar;
 		Dialog: typeof Dialog = Dialog;
 		Panel: typeof Panel = Panel;
+		widget: typeof widget = widget;
+		Tabs: typeof Tabs = Tabs;
+		Console: typeof Console = Console;
         special_codes: any;
 
 		/**
@@ -329,6 +336,11 @@ declare let escapeHtmlEntities: any | undefined;
 			this.add(this.menubar);
 		}
 
+		ContextMenu(options: any, values: any): ContextMenu
+		{
+			return new ContextMenu(values, options);
+		}
+
 		setWindowSize(w: number | undefined, h: number | undefined) : void
 		{
 			const style = this.root?.style;
@@ -551,7 +563,7 @@ declare let escapeHtmlEntities: any | undefined;
 					const err = "Error " + this.status;
 					if (request.error)
 					{request.error(err);}
-					LEvent.trigger(xhr,"fail", this.status);
+					LiteGUI.trigger(xhr,"fail", this.status);
 					return;
 				}
 

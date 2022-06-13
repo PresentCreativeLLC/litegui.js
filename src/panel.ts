@@ -44,14 +44,14 @@ export class Panel
 		this.footer = this.root.querySelector(".panel-footer")!;
 
 		if (options.width)
-		{this.root.style.width = LiteGUI.sizeToCSS(options.width);}
+		{this.root.style.width = LiteGUI.sizeToCSS(options.width) as string;}
 		if (options.height)
-		{this.root.style.height = LiteGUI.sizeToCSS(options.height);}
+		{this.root.style.height = LiteGUI.sizeToCSS(options.height) as string;}
 		if (options.position)
 		{
 			this.root.style.position = "absolute";
-			this.root.style.left = LiteGUI.sizeToCSS(options.position[0]);
-			this.root.style.top = LiteGUI.sizeToCSS(options.position[1]);
+			this.root.style.left = LiteGUI.sizeToCSS(options.position[0]) as string;
+			this.root.style.top = LiteGUI.sizeToCSS(options.position[1]) as string;
 		}
 
 		// If(options.scroll == false)	this.content.style.overflow = "hidden";
