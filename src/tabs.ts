@@ -10,7 +10,7 @@ import { HTMLDivElementPlus, HTMLLIElementPlus, HTMLParagraphElementPlus } from 
  * @class Tabs
  * @constructor
  */
-class Tabs
+export class Tabs
 {
 	root: HTMLDivElementPlus;
 	options: any;
@@ -22,12 +22,12 @@ class Tabs
 	tabs: tab_info[];
 	tabs_by_index: tab_info[];
 	selected: string | null;
-	tabs_width: number;
-	tabs_height: number;
 	onchange: CallableFunction;
 	plus_tab: any;
 	_timeout_mouseover?: number | null;
-
+	static tabs_width: number = 64;
+	static tabs_height: number = 26;
+    
 	constructor(options: any, legacy: boolean)
 	{
 		if (legacy || (options && options.constructor === String))
@@ -89,9 +89,6 @@ class Tabs
 		this.onchange = options.callback;
 
 		if (options.parent) { this.appendTo(options.parent); }
-
-		this.tabs_width = 64;
-		this.tabs_height = 26;
 	}
 
 	onMouseWheel(e: any) {

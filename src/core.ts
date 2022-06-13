@@ -2,6 +2,7 @@ import { isArray, isFunction } from "util";
 import {Area, Split} from "./area";
 import { Menubar} from "./menubar";
 import { Panel } from "./panel";
+import { Tabs } from "./tabs";
 import { widget, ContextMenu } from "./widgets"
 
 declare let escapeHtmlEntities: any | undefined;
@@ -49,6 +50,7 @@ declare let escapeHtmlEntities: any | undefined;
         Menubar: typeof Menubar = Menubar;
 		Panel: typeof Panel = Panel;
 		widget: typeof widget = widget;
+		Tabs: typeof Tabs = Tabs;
         special_codes: any;
 
 		/**
