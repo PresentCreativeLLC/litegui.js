@@ -6,6 +6,7 @@ export class Tree
 	tree : any;
 	options : any;
 	root_item : any;
+	parentNode: any;
 	_skip_scroll : boolean = false;
 	indent_offset : number;
 	collapsed_depth : number;
@@ -848,7 +849,7 @@ export class Tree
 
 		if (!item.listbox) {return;}
 
-		listbox.setValue(false);  // This propagates changes
+		item.listbox.setValue(false);  // This propagates changes
 	};
 
 
@@ -1303,7 +1304,7 @@ private _updateListBox(node : any, options : any = undefined, current_level : nu
 	if (!node.listbox)
 	{
 		const pre = node.title_element.querySelector(".collapsebox");
-		const box = LiteGUI.createLitebox(true, (e : any) =>
+		const box = LiteGUI.widget.createLitebox(true, (e : any) =>
 		{
 			that.onClickBox(e, node);
 			LiteGUI.trigger(that.root, "item_collapse_change", { item: node, data: box.getValue() });

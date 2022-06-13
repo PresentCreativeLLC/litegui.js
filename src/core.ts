@@ -6,6 +6,7 @@ import { Panel } from "./panel";
 import { Tabs } from "./tabs";
 import { widget, ContextMenu } from "./widgets"
 import { Console } from "./console";
+import { Tree } from "./tree";
 
 declare let escapeHtmlEntities: any | undefined;
 	// Those useful HTML unicode codes that I never remeber but I always need
@@ -54,6 +55,7 @@ declare let escapeHtmlEntities: any | undefined;
 		Panel: typeof Panel = Panel;
 		widget: typeof widget = widget;
 		Tabs: typeof Tabs = Tabs;
+		Tree: typeof Tree = Tree;
 		Console: typeof Console = Console;
         special_codes: any;
 
@@ -951,7 +953,7 @@ declare let escapeHtmlEntities: any | undefined;
 			const dialog = new LiteGUI.Dialog(options);
 			if (!options.noclose)
 			{dialog.addButton("Close",{ close: true });}
-			dialog.makeModal('fade');
+			dialog.makeModal(/* 'fade' */);
 			return dialog;
 		}
 

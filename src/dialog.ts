@@ -19,8 +19,8 @@ export class Dialog
 	draggable: boolean = false;
 	on_resize?: Function;
 	onclose: any;
-	on_attached_to_DOM: any;
-	on_detached_from_DOM: any;
+	on_attached_to_DOM?: Function;
+	on_detached_from_DOM?: Function;
 	private _old_height: any;
 
 	public static MINIMIZED_WIDTH = 200;
@@ -301,7 +301,7 @@ export class Dialog
 		corner.addEventListener("mousedown", inner_mouse, true);
 	}
 
-	dockTo(parent : any, dock_type : String)
+	dockTo(parent : any, dock_type : string)
 	{
 		if (!parent) {return;}
 		const panel = this.root as any;
@@ -573,7 +573,7 @@ export class Dialog
 		LiteGUI.trigger(this, "hidden");
 	}
 
-	fadeIn(time : Number)
+	fadeIn(time : number)
 	{
 		time = time || 1000;
 		this.root.style.display = "";
@@ -586,7 +586,7 @@ export class Dialog
 		},100);
 	}
 
-	setPosition(x : Number, y : Number)
+	setPosition(x : number, y : number)
 	{
 		if (!this.root.parentNode)
 		{console.warn("LiteGUI.Dialog: Cannot set position of dialog if it is not in the DOM");}
@@ -595,13 +595,13 @@ export class Dialog
 		this.root.style.top = y + "px";
 	}
 
-	setSize(w : Number, h : Number)
+	setSize(w : number, h : number)
 	{
 		this.root.style.width = typeof(w) == "number" ? w + "px" : w;
 		this.root.style.height = typeof(h) == "number" ? h + "px" : h;
 	}
 
-	setTitle(text : String)
+	setTitle(text : string)
 	{
 		if (!this.header)
 		{return;}
@@ -627,7 +627,7 @@ export class Dialog
 	 * @method adjustSize
 	 * @param {number} margin
 	 */
-	adjustSize(margin : Number, skip_timeout : Boolean)
+	adjustSize(margin : number, skip_timeout : boolean)
 	{
 		margin = margin || 0;
 		this.content.style.height = "auto";
