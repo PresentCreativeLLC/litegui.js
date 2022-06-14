@@ -1,12 +1,13 @@
+import { HTMLDivElementPlus } from "./@types/globals";
 import { LiteGUI } from "./core";
 
 /** *** DRAGGER **********/
 export class Dragger
 {
 	value : number;
-	root : any;
+	root : HTMLDivElementPlus;
 	options : any;
-	input : any;
+	input : HTMLInputElement;
 	dragging : boolean = false;
 
 	constructor(v : number, options : any)
@@ -203,7 +204,7 @@ export class Dragger
 		if (!skip_event) {LiteGUI.trigger(this.input, "change");}
 	}
 
-	getValue()
+	getValue() : number
 	{
 		return this.value;
 	}

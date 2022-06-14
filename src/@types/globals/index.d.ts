@@ -19,6 +19,7 @@ export interface HTMLDivElementPlus extends HTMLDivElement
     options: any;
     canvas: canvas;
     getValueAt: Function;
+    position : string;
 }
 
 export interface HTMLSpanElementPlus extends HTMLSpanElement
@@ -41,11 +42,26 @@ export interface HTMLLIElementPlus extends HTMLLIElement
     options: any;
     tabs: tabs;
     selected: boolean;
+    title_element : HTMLDivElementPlus;
+    parent_id : string;
 }
 
 export interface HTMLElementPlus extends HTMLElement
 {
     update?: Function;
+    dialog? : any;
+}
+
+export interface ChildNodePlus extends ChildNode
+{
+    listbox : LiteBox;
+    offsetTop : number;
+    classList : DOMTokenList;
+    parent_id : string;
+    dataset : any;
+    data : any;
+    title_element: HTMLDivElementPlus;
+    id: string
 }
 
 export interface HTMLParagraphElementPlus extends HTMLParagraphElement

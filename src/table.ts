@@ -2,7 +2,7 @@ import { LiteGUI } from "./core";
 
 export class Table
 {
-	root : any;
+	root : HTMLTableElement;
 	columns : Array<any>;
 	rows : Array<any>;
 	column_fields : Array<any>;
@@ -32,7 +32,7 @@ export class Table
 		{this.root.style.overflow = "auto";}
 
 		if (options.height)
-		{this.root.style.height = LiteGUI.sizeToCSS(options.height);}
+		{this.root.style.height = LiteGUI.sizeToCSS(options.height) as string;}
 
 		if (options.columns)
 		{this.setColumns(options.columns);}
@@ -47,7 +47,7 @@ export class Table
 		this.updateContent(reuse);
 	}
 
-	addRow(row : Array<any>, skip_add : boolean)
+	addRow(row : Array<any>, skip_add : boolean) : HTMLTableRowElement
 	{
 		const tr = document.createElement("tr");
 

@@ -1028,8 +1028,8 @@ declare let escapeHtmlEntities: any | undefined;
 			options.noclose = true;
 
 			const dialog = this.showMessage(content,options);
-			dialog.content.style.paddingBottom = "10px";
-			const buttons = dialog.content.querySelectorAll("button");
+			dialog.content!.style.paddingBottom = "10px";
+			const buttons = dialog.content!.querySelectorAll("button");
 
 			const inner = (v : any) =>
 			{
@@ -1082,7 +1082,7 @@ declare let escapeHtmlEntities: any | undefined;
 			const inner = function(e : any)
 			{
 				const button = e.target;
-				let value = input.value;
+				let value = (input as any).value;
 				if (button.dataset && button.dataset["value"] == "cancel")
 				{
 					value = null;
@@ -1104,16 +1104,16 @@ declare let escapeHtmlEntities: any | undefined;
 				return;
 			};
 
-			const buttons = dialog.content.querySelectorAll("button");
+			const buttons = dialog.content!.querySelectorAll("button");
 			for (let i = 0; i < buttons.length; i++)
 			{
 				buttons[i].addEventListener("click", inner);
 			}
 
-			const input = dialog.content.querySelector("input,textarea");
-			input.addEventListener("keydown", inner_key, true);
+			const input = dialog.content!.querySelector("input,textarea");
+			input!.addEventListener("keydown", inner_key, true);
 
-			input.focus();
+			(input as any).focus();
 			return dialog;
 		}
 
@@ -1144,8 +1144,8 @@ declare let escapeHtmlEntities: any | undefined;
 			options.noclose = true;
 
 			const dialog = this.showMessage(content,options);
-			dialog.content.style.paddingBottom = "10px";
-			const buttons = dialog.content.querySelectorAll("button");
+			dialog.content!.style.paddingBottom = "10px";
+			const buttons = dialog.content!.querySelectorAll("button");
 
 			const inner = (v : any) =>
 			{

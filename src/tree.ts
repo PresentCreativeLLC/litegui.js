@@ -1,12 +1,13 @@
+import { ChildNodePlus, HTMLDivElementPlus, HTMLLIElementPlus } from "./@types/globals";
 import { LiteGUI }  from "./core";
 
 export class Tree
 {
-	root : any;
+	root : HTMLDivElementPlus;
 	tree : any;
 	options : any;
-	root_item : any;
-	parentNode: any;
+	root_item? : HTMLLIElementPlus;
+	parentNode?: ParentNode;
 	_skip_scroll : boolean = false;
 	indent_offset : number;
 	collapsed_depth : number;
@@ -61,7 +62,7 @@ export class Tree
 		options = options || {};
 
 		const root = document.createElement("div");
-		this.root = root;
+		this.root = root as HTMLDivElementPlus;
 		if (options.id) {root.id = options.id;}
 
 		root.className = "litetree";
@@ -123,7 +124,7 @@ export class Tree
 		}
 		else
 		{
-			this.root_item = null;
+			this.root_item = undefined;
 		}
 	};
 
@@ -136,11 +137,11 @@ export class Tree
 	 * @param {object} options
 	 * @return {DIVElement}
 	 */
-	insertItem(data : any, parent_id : string, position : number, options: any)
+	insertItem(data : any, parent_id : string, position : number, options: any) : HTMLLIElementPlus | undefined
 	{
 		if (!parent_id)
 		{
-			const root = this.root.childNodes[0];
+			const root = this.root.childNodes[0] as ChildNodePlus;
 			if (root)
 			{
 				parent_id = root.dataset["item_id"];
@@ -158,7 +159,7 @@ export class Tree
 		return element;
 	};
 
-	createAndInsert(data : any, options : any, parent_id : string | null, element_index : number | undefined)
+	createAndInsert(data : any, options : any, parent_id : string | null, element_index : number | undefined) : HTMLLIElementPlus | undefined
 	{
 		// Find parent
 		let parent_element_index = -1;
@@ -178,17 +179,17 @@ export class Tree
 		if (parent_element_index != -1)
 		{
 			parent = this.root.childNodes[ parent_element_index ];
-			child_level = parseInt(parent.dataset["level"]) + 1;
+			child_level = parseInt((parent as any).dataset["level"]) + 1;
 		}
 
 		// Create
-		const element = this.createTreeItem(data, options, child_level) as any;
+		const element = this.createTreeItem(data, options, child_level) as HTMLLIElementPlus;
 		if (!element) {return;} // Error creating element
 
-		element.parent_id = parent_id;
+		element.parent_id = parent_id as string;
 
 		// Check
-		const existing_item = this.getItem(element.dataset["item_id"]);
+		const existing_item = this.getItem(element.dataset["item_id"] as any);
 		if (existing_item) {console.warn("There another item with the same ID in this tree");}
 
 		// Insert
@@ -229,7 +230,7 @@ export class Tree
 
 	_insertInside(element : any, parent_index : number, offset_index : any, level : number | undefined)
 	{
-		const parent = this.root.childNodes[ parent_index ];
+		const parent = this.root.childNodes[ parent_index ] as ChildNodePlus;
 		if (!parent)
 		{
 			throw ("No parent node found, index: " + parent_index +", nodes: " + this.root.childNodes.length);
@@ -248,7 +249,7 @@ export class Tree
 		// Under level nodes
 		for (let j = parent_index+1; j < this.root.childNodes.length; ++j)
 		{
-			const new_childNode = this.root.childNodes[j];
+			const new_childNode = this.root.childNodes[j] as any;
 			if (!new_childNode.classList || !new_childNode.classList.contains("ltreeitem"))
 			{
 				continue;
@@ -273,14 +274,14 @@ export class Tree
 		this.root.appendChild(element);
 	};
 
-	_isNodeChildrenVisible(id : any)
+	_isNodeChildrenVisible(id : any) : boolean
 	{
-		const node = this.getItem(id);
+		const node = this.getItem(id) as ChildNodePlus;
 		if (!node) {return false;}
 		if (node.classList.contains("hidden")) {return false;}
 
 		// Check listboxes
-		const listbox = node.querySelector(".listbox");
+		const listbox = (node as any).querySelector(".listbox");
 		if (!listbox) {return true;}
 		if (listbox.getValue() == "closed") {return false;}
 		return true;
@@ -294,7 +295,7 @@ export class Tree
 		}
 		for (let i = 0; i < this.root.childNodes.length; ++i)
 		{
-			const childNode = this.root.childNodes[i];
+			const childNode = this.root.childNodes[i] as any;
 			if (!childNode.classList || !childNode.classList.contains("ltreeitem"))
 			{
 				continue;
@@ -308,11 +309,11 @@ export class Tree
 		return null;
 	};
 
-	_findElementIndex(id : string)
+	_findElementIndex(id : string) : number
 	{
 		for (let i = 0; i < this.root.childNodes.length; ++i)
 		{
-			const childNode = this.root.childNodes[i];
+			const childNode = this.root.childNodes[i] as ChildNodePlus;
 			if (!childNode.classList || !childNode.classList.contains("ltreeitem"))
 			{
 				continue;
@@ -334,18 +335,18 @@ export class Tree
 		return -1;
 	};
 
-	_findElementLastChildIndex(start_index : number)
+	_findElementLastChildIndex(start_index : number) : number
 	{
 		if (start_index == -1)
 		{
 			return -1;
 		}
 
-		const level = parseInt(this.root.childNodes[ start_index ].dataset["level"]);
+		const level = parseInt((this.root.childNodes[ start_index ] as any).dataset["level"]);
 
 		for (let i = start_index+1; i < this.root.childNodes.length; ++i)
 		{
-			const childNode = this.root.childNodes[i];
+			const childNode = this.root.childNodes[i] as any;
 			if (!childNode.classList || !childNode.classList.contains("ltreeitem"))
 			{
 				continue;
@@ -362,7 +363,7 @@ export class Tree
 	};
 
 	// Returns child elements (you can control levels)
-	_findChildElements(id : string, only_direct : boolean)
+	_findChildElements(id : string, only_direct : boolean) : ChildNodePlus[] | undefined
 	{
 		const parent_index = this._findElementIndex(id);
 		if (parent_index == -1)
@@ -370,14 +371,14 @@ export class Tree
 			return;
 		}
 
-		const parent = this.root.childNodes[ parent_index ];
+		const parent = this.root.childNodes[ parent_index ] as ChildNodePlus;
 		const parent_level = parseInt(parent.dataset["level"]);
 
 		const result = [];
 
 		for (let i = parent_index + 1; i < this.root.childNodes.length; ++i)
 		{
-			const childNode = this.root.childNodes[i];
+			const childNode = this.root.childNodes[i] as ChildNodePlus;
 			if (!childNode.classList || !childNode.classList.contains("ltreeitem"))
 			{
 				continue;
@@ -393,7 +394,7 @@ export class Tree
 		return result;
 	};
 
-	createTreeItem(data : any, options : any, level : any)
+	createTreeItem(data : any, options : any, level : any) : HTMLLIElementPlus | undefined
 	{
 		if (data === null || data === undefined)
 		{
@@ -403,7 +404,7 @@ export class Tree
 
 		options = options || this.options;
 
-		const root = document.createElement("li") as any;
+		const root = document.createElement("li") as HTMLLIElementPlus;
 		root.className = "ltreeitem";
 		const that = this;
 
@@ -457,7 +458,7 @@ export class Tree
 		}
 
 		root.appendChild(title_element);
-		root.title_element = title_element;
+		root.title_element = title_element as HTMLDivElementPlus;
 
 		if (data.visible === false)
 		{
@@ -512,7 +513,7 @@ export class Tree
 
 				if (last_item === node) {return;}
 
-				const nodeList = Array.prototype.slice.call(last_item.parentNode.children);
+				const nodeList = Array.prototype.slice.call(last_item.parentNode!.children);
 				const last_index = nodeList.indexOf(last_item);
 				const current_index = nodeList.indexOf(node);
 
@@ -618,7 +619,7 @@ export class Tree
 			// Starts dragging this element
 			draggable_element.addEventListener("dragstart", (ev : any) =>
 			{
-				ev.dataTransfer.setData("item_id", this.parentNode.dataset["item_id"]);
+				ev.dataTransfer.setData("item_id", (this.parentNode! as any).dataset["item_id"]);
 				if (!data.onDragData) {return;}
 
 				const drag_data = data.onDragData();
@@ -701,11 +702,11 @@ export class Tree
 	 * @method filterByName
 	 * @param {string} name
 	 */
-	filterByName(name : string)
+	filterByName(name : string) : void
 	{
 		for (let i = 0; i < this.root.childNodes.length; ++i)
 		{
-			const childNode = this.root.childNodes[i]; // Ltreeitem
+			const childNode = this.root.childNodes[i] as any; // Ltreeitem
 			if (!childNode.classList || !childNode.classList.contains("ltreeitem"))
 			{
 				continue;
@@ -731,7 +732,7 @@ export class Tree
 					}
 					else
 					{
-						indent.style.paddingLeft = paddingLeft = ((parseInt(childNode.dataset["level"]) + this.indent_offset) * Tree.INDENT) + "px";
+						indent.style.paddingLeft = /* paddingLeft = */ ((parseInt(childNode.dataset["level"]) + this.indent_offset) * Tree.INDENT) + "px";
 					}
 				}
 			}
@@ -747,12 +748,12 @@ export class Tree
 	 * @method filterByName
 	 * @param {string} name
 	 */
-	filterByRule(callback_to_filter : Function, name : string)
+	filterByRule(callback_to_filter : Function, name : string) : void
 	{
 		if (!callback_to_filter) {throw ("filterByRule requires a callback");}
 		for (let i = 0; i < this.root.childNodes.length; ++i)
 		{
-			const childNode = this.root.childNodes[i]; // Ltreeitem
+			const childNode = this.root.childNodes[i] as any; // Ltreeitem
 			if (!childNode.classList || !childNode.classList.contains("ltreeitem"))
 			{
 				continue;
@@ -776,7 +777,7 @@ export class Tree
 					}
 					else
 					{
-						indent.style.paddingLeft = paddingLeft = ((parseInt(childNode.dataset["level"]) + this.indent_offset) * LiteGUI.Tree.INDENT) + "px";
+						indent.style.paddingLeft = /* paddingLeft = */ ((parseInt(childNode.dataset["level"]) + this.indent_offset) * LiteGUI.Tree.INDENT) + "px";
 					}
 				}
 			}
@@ -794,15 +795,15 @@ export class Tree
 	 * @param {string} id
 	 * @return {Object}
 	 */
-	getItem(id : any)
+	getItem(id : string | ChildNodePlus) : ChildNodePlus | string | null
 	{
 		if (!id) {return null;}
 
-		if (id.classList) {return id;} // If it is already a node
+		if ((id as ChildNodePlus).classList) {return id;} // If it is already a node
 
 		for (let i = 0; i < this.root.childNodes.length; ++i)
 		{
-			const childNode = this.root.childNodes[i];
+			const childNode = this.root.childNodes[i] as ChildNodePlus;
 			if (!childNode.classList || !childNode.classList.contains("ltreeitem"))
 			{
 				continue;
@@ -822,19 +823,19 @@ export class Tree
 	 * @method expandItem
 	 * @param {string} id
 	 */
-	expandItem(id : string, parents : any)
+	expandItem(id : string, parents : any) : void
 	{
 		const item = this.getItem(id);
 		if (!item) {return;}
 
-		if (!item.listbox) {return;}
+		if (!(item as ChildNodePlus).listbox) {return;}
 
-		item.listbox.setValue(true); // This propagates changes
+		(item as ChildNodePlus).listbox.setValue(true); // This propagates changes
 
 		if (!parents) {return;}
 
 		const parent = this.getParent(item);
-		if (parent) {this.expandItem(parent,parents);}
+		if (parent) {this.expandItem(parent as string,parents);}
 	};
 
 	/**
@@ -842,9 +843,9 @@ export class Tree
 	 * @method collapseItem
 	 * @param {string} id
 	 */
-	collapseItem(id : string)
+	collapseItem(id : string) : void
 	{
-		const item = this.getItem(id);
+		const item = this.getItem(id) as ChildNodePlus;
 		if (!item) {return;}
 
 		if (!item.listbox) {return;}
@@ -858,7 +859,7 @@ export class Tree
 	 * @method isInsideArea
 	 * @param {string} id
 	 */
-	isInsideArea(id : string)
+	isInsideArea(id : string) : boolean
 	{
 		const item = id.constructor === String ? this.getItem(id) : id;
 		if (!item) {return false;}
@@ -867,7 +868,7 @@ export class Tree
 		if (!rects.length) {return false;}
 		const r = rects[0];
 		const h = r.height;
-		const y = item.offsetTop;
+		const y = (item as ChildNodePlus).offsetTop;
 
 		if (this.root.scrollTop < y && y < (this.root.scrollTop + h))
 		{
@@ -881,20 +882,20 @@ export class Tree
 	 * @method scrollToItem
 	 * @param {string} id
 	 */
-	scrollToItem(id : string)
+	scrollToItem(id : string) : void
 	{
 		const item = id.constructor === String ? this.getItem(id) : id;
 		if (!item) {return;}
 
-		const container = this.root.parentNode;
+		const container = this.root.parentNode as any;
 
 		if (!container) {return;}
 
 		const rect = container.getBoundingClientRect();
 		if (!rect) {return;}
-		const x = (parseInt(item.dataset["level"]) + this.indent_offset) * Tree.INDENT + 50;
+		const x = (parseInt((item as ChildNodePlus).dataset["level"]) + this.indent_offset) * Tree.INDENT + 50;
 
-		container.scrollTop = item.offsetTop - (h * 0.5)|0;
+		container.scrollTop = (item as ChildNodePlus).offsetTop - (h * 0.5)|0;
 		if (rect.width * 0.75 < x)
 		{
 			container.scrollLeft = x;
@@ -910,7 +911,7 @@ export class Tree
 	 * @method setSelectedItem
 	 * @param {string} id
 	 */
-	setSelectedItem(id : string, scroll : any, send_event : any)
+	setSelectedItem(id : string, scroll : any, send_event : any) : string | ChildNodePlus | null | undefined
 	{
 		if (!id)
 		{
@@ -923,13 +924,13 @@ export class Tree
 		if (!node) {return null;}// Not found
 
 		// Already selected
-		if (node.classList.contains("selected")) {return;}
+		if ((node as ChildNodePlus).classList.contains("selected")) {return;}
 
 		this.markAsSelected(node);
-		if (scroll && !this._skip_scroll) {this.scrollToItem(node);}
+		if (scroll && !this._skip_scroll) {this.scrollToItem(node as string);}
 
 		// Expand parents
-		this.expandItem(node, true);
+		this.expandItem(node as string, true);
 
 		if (send_event) {LiteGUI.trigger(node, "click");}
 
@@ -941,7 +942,7 @@ export class Tree
 	 * @method addItemToSelection
 	 * @param {string} id
 	 */
-	addItemToSelection(id : string)
+	addItemToSelection(id : string) : string | ChildNodePlus | null | undefined
 	{
 		if (!id) {return;}
 
@@ -957,12 +958,12 @@ export class Tree
 	 * @method removeItemFromSelection
 	 * @param {string} id
 	 */
-	removeItemFromSelection(id : string)
+	removeItemFromSelection(id : string) 
 	{
 		if (!id) {return;}
 		const node = this.getItem(id);
 		if (!node) {return null;} // Not found
-		node.classList.remove("selected");
+		(node as ChildNodePlus).classList.remove("selected");
 		return;
 	};
 
@@ -971,7 +972,7 @@ export class Tree
 	 * @method getSelectedItem
 	 * @return {HTML}
 	 */
-	getSelectedItem()
+	getSelectedItem() : Element | null
 	{
 		return this.root.querySelector(".ltreeitem.selected");
 	};
@@ -981,7 +982,7 @@ export class Tree
 	 * @method getSelectedItems
 	 * @return {HTML}
 	 */
-	getSelectedItems()
+	getSelectedItems() : NodeListOf<Element>
 	{
 		return this.root.querySelectorAll(".ltreeitem.selected");
 	};
@@ -992,7 +993,7 @@ export class Tree
 	 * @param {string} id
 	 * @return {bool}
 	 */
-	isItemSelected(id : string)
+	isItemSelected(id : string) : boolean
 	{
 		const node = this.getItem(id);
 		if (!node) {return false;}
@@ -1006,7 +1007,7 @@ export class Tree
 	 * @param {bool} [only_direct=false] to get only direct children
 	 * @return {Array}
 	 */
-	getChildren(id : any, only_direct : boolean = false)
+	getChildren(id : any, only_direct : boolean = false) : ChildNodePlus[] | undefined
 	{
 		if (id && id.constructor !== String && id.dataset)
 		{
@@ -1021,9 +1022,9 @@ export class Tree
 	 * @param {string} id
 	 * @return {HTML}
 	 */
-	getParent(id_or_node : any)
+	getParent(id_or_node : any) : string | ChildNodePlus | null | undefined
 	{
-		const element = this.getItem(id_or_node);
+		const element = this.getItem(id_or_node) as ChildNodePlus;
 		if (element) {return this.getItem(element.parent_id);}
 		return null;
 	};
@@ -1037,7 +1038,7 @@ export class Tree
 	getAncestors(id_or_node : any, result : any) : Array<any>
 	{
 		result = result || [];
-		const element = this.getItem(id_or_node);
+		const element = this.getItem(id_or_node) as ChildNodePlus;
 		if (element)
 		{
 			result.push(element);
@@ -1054,7 +1055,7 @@ export class Tree
 	 */
 	isAncestor(child : any, node : any) : Array<any> | boolean
 	{
-		const element = this.getItem(child);
+		const element = this.getItem(child) as ChildNodePlus;
 		if (!element) {return false;}
 		const dest = this.getItem(node);
 		const parent = this.getItem(element.parent_id);
@@ -1070,18 +1071,18 @@ export class Tree
 	 * @param {string} parent_id
 	 * @return {bool}
 	 */
-	moveItem(id : any, parent_id : string)
+	moveItem(id : any, parent_id : string) : boolean
 	{
 		if (id === parent_id) {return false;}
 
-		const node = this.getItem(id);
+		const node = this.getItem(id) as ChildNodePlus;
 		const parent = this.getItem(parent_id);
 
 		if (this.isAncestor(parent, node)) {return false;}
 
-		let parent_index = this._findElementIndex(parent);
-		const parent_level = parseInt(parent.dataset["level"]);
-		const old_parent = this.getParent(node);
+		let parent_index = this._findElementIndex(parent as string);
+		const parent_level = parseInt((parent! as ChildNodePlus).dataset["level"]);
+		const old_parent = this.getParent(node) as ChildNodePlus;
 		if (!old_parent)
 		{
 			console.error("node parent not found by id, maybe id has changed");
@@ -1106,7 +1107,7 @@ export class Tree
 			// Remove all children
 			for (let i = 0; i < children.length; i++)
 			{
-				children[i].parentNode.removeChild(children[i]);
+				children[i].parentNode!.removeChild(children[i]);
 			}
 
 			// Update levels
@@ -1118,7 +1119,7 @@ export class Tree
 			}
 
 			// Reinsert
-			parent_index = this._findElementIndex(parent); // Update parent index
+			parent_index = this._findElementIndex(parent as string); // Update parent index
 			let last_index = this._findElementLastChildIndex(parent_index);
 			if (last_index == -1) {last_index = 0;}
 			for (let i = 0; i < children.length; i++)
@@ -1141,7 +1142,7 @@ export class Tree
 	 * @param {string} id
 	 * @return {bool}
 	 */
-	removeItem(id_or_node : any, remove_children : boolean)
+	removeItem(id_or_node : any, remove_children : boolean) : boolean
 	{
 		let node = id_or_node;
 		if (typeof(id_or_node) == "string") {node = this.getItem(id_or_node);}
@@ -1177,9 +1178,9 @@ export class Tree
 	 * @param {string} id
 	 * @param {object} data
 	 */
-	updateItem(id : string, data : any)
+	updateItem(id : string, data : any) : boolean
 	{
-		const node = this.getItem(id);
+		const node = this.getItem(id) as ChildNodePlus;
 		if (!node) {return false;}
 
 		node.data = data;
@@ -1187,7 +1188,7 @@ export class Tree
 		if (data.content)
 		{
 			const incontent = node.title_element.querySelector(".incontent");
-			incontent.innerHTML = data.content;
+			incontent!.innerHTML = data.content;
 		}
 
 		return true;
@@ -1199,9 +1200,9 @@ export class Tree
 	 * @param {string} old_id
 	 * @param {string} new_id
 	 */
-	updateItemId(old_id : string, new_id : string)
+	updateItemId(old_id : string, new_id : string) : boolean
 	{
-		const node = this.getItem(old_id);
+		const node = this.getItem(old_id) as ChildNodePlus;
 		if (!node) {return false;}
 
 		const children = this.getChildren(old_id, true);
@@ -1239,7 +1240,7 @@ export class Tree
 	};
 
 
-	getNodeByIndex(index : number)
+	getNodeByIndex(index : number) : Element
 	{
 		const items = this.root.querySelectorAll(".ltreeitem");
 		return items[index];
@@ -1265,7 +1266,7 @@ private unmarkAllAsSelected()
 	}
 };
 
-private isNodeSelected(node : any)
+private isNodeSelected(node : any) : boolean
 {
 	// Already selected
 	if (node.classList.contains("selected")) {return true;}
@@ -1284,13 +1285,13 @@ private markAsSelected(node : any, add_to_existing_selection : boolean = false)
 	node.classList.add("selected");
 
 	// Go up and semiselect
-	let parent = this.getParent(node);
+	let parent = this.getParent(node) as ChildNodePlus;
 	const visited = [];
 	while (parent && visited.indexOf(parent) == -1)
 	{
 		parent.classList.add("semiselected");
 		visited.push(parent);
-		parent = this.getParent(parent);
+		parent = this.getParent(parent) as any;
 	}
 };
 
