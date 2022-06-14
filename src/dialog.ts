@@ -460,16 +460,16 @@ export class Dialog
 
 		this.root!.style.width = LiteGUI.Dialog.MINIMIZED_WIDTH + "px";
 
-		const closeCallback = function(e : any)
+		const closeCallback = (e : any) =>
 		{
 			const el = e.target;
-			LiteGUI.Dialog.minimized.splice(LiteGUI.Dialog.minimized.indexOf(el), 1);
-			LiteGUI.Dialog.arrangeMinimized();
+			this.minimized.splice(this.minimized.indexOf(el), 1);
+			this.arrangeMinimized();
 		};
 		LiteGUI.bind(this, "closed", closeCallback);
 
-		LiteGUI.Dialog.minimized.push(this);
-		LiteGUI.Dialog.arrangeMinimized();
+		this.minimized.push(this);
+		this.arrangeMinimized();
 
 
 		LiteGUI.trigger(this,"minimizing");
@@ -477,9 +477,9 @@ export class Dialog
 
 	arrangeMinimized()
 	{
-		for (const i in LiteGUI.Dialog.minimized)
+		for (const i in this.minimized)
 		{
-			const dialog = LiteGUI.Dialog.minimized[i];
+			const dialog = this.minimized[i];
 			const parent = dialog.root.parentNode;
 			const pos = parent.getBoundingClientRect().height - 20;
 			dialog.root.style.left = LiteGUI.Dialog.MINIMIZED_WIDTH * parseInt(i);
@@ -508,8 +508,8 @@ export class Dialog
 		if (maximize_button)
 		{maximize_button.style.display = "none";}
 
-		LiteGUI.Dialog.minimized.splice(LiteGUI.Dialog.minimized.indexOf(this), 1);
-		LiteGUI.Dialog.arrangeMinimized();
+		this.minimized.splice(this.minimized.indexOf(this), 1);
+		this.arrangeMinimized();
 		LiteGUI.trigger(this, "maximizing");
 	}
 
