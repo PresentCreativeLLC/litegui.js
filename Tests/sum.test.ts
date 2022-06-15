@@ -1,4 +1,4 @@
-function sum (a: number, b: number)
+/*function sum (a: number, b: number)
 {
     return a + b;
 }
@@ -7,3 +7,4 @@ describe("Test de suma", () => {
         expect(sum(2, 3)).toBe(5);
     });
 });
+*/

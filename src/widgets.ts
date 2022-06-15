@@ -51,13 +51,13 @@ export class widget {
 	{
 		return new LineEditor(valuesArray, options);
 	}
-	createComplexList(valuesArray: any[], options: any)
+	createComplexList(options: any)
 	{
 		return new ComplexList(options);
 	}
 }
 
-class Button
+export class Button
 {
 	root: HTMLDivElement;
 	content: HTMLButtonElement;
@@ -100,7 +100,7 @@ class Button
 	 * @param {Object} options
 	 */
 
-class SearchBox
+export class SearchBox
 {
 	root: HTMLDivElement;
 	options: any;
@@ -310,7 +310,7 @@ export class ContextMenu
 
 	addItem(name: string, value: any, options: any) {
 		const that = this;
-		options = options || {};
+		this.options = options || {};
 
 		const element = document.createElement("div") as HTMLDivElementPlus;
 		element.className = "litemenu-entry submenu";
@@ -404,7 +404,7 @@ export class ContextMenu
 	}
 }
 
-class Checkbox
+export class Checkbox
 {
 	root: HTMLSpanElementPlus;
 	value: boolean;
@@ -462,7 +462,7 @@ class Checkbox
 
 
 // The tiny box to expand the children of a node
-class Litebox
+export class Litebox
 {
 	element: HTMLSpanElementPlus;
 
@@ -536,7 +536,7 @@ class Litebox
  * @param {Array} values
  * @param {Object} options
  */
-class List
+ export class List
 {
 	root: HTMLUListElement;
 	callback: CallableFunction;
@@ -987,12 +987,12 @@ export class LineEditor
 }
 
 
-class ComplexList
+export class ComplexList
 {
 	root: HTMLDivElement;
 	options: any;
 	item_code: string;
-	selected: number | null;
+	selected: any | null;
 	onItemSelected: Function | null;
 	onItemToggled: Function | null;
 	onItemRemoved: Function | null;
@@ -1023,7 +1023,7 @@ class ComplexList
 		return elem;
 	};
 
-	addHTML(html: any, on_click: CallableFunction)
+	addHTML(html: string, on_click: CallableFunction)
 	{
 		const elem = LiteGUI.createElement("div", ".listtext", html);
 		if (on_click) { elem.addEventListener("mousedown", on_click); }

@@ -248,9 +248,8 @@ export class Tabs
 	 * @return {Object} an object containing { id, tab, content }
 	 */
 	addTab(id: string, options: any, skip_event: boolean = false) {
-		this.options = options || {};
 		if (typeof (options) == "function") { options = { callback: options }; }
-
+		this.options = options || {};
 		const that = this;
 		if (id === undefined || id === null) { id = "rand_" + ((Math.random() * 1000000) | 0); }
 
@@ -402,14 +401,14 @@ export class Tabs
 		this.plus_tab = this.addTab("plus_tab", { title: "+", tab_width: 20, button: true, callback: callback, skip_callbacks: true });
 	}
 
-	addButtonTab(id: string, title: Element, callback: CallableFunction) {
+	addButtonTab(id: string, title: string, callback: CallableFunction) {
 		return this.addTab(id, { title: title, tab_width: 20, button: true, callback: callback, skip_callbacks: true });
 	}
 
 	// This is tab
 	onTabClicked(e: any, element: HTMLLIElementPlus) {
 		// Skip if already selected
-		if (element.classList.contains("selected")) { return; }
+		if (element.selected) { return; }
 
 		if (!element.parentNode) { return; } // This could happend if it gets removed while being clicked (not common)
 
@@ -448,7 +447,7 @@ export class Tabs
 			//list[i].classList.remove("selected");
 			(list[i] as HTMLLIElementPlus).selected = false;
 		}
-		element.classList.add("selected");
+		element.selected = true;
 
 		// Change tab
 		this.previous_tab = this.current_tab;
