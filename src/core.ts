@@ -7,6 +7,7 @@ import { Tabs } from "./tabs";
 import { widget, ContextMenu } from "./widgets"
 import { Console } from "./console";
 import { Tree } from "./tree";
+import { Inspector } from "./inspector"
 
 declare let escapeHtmlEntities: any | undefined;
 	// Those useful HTML unicode codes that I never remeber but I always need
@@ -58,6 +59,7 @@ declare let escapeHtmlEntities: any | undefined;
 		Tabs: typeof Tabs = Tabs;
 		Tree: typeof Tree = Tree;
 		Console: typeof Console = Console;
+        Inspector: typeof Inspector = Inspector;
         special_codes: any;
 
 		/**
@@ -1501,7 +1503,7 @@ Object.defineProperty(String.prototype, "template", {
 });
 
 
-function purgeElement(d : any, skip : any)
+export function purgeElement(d : any, skip : any)
 {
 	let a = d.attributes, i, l, n;
 
