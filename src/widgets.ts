@@ -35,7 +35,7 @@ export class widget {
 	{
 		return new Checkbox(value, on_change);
 	}
-	createLitebox(state: boolean, on_change: CallableFunction)
+	static createLitebox(state: boolean, on_change: CallableFunction)
 	{
 		return new Litebox(state, on_change);
 	}
@@ -464,7 +464,7 @@ export class Checkbox
 // The tiny box to expand the children of a node
 export class Litebox
 {
-	element: HTMLSpanElementPlus;
+	element: HTMLSpanElementPlus | null;
 
 	constructor(state: boolean, on_change: CallableFunction)
 	{
@@ -504,6 +504,7 @@ export class Litebox
 
 	setValue(v: boolean)
 	{
+		if (!this.element) { return; }
 		if (this.element.dataset["value"] == (v ? "open" : "closed")) { return; }
 
 		if (!v) {
@@ -521,9 +522,17 @@ export class Litebox
 		if (this.element.onchange) { this.element.onchange(new Event("change")); }
 	}
 
-	getElement()
+	getValue()
 	{
 		return this.element;
+	}
+
+	setEmpty(isEmpty: boolean)
+	{
+		if (isEmpty)
+		{
+			this.element = null;
+		}
 	}
 }
 
