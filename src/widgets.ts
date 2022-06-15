@@ -616,7 +616,7 @@ class List
  * @param {Number} value
  * @param {Object} options
  */
-class Slider
+export class Slider
 {
 	root: HTMLDivElementPlus;
 	value: number;
@@ -708,7 +708,7 @@ class Slider
  * @param {Object} options
  */
 
-class LineEditor
+export class LineEditor
 {
 	root: HTMLDivElementPlus;
 	options: any;

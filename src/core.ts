@@ -4,10 +4,11 @@ import { Dialog } from "./dialog";
 import { Menubar} from "./menubar";
 import { Panel } from "./panel";
 import { Tabs } from "./tabs";
-import { widget, ContextMenu } from "./widgets"
+import { widget, ContextMenu, LineEditor, Slider } from "./widgets"
 import { Console } from "./console";
 import { Tree } from "./tree";
 import { Inspector } from "./inspector"
+import { Dragger } from "./dragger";
 
 declare let escapeHtmlEntities: any | undefined;
 	// Those useful HTML unicode codes that I never remeber but I always need
@@ -60,6 +61,9 @@ declare let escapeHtmlEntities: any | undefined;
 		Tree: typeof Tree = Tree;
 		Console: typeof Console = Console;
         Inspector: typeof Inspector = Inspector;
+        Dragger: typeof Dragger = Dragger;
+        LineEditor: typeof LineEditor = LineEditor;
+        Slider: typeof Slider = Slider;
         special_codes: any;
 
 		/**

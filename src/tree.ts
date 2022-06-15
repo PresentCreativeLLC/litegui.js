@@ -48,7 +48,7 @@ export class Tree
 	 * @class Tree
 	 * @constructor
 	 */
-	constructor(data : any, options : any, legacy : any)
+	constructor(data: any, options: any, legacy?: any)
 	{
 		if (legacy || (data && data.constructor === String))
 		{
