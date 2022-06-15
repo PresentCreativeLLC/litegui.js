@@ -465,6 +465,7 @@ export class Checkbox
 export class Litebox
 {
 	element: HTMLSpanElementPlus | null;
+	stopPropagation : boolean = false;
 
 	constructor(state: boolean, on_change: CallableFunction)
 	{

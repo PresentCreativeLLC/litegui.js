@@ -892,6 +892,7 @@ export class Tree
 		if (!container) {return;}
 
 		const rect = container.getBoundingClientRect();
+		const h = rect.h; // If this function is misbehaving then remove this line and find another way to get "h"
 		if (!rect) {return;}
 		const x = (parseInt((item as ChildNodePlus).dataset["level"]) + this.indent_offset) * Tree.INDENT + 50;
 
