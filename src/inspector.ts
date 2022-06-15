@@ -6,9 +6,8 @@ export class Inspector
 {
     root: any;
     sections: Array<Object>; // TODO: Define the objects
-    values: any; // TODO: I think this is a map
-    // values: Object; // TODO: I think this is a map
-    widgets: any; // TODO: Define the objects
+    values: Map<string, any>;
+    widgets: Array<any>;
     widgets_by_name: Map<string, HTMLDivElement>; // TODO: I think this is a map too
     row_number: number = 0;
     tab_index: number;
@@ -50,9 +49,9 @@ export class Inspector
         if (options.id) { this.root.id = options.id; }
 
         this.sections = new Array<Object>();
-        this.values = {};
-        this.widgets = new Array<>();
-        this.widgets_by_name = new Map<>();
+        this.values = new Map<string, any>();
+        this.widgets = new Array();
+        this.widgets_by_name = new Map<string, any>();
         this.row_number = 0; // Used to detect if element is even (cannot use CSS, special cases everywhere)
 
         this.addContainer("", {}); // Add empty container
@@ -130,7 +129,7 @@ export class Inspector
         this.root.className = this.className;
     
         this.row_number = 0;
-        this.values = {};
+        this.values.clear();
         this.widgets = [];
         this.widgets_by_name.clear();
         this.sections = [];
@@ -233,11 +232,13 @@ export class Inspector
      * @param {String} name the name of the widget supplied when creating it or the number of the widget
      * @return {Object} widget object
      */
-    getWidget(name: string)
+    getWidget(name: string | number)
     {
         if (name !== null && name.constructor === Number)
-        {return this.widgets[ name ];}
-        return this.widgets_by_name.get(name);
+        {
+            return this.widgets[name];
+        }
+        return this.widgets_by_name.get(name.toString());
     };
     
     /**
@@ -505,11 +506,11 @@ export class Inspector
      * - pre_title: string to append to the left side of the name, this is helpful if you want to add icons with behaviour when clicked
      * - title: string to replace the name, sometimes you want to supply a different name than the one you want to show (this is helpful to retrieve values from an inspector)
      */
-    createWidget(name: any, content: any, options: any)
+    createWidget(name: string | null, content: any, options: any)
     {
         options = options || {};
         content = (content === undefined || content === null) ? "" : content;
-        const element:any = document.createElement("DIV");
+        const element: any = document.createElement("DIV");
         element.className = "widget " + (options.className || "");
         element.inspector = this;
         element.options = options;
@@ -615,7 +616,7 @@ export class Inspector
         }
     
         // Assign and launch callbacks
-        this.values[name] = value;
+        this.values.set(name, value);
         let r = undefined;
         if (options.callback)
         {
@@ -638,12 +639,11 @@ export class Inspector
     };
     
     // Must be lowercase
-    public static widget_constructors = 
+    public static widget_constructors: { [key: string]: string | Function } = 
     {
         "null": 'addNull', // Use for special cases
         title: 'addTitle',
         info: 'addInfo',
-        "default": 'addDefault', // It guesses
         number: 'addNumber',
         slider: 'addSlider',
         string: 'addString',
@@ -672,19 +672,10 @@ export class Inspector
         pad: 'addPad',
         array: 'addArray',
         separator: 'addSeparator'
-    };
-    
-    
-    public static registerWidget(name: string, callback: any)
-    {
-        const func_name = "add" + name.charAt(0).toUpperCase() + name.slice(1);
-        // Inspector.prototype[func_name] = callback;
-        // Inspector.widget_constructors[name] = func_name;
-    };
-    
+    };   
     
     /**
-     * Adds a widgete to the inspector, its a way to provide the widget type from a string
+     * Adds a widget to the inspector, its a way to provide the widget type from a string
      * @method add
      * @param {string} type string specifying the name of the widget to use (check Inspector.widget_constructors for a complete list)
      * @param {string} name the string to show at the left side of the widget, if null this element wont be created and the value part will use the full width
@@ -717,8 +708,10 @@ export class Inspector
             return;
         }
     
-        if (func.constructor === String)
-        {func = LiteGUI.Inspector.prototype[func];}
+        if (typeof func === 'string')
+        {
+            func = (Inspector.prototype as any)[func];
+        }
         if (!func)
         {return;}
         if (func.constructor !== Function)
@@ -727,12 +720,12 @@ export class Inspector
         if (options && options.constructor === Function)
         {options = { callback: options };}
     
-        return func.call(this, name,value, options);
+        return (func as Function).call(this, name, value, options);
     };
     
     getValue(name: string)
     {
-        return this.values[name];
+        return this.values.get(name);
     };
     
     
@@ -767,32 +760,10 @@ export class Inspector
     };
     
     // Used when you want to skip the widget of an object
-    addNull(name: any,value: any, options: any)
+    addNull(name: any, value: any, options: any)
     {
         return null;
-    };
-    
-    // Used when you dont know which widget to use
-    addDefault(name: any, value: any, options: any)
-    {
-        if (value === null || value === undefined) // Can we guess it from the current value?
-        {return null;}
-    
-        if (value.constructor === Boolean)
-        {return this.addCheckbox(name, value, options);}
-        else if (value.constructor === String)
-        {return this.addString(name, value, options);}
-        else if (value.constructor === Number)
-        {return this.addNumber(name, value, options);}
-        else if (value.length == 4)
-        {return this.addVector4(name, value, options);}
-        else if (value.length == 3)
-        {return this.addVector3(name, value, options);}
-        else if (value.length == 2)
-        {return this.addVector2(name, value, options);}
-        return null;
-    };
-    
+    };    
     
     /**
      * Widget to edit strings
@@ -814,7 +785,7 @@ export class Inspector
     
         value = value || "";
         const that = this;
-        this.values[name] = value;
+        this.values.set(name, value);
     
         let inputtype = "text";
         if (options.password)
@@ -909,7 +880,7 @@ export class Inspector
         if (value === undefined)
         {value = "";}
         const that = this;
-        this.values[name] = value;
+        this.values.set(name, value);
     
         const element = this.createWidget(name,
             "<span class='inputfield button'><input type='text' tabIndex='" + this.tab_index +
@@ -992,7 +963,7 @@ export class Inspector
     
         value = value || "";
         const that = this;
-        this.values[name] = value;
+        this.values.set(name, value);
     
         const element = this.createWidget(name,"<span class='inputfield textarea "+(options.disabled?"disabled":"")+"'><textarea tabIndex='"+this.tab_index+"' "+(options.disabled?"disabled":"")+"></textarea></span>", options);
         this.tab_index++;
@@ -1057,7 +1028,7 @@ export class Inspector
     
         value = value || 0;
         const that = this;
-        this.values[name] = value;
+        this.values.set(name, value);
     
         const element = this.createWidget(name,"", options);
         this.append(element,options);
@@ -1094,7 +1065,7 @@ export class Inspector
             const el = e.target;
             LiteGUI.trigger(element, "wbeforechange", e.target.value);
     
-            that.values[name] = e.target.value;
+            this.values.set(name, e.target.value);
     
             if (options.callback && dragger.dragging)
             {
@@ -1172,7 +1143,7 @@ export class Inspector
     
         value = value || [0,0];
         const that = this;
-        this.values[name] = value;
+        this.values.set(name, value);
     
         const element = this.createWidget(name,"", options);
     
@@ -1202,7 +1173,7 @@ export class Inspector
         }
     
         const inputs = element.querySelectorAll("input");
-        const onChangeCallback = function(e: any)
+        const onChangeCallback = (e: any) =>
         {
             // Gather all three parameters
             let r = [];
@@ -1214,7 +1185,7 @@ export class Inspector
     
             LiteGUI.trigger(element, "wbeforechange", [r]);
     
-            that.values[name] = r;
+            this.values.set(name, r);
     
             const dragger = e.target.dragger;
             if (options.callback && dragger.dragging)
@@ -1309,7 +1280,7 @@ export class Inspector
     
         value = value || [0,0,0];
         const that = this;
-        this.values[name] = value;
+        this.values.set(name, value);
     
         const element = this.createWidget(name,"", options);
     
@@ -1339,7 +1310,7 @@ export class Inspector
         }
     
         const inputs = element.querySelectorAll("input");
-        const onChangeCallback = function(e: any)
+        const onChangeCallback = (e: any) =>
         {
             // Gather all three parameters
             let r = [];
@@ -1351,7 +1322,7 @@ export class Inspector
     
             LiteGUI.trigger(element, "wbeforechange", [r]);
     
-            that.values[name] = r;
+            this.values.set(name, r);
     
             const dragger = e.target.dragger;
             if (options.callback && dragger.dragging)
@@ -1446,7 +1417,7 @@ export class Inspector
     
         value = value || [0,0,0,0];
         const that = this;
-        this.values[name] = value;
+        this.values.set(name, value);
     
         const element = this.createWidget(name,"", options);
     
@@ -1476,10 +1447,10 @@ export class Inspector
         }
     
         const inputs = element.querySelectorAll("input");
-        const onChangeCallback = function(e: any)
+        const onChangeCallback = (e: any) =>
         {
             // Gather all parameters
-            let r = [];
+            let r: any = [];
             const elems = inputs;
             for (let j = 0; j < elems.length; j++)
             {
@@ -1488,7 +1459,7 @@ export class Inspector
     
             LiteGUI.trigger(element, "wbeforechange", [r]);
     
-            that.values[name] = r;
+            this.values.set(name, r);
     
             const dragger = e.target.dragger;
             if (options.callback && dragger.dragging)
@@ -1579,7 +1550,7 @@ export class Inspector
      * @return {HTMLElement} the widget in the form of the DOM element that contains it
      *
      */
-    addPad(name: string,value: any, options: any)
+    addPad(name: string, value: any, options: any)
     {
         options = this.processOptions(options);
         if (!options.step)
@@ -1587,7 +1558,7 @@ export class Inspector
     
         value = value || [0,0];
         const that = this;
-        this.values[name] = value;
+        this.values.set(name, value);
     
         const element = this.createWidget(name,"", options);
     
@@ -1817,7 +1788,7 @@ export class Inspector
         const that = this;
         if (value === undefined || value === null)
         {value = 0;}
-        this.values[name] = value;
+        this.values.set(name, value);
     
         const element = this.createWidget(name,
             "<span class='inputfield full'>\n<input tabIndex='" + this.tab_index +
@@ -1885,7 +1856,7 @@ export class Inspector
         options = this.processOptions(options);
         value = Boolean(value);
         const that = this;
-        this.values[name] = value;
+        this.values.set(name, value);
     
         const label_on = options.label_on || options.label || "on";
         const label_off = options.label_off || options.label || "off";
@@ -1926,7 +1897,7 @@ export class Inspector
             if (v === undefined)
             {return;}
             value = v;
-            if (that.values[name] != v && !skip_event)
+            if (this.values.get(name) != v && !skip_event)
             {LiteGUI.trigger(checkbox, "click");}
         };
     
@@ -1993,7 +1964,7 @@ export class Inspector
     
         // Value = value || "";
         const that = this;
-        this.values[name] = value;
+        this.values.set(name, value);
     
         this.tab_index++;
     
@@ -2124,7 +2095,7 @@ export class Inspector
     
         value = value || "";
         const that = this;
-        this.values[name] = value;
+        this.values.set(name, value);
     
         let code = "";
         if (options.values)
@@ -2141,7 +2112,7 @@ export class Inspector
         {
             const el = e.target;
             const buttonname = e.target.innerHTML;
-            that.values[name] = buttonname;
+            that.values.set(name, buttonname);
     
             const elements = element.querySelectorAll(".selected");
             for (let i = 0; i < elements.length; ++i)
@@ -2164,7 +2135,7 @@ export class Inspector
     
         value = value || [];
         const that = this;
-        this.values[name] = value;
+        this.values.set(name, value);
     
         let code = "<select>";
         if (options.values)
@@ -2214,7 +2185,7 @@ export class Inspector
     
             element.querySelector(".wtagscontainer").appendChild(tag);
     
-            that.values[name] = element.tags;
+            that.values.set(name, element.tags);
             if (options.callback)
             {options.callback.call(element, element.tags);}
             LiteGUI.trigger(element, "wchange", element.tags);
@@ -2745,7 +2716,7 @@ export class Inspector
     
         value = value || [0.0,0.0,0.0];
         const that = this;
-        this.values[name] = value;
+        this.values.set(name, value);
     
         let code = "<input tabIndex='"+this.tab_index+"' id='colorpicker-"+name+"' class='color' value='"+(value[0]+","+value[1]+","+value[2])+"' "+(options.disabled?"disabled":"")+"/>";
         this.tab_index++;
@@ -2852,7 +2823,7 @@ export class Inspector
                     // Inspector.onWidgetChange.call(that,element,name,v, options);
                     const event_data = [v.concat(), myColor.toString()];
                     LiteGUI.trigger(element, "wbeforechange", event_data);
-                    that.values[name] = v;
+                    this.values.set(name, v);
                     if (options.callback && dragging)
                     {
                         options.callback.call(element, v.concat(), "#" + myColor.toString(), myColor);
@@ -2913,7 +2884,7 @@ export class Inspector
                     // Inspector.onWidgetChange.call(that,element,name,v, options);
                     const event_data = [v.concat(), myColor.toString()];
                     LiteGUI.trigger(element, "wbeforechange", event_data);
-                    that.values[name] = v;
+                    this.values.set(name, v);
                     if (options.callback)
                     {options.callback.call(element, v.concat(), "#" + myColor.toString(), myColor);}LiteGUI.trigger(element, "wchange", event_data);
                     if (that.onchange) {that.onchange(name, v.concat(), element);}
@@ -2948,7 +2919,7 @@ export class Inspector
     
         value = value || [0.0,0.0,0.0];
         const that = this;
-        this.values[name] = value;
+        this.values.set(name, value);
     
         let code = "<input tabIndex='"+this.tab_index+"' id='colorpicker-"+name+"' class='color' value='"+
             (value[0]+","+value[1]+","+value[2])+"' "+(options.disabled?"disabled":"")+"/>";
@@ -3052,7 +3023,7 @@ export class Inspector
                     // Inspector.onWidgetChange.call(that,element,name,v, options);
                     const event_data = [v.concat(), myColor.toString()];
                     LiteGUI.trigger(element, "wbeforechange", event_data);
-                    that.values[name] = v;
+                    this.values.set(name, v);
                     if (options.callback && dragging)
                     {
                         options.callback.call(element, myColor.position, "#" + myColor.toString(), myColor);
@@ -3107,13 +3078,13 @@ export class Inspector
             }
             else
             {
-                myColor.onImmediateChange = function()
+                myColor.onImmediateChange = () =>
                 {
                     const v = [ myColor.rgb[0] * myColor.rgb_intensity, myColor.rgb[1] * myColor.rgb_intensity, myColor.rgb[2] * myColor.rgb_intensity ];
                     // Inspector.onWidgetChange.call(that,element,name,v, options);
                     const event_data = [v.concat(), myColor.toString()];
                     LiteGUI.trigger(element, "wbeforechange", event_data);
-                    that.values[name] = v;
+                    this.values.set(name, v);
                     if (options.callback)
                     {options.callback.call(element, v.concat(), "#" + myColor.toString(), myColor);}LiteGUI.trigger(element, "wchange", event_data);
                     if (that.onchange) {that.onchange(name, v.concat(), element);}
@@ -3149,7 +3120,7 @@ export class Inspector
     
         value = value || "";
         const that = this;
-        this.values[name] = value;
+        this.values.set(name, value);
     
         const element = this.createWidget(name,"<span class='inputfield full whidden' style='width: calc(100% - 26px)'><span class='filename'></span></span><button class='litebutton' style='width:20px; margin-left: 2px;'>...</button><input type='file' size='100' class='file' value='"+value+"'/>", options);
         const content = element.querySelector(".wcontent");
@@ -3208,7 +3179,7 @@ export class Inspector
     
         value = value || "";
         const that = this;
-        this.values[name] = value;
+        this.values.set(name, value);
     
         const element = this.createWidget(name,"<span class='line-editor'></span>", options);
         element.style.width = "100%";
