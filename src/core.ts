@@ -10,7 +10,7 @@ import { Tree } from "./tree";
 import { Inspector } from "./inspector"
 import { Dragger } from "./dragger";
 
-declare let escapeHtmlEntities: any | undefined;
+let escapeHtmlEntities: any;
 	// Those useful HTML unicode codes that I never remeber but I always need
 	enum special_codes {
 		close = "&#10005;",
