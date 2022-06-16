@@ -9,6 +9,7 @@ import { Console } from "./console";
 import { Tree } from "./tree";
 import { Inspector } from "./inspector"
 import { Dragger } from "./dragger";
+import { Table } from "./table";
 
 let escapeHtmlEntities: any;
 	// Those useful HTML unicode codes that I never remeber but I always need
@@ -64,6 +65,7 @@ let escapeHtmlEntities: any;
         Dragger: typeof Dragger = Dragger;
         LineEditor: typeof LineEditor = LineEditor;
         Slider: typeof Slider = Slider;
+		Table: typeof Table = Table;
         special_codes: any;
 
 		/**
