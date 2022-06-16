@@ -1,6 +1,7 @@
 import { LiteGUI } from "./core";
 import { purgeElement } from "./core";
 import { Dragger } from "./dragger";
+import { jscolor } from "jscolor";
 
 export class Inspector 
 {
@@ -2728,179 +2729,188 @@ export class Inspector
     
         // Create jsColor
         const input_element = element.querySelector("input.color");
-        let myColor: any = null;
+        let myColor: jscolor.color;
+    	interface Window
+        {
+            jscolor: typeof jscolor
+        }
+        
+        if (window.jscolor)
+        {
     
-        // if (window.jscolor)
-        // {
+            /*
+             * SHOWS CONTEXTUAL MENU
+             * block focusing
+             */
+            /*
+             *Input_element.addEventListener("contextmenu", function(e) {
+             *	if(e.button != 2) //right button
+             *		return false;
+             *	//create the context menu
+             *	var contextmenu = new LiteGUI.ContextMenu( ["Copy in HEX","Copy in RGBA"], { event: e, callback: inner_action });
+             *	e.preventDefault();
+             *	e.stopPropagation();
+             *
+             *	input_element.addEventListener("focus", block_focus , true);
+             *	setTimeout(function(){ input_element.removeEventListener("focus", block_focus , true);},1000);
+             *
+             *	return false;
+             *},true);
+             *
+             *function block_focus(e)
+             *{
+             *	e.stopPropagation();
+             *	e.stopImmediatePropagation();
+             *	e.preventDefault();
+             *	return false;
+             *}
+             *
+             *function inner_action(v)
+             *{
+             *	if(v == "Copy in HEX")
+             *	{
+             *		LiteGUI.toClipboard( "in HEX");
+             *	}
+             *	else
+             *	{
+             *		LiteGUI.toClipboard( "in RGB");
+             *	}
+             *}
+             */
+
+            myColor = new jscolor.color(input_element);
+            myColor.pickerFaceColor = "#333";
+            myColor.pickerBorderColor = "black";
+            myColor.pickerInsetColor = "#222";
+            let rgb_intensity = 1.0;
     
-        //     /*
-        //      * SHOWS CONTEXTUAL MENU
-        //      * block focusing
-        //      */
-        //     /*
-        //      *Input_element.addEventListener("contextmenu", function(e) {
-        //      *	if(e.button != 2) //right button
-        //      *		return false;
-        //      *	//create the context menu
-        //      *	var contextmenu = new LiteGUI.ContextMenu( ["Copy in HEX","Copy in RGBA"], { event: e, callback: inner_action });
-        //      *	e.preventDefault();
-        //      *	e.stopPropagation();
-        //      *
-        //      *	input_element.addEventListener("focus", block_focus , true);
-        //      *	setTimeout(function(){ input_element.removeEventListener("focus", block_focus , true);},1000);
-        //      *
-        //      *	return false;
-        //      *},true);
-        //      *
-        //      *function block_focus(e)
-        //      *{
-        //      *	e.stopPropagation();
-        //      *	e.stopImmediatePropagation();
-        //      *	e.preventDefault();
-        //      *	return false;
-        //      *}
-        //      *
-        //      *function inner_action(v)
-        //      *{
-        //      *	if(v == "Copy in HEX")
-        //      *	{
-        //      *		LiteGUI.toClipboard( "in HEX");
-        //      *	}
-        //      *	else
-        //      *	{
-        //      *		LiteGUI.toClipboard( "in RGB");
-        //      *	}
-        //      *}
-        //      */
+            if (options.disabled)
+            {myColor.pickerOnfocus = false;} // This doesnt work
     
-        //     myColor = new jscolor.color(input_element);
-        //     myColor.pickerFaceColor = "#333";
-        //     myColor.pickerBorderColor = "black";
-        //     myColor.pickerInsetColor = "#222";
-        //     myColor.rgb_intensity = 1.0;
+            if (value.constructor !== String && value.length && value.length > 2)
+            {
+                const intensity = 1.0;
+                myColor.fromRGB(value[0]*intensity, value[1]*intensity, value[2]*intensity);
+                rgb_intensity = intensity;
+            }
     
-        //     if (options.disabled)
-        //     {myColor.pickerOnfocus = false;} // This doesnt work
+            // Update values in rgb format
+            input_element.addEventListener("change", (e: any) =>
+            {
+                const rgbelement = element.querySelector(".rgb-color");
+                if (rgbelement)
+                {rgbelement.innerHTML = LiteGUI.Inspector.parseColor(myColor.rgb);}
+            });
+            input_element.addEventListener("focusin", (e: any) =>
+            {
+                input_element.focused = true;
+            });
+            input_element.addEventListener("focusout", (e: any) =>
+            {
+                input_element.focused = false;
+                const v = [ myColor.rgb[0] * rgb_intensity, myColor.rgb[1] * rgb_intensity,
+                    myColor.rgb[2] * rgb_intensity ];
+                if (options.finalCallback)
+                {
+                    options.finalCallback.call(element, v.concat(), "#" + myColor.toString(), myColor);
+                }
+                else if (options.callback)
+                {
+                    options.callback.call(element, v.concat(), "#" + myColor.toString(), myColor);
+                }
+            });
     
-        //     if (value.constructor !== String && value.length && value.length > 2)
-        //     {
-        //         const intensity = 1.0;
-        //         myColor.fromRGB(value[0]*intensity,value[1]*intensity,value[2]*intensity);
-        //         myColor.rgb_intensity = intensity;
-        //     }
+            if (options.add_dragger)
+            {
+                myColor.onImmediateChange = (dragging: any) =>
+                {
+                    const v = [ myColor.rgb[0] * rgb_intensity, myColor.rgb[1] * rgb_intensity,
+                        myColor.rgb[2] * rgb_intensity ];
+                    // Inspector.onWidgetChange.call(that,element,name,v, options);
+                    const event_data = [v.concat(), myColor.toString()];
+                    LiteGUI.trigger(element, "wbeforechange", event_data);
+                    this.values.set(name, v);
+                    if (options.callback && dragging)
+                    {
+                        options.callback.call(element, v.concat(), "#" + myColor.toString(), myColor);
+                    }
+                    else if ((options.callback || options.finalCallback) && !dragging)
+                    {
+                        if (options.finalCallback)
+                        {
+                            options.finalCallback.call(element, v.concat(), "#" + myColor.toString(), myColor);
+                        }
+                        else if (options.callback)
+                        {
+                            options.callback.call(element, v.concat(), "#" + myColor.toString(), myColor);
+                        }
+                    }
+                    LiteGUI.trigger(element, "wchange", event_data);
+                    if (that.onchange) {that.onchange(name, v.concat(), element);}
+                };
     
-        //     // Update values in rgb format
-        //     input_element.addEventListener("change", (e: any) =>
-        //     {
-        //         const rgbelement = element.querySelector(".rgb-color");
-        //         if (rgbelement)
-        //         {rgbelement.innerHTML = LiteGUI.Inspector.parseColor(myColor.rgb);}
-        //     });
-        //     input_element.addEventListener("focusin", (e: any) =>
-        //     {
-        //         input_element.focused = true;
-        //     });
-        //     input_element.addEventListener("focusout", (e: any) =>
-        //     {
-        //         input_element.focused = false;
-        //         const v = [ myColor.rgb[0] * myColor.rgb_intensity, myColor.rgb[1] * myColor.rgb_intensity,
-        //             myColor.rgb[2] * myColor.rgb_intensity ];
-        //         if (options.finalCallback)
-        //         {
-        //             options.finalCallback.call(element, v.concat(), "#" + myColor.toString(), myColor);
-        //         }
-        //         else if (options.callback)
-        //         {
-        //             options.callback.call(element, v.concat(), "#" + myColor.toString(), myColor);
-        //         }
-        //     });
+                // Alpha dragger
+                options.step = options.step || 0.01;
+                options.dragger_class = "nano";
     
-        //     if (options.add_dragger)
-        //     {
-        //         myColor.onImmediateChange = function(dragging: any)
-        //         {
-        //             const v = [ myColor.rgb[0] * myColor.rgb_intensity, myColor.rgb[1] * myColor.rgb_intensity, myColor.rgb[2] * myColor.rgb_intensity ];
-        //             // Inspector.onWidgetChange.call(that,element,name,v, options);
-        //             const event_data = [v.concat(), myColor.toString()];
-        //             LiteGUI.trigger(element, "wbeforechange", event_data);
-        //             this.values.set(name, v);
-        //             if (options.callback && dragging)
-        //             {
-        //                 options.callback.call(element, v.concat(), "#" + myColor.toString(), myColor);
-        //             }
-        //             else if ((options.callback || options.finalCallback) && !dragging)
-        //             {
-        //                 if (options.finalCallback)
-        //                 {
-        //                     options.finalCallback.call(element, v.concat(), "#" + myColor.toString(), myColor);
-        //                 }
-        //                 else if (options.callback)
-        //                 {
-        //                     options.callback.call(element, v.concat(), "#" + myColor.toString(), myColor);
-        //                 }
-        //             }
-        //             LiteGUI.trigger(element, "wchange", event_data);
-        //             if (that.onchange) {that.onchange(name, v.concat(), element);}
-        //         };
+                const dragger = new LiteGUI.Dragger(1, options);
+                element.querySelector('.wcontent').appendChild(dragger.root);
+                const callOnInmediateChange = function(dragging: any)
+                {
+                    if (myColor.onImmediateChange)
+                    {myColor.onImmediateChange(dragging);}
+                };
+                const callOnStopDragging = function()
+                {
+                    if (!input_element.focused)
+                    {
+                        callOnInmediateChange(false);
+                    }
+                };
+                dragger.root.addEventListener("stop_dragging", callOnStopDragging);
+                dragger.input.addEventListener("change", (e: any) =>
+                {
+                    const v = parseFloat(dragger.input.value);
+                    rgb_intensity = v;
+                    callOnInmediateChange(dragger.dragging);
+                });
     
-        //         // Alpha dragger
-        //         options.step = options.step || 0.01;
-        //         options.dragger_class = "nano";
+                element.setValue = function(value: any, skip_event: any)
+                {
+                    myColor.fromRGB(value[0],value[1],value[2]);
+                    if (!skip_event)
+                    {LiteGUI.trigger(dragger.input, "change");}
+                };
+            }
+            else
+            {
+                myColor.onImmediateChange = () =>
+                {
+                    const v = [ myColor.rgb[0] * rgb_intensity, myColor.rgb[1] *
+                        rgb_intensity, myColor.rgb[2] * rgb_intensity ];
+                    // Inspector.onWidgetChange.call(that,element,name,v, options);
+                    const event_data = [v.concat(), myColor.toString()];
+                    LiteGUI.trigger(element, "wbeforechange", event_data);
+                    this.values.set(name, v);
+                    if (options.callback)
+                    {
+                        options.callback.call(element, v.concat(), "#" + myColor.toString(), myColor);
+                    }
+                    LiteGUI.trigger(element, "wchange", event_data);
+                    if (that.onchange) {that.onchange(name, v.concat(), element);}
+                };
+                element.setValue = function(value: any)
+                {
+                    myColor.fromRGB(value[0],value[1],value[2]);
+                };
+            }
     
-        //         const dragger = new LiteGUI.Dragger(1, options);
-        //         element.querySelector('.wcontent').appendChild(dragger.root);
-        //         const callOnInmediateChange = function(dragging: any)
-        //         {
-        //             if (myColor.onImmediateChange)
-        //             {myColor.onImmediateChange(dragging);}
-        //         };
-        //         const callOnStopDragging = function()
-        //         {
-        //             if (!input_element.focused)
-        //             {
-        //                 callOnInmediateChange(false);
-        //             }
-        //         };
-        //         dragger.root.addEventListener("stop_dragging", callOnStopDragging);
-        //         dragger.input.addEventListener("change", (e) =>
-        //         {
-        //             const v = parseFloat(dragger.input.value);
-        //             myColor.rgb_intensity = v;
-        //             callOnInmediateChange(dragger.dragging);
-        //         });
-    
-        //         element.setValue = function(value: any, skip_event: any)
-        //         {
-        //             myColor.fromRGB(value[0],value[1],value[2]);
-        //             if (!skip_event)
-        //             {LiteGUI.trigger(dragger.input, "change");}
-        //         };
-        //     }
-        //     else
-        //     {
-        //         myColor.onImmediateChange = function()
-        //         {
-        //             const v = [ myColor.rgb[0] * myColor.rgb_intensity, myColor.rgb[1] * myColor.rgb_intensity, myColor.rgb[2] * myColor.rgb_intensity ];
-        //             // Inspector.onWidgetChange.call(that,element,name,v, options);
-        //             const event_data = [v.concat(), myColor.toString()];
-        //             LiteGUI.trigger(element, "wbeforechange", event_data);
-        //             this.values.set(name, v);
-        //             if (options.callback)
-        //             {options.callback.call(element, v.concat(), "#" + myColor.toString(), myColor);}LiteGUI.trigger(element, "wchange", event_data);
-        //             if (that.onchange) {that.onchange(name, v.concat(), element);}
-        //         };
-        //         element.setValue = function(value: any)
-        //         {
-        //             myColor.fromRGB(value[0],value[1],value[2]);
-        //         };
-        //     }
-    
-        //     element.getValue = function()
-        //     {
-        //         return value;
-        //     };
-        // }
-        // else
+            element.getValue = function()
+            {
+                return value;
+            };
+        }
+        else
         {
             input_element.addEventListener("change", (e: any) =>
             {
@@ -2934,173 +2944,173 @@ export class Inspector
         const input_element = element.querySelector("input.color");
         let myColor: any = null;
     
-        // if (window.jscolor)
-        // {
+        if (window.jscolor)
+        {
     
-        //     /*
-        //      * SHOWS CONTEXTUAL MENU
-        //      * block focusing
-        //      */
-        //     /*
-        //      *Input_element.addEventListener("contextmenu", function(e) {
-        //      *	if(e.button != 2) //right button
-        //      *		return false;
-        //      *	//create the context menu
-        //      *	var contextmenu = new LiteGUI.ContextMenu( ["Copy in HEX","Copy in RGBA"], { event: e, callback: inner_action });
-        //      *	e.preventDefault();
-        //      *	e.stopPropagation();
-        //      *
-        //      *	input_element.addEventListener("focus", block_focus , true);
-        //      *	setTimeout(function(){ input_element.removeEventListener("focus", block_focus , true);},1000);
-        //      *
-        //      *	return false;
-        //      *},true);
-        //      *
-        //      *function block_focus(e)
-        //      *{
-        //      *	e.stopPropagation();
-        //      *	e.stopImmediatePropagation();
-        //      *	e.preventDefault();
-        //      *	return false;
-        //      *}
-        //      *
-        //      *function inner_action(v)
-        //      *{
-        //      *	if(v == "Copy in HEX")
-        //      *	{
-        //      *		LiteGUI.toClipboard( "in HEX");
-        //      *	}
-        //      *	else
-        //      *	{
-        //      *		LiteGUI.toClipboard( "in RGB");
-        //      *	}
-        //      *}
-        //      */
+            /*
+             * SHOWS CONTEXTUAL MENU
+             * block focusing
+             */
+            /*
+             *Input_element.addEventListener("contextmenu", function(e) {
+             *	if(e.button != 2) //right button
+             *		return false;
+             *	//create the context menu
+             *	var contextmenu = new LiteGUI.ContextMenu( ["Copy in HEX","Copy in RGBA"], { event: e, callback: inner_action });
+             *	e.preventDefault();
+             *	e.stopPropagation();
+             *
+             *	input_element.addEventListener("focus", block_focus , true);
+             *	setTimeout(function(){ input_element.removeEventListener("focus", block_focus , true);},1000);
+             *
+             *	return false;
+             *},true);
+             *
+             *function block_focus(e)
+             *{
+             *	e.stopPropagation();
+             *	e.stopImmediatePropagation();
+             *	e.preventDefault();
+             *	return false;
+             *}
+             *
+             *function inner_action(v)
+             *{
+             *	if(v == "Copy in HEX")
+             *	{
+             *		LiteGUI.toClipboard( "in HEX");
+             *	}
+             *	else
+             *	{
+             *		LiteGUI.toClipboard( "in RGB");
+             *	}
+             *}
+             */
     
-        //     myColor = new jscolor.color(input_element);
-        //     myColor.pickerFaceColor = "#333";
-        //     myColor.pickerBorderColor = "black";
-        //     myColor.pickerInsetColor = "#222";
-        //     myColor.position = options.position || 0;
+            myColor = new jscolor.color(input_element);
+            myColor.pickerFaceColor = "#333";
+            myColor.pickerBorderColor = "black";
+            myColor.pickerInsetColor = "#222";
+            myColor.position = options.position || 0;
     
-        //     if (options.disabled)
-        //     {myColor.pickerOnfocus = false;} // This doesnt work
+            if (options.disabled)
+            {myColor.pickerOnfocus = false;} // This doesnt work
     
-        //     if (value.constructor !== String && value.length && value.length > 2)
-        //     {
-        //         myColor.fromRGB(value[0],value[1],value[2]);
-        //     }
+            if (value.constructor !== String && value.length && value.length > 2)
+            {
+                myColor.fromRGB(value[0],value[1],value[2]);
+            }
     
-        //     // Update values in rgb format
-        //     input_element.addEventListener("change", (e: any) =>
-        //     {
-        //         const rgbelement = element.querySelector(".rgb-color");
-        //         if (rgbelement)
-        //         {rgbelement.innerHTML = LiteGUI.Inspector.parseColor(myColor.rgb);}
-        //     });
-        //     input_element.addEventListener("focusin", (e: any) =>
-        //     {
-        //         input_element.focused = true;
-        //     });
-        //     input_element.addEventListener("focusout", (e: any) =>
-        //     {
-        //         input_element.focused = false;
-        //         if (options.finalCallback)
-        //         {
-        //             options.finalCallback.call(element, myColor.position, "#" + myColor.toString(), myColor);
-        //         }
-        //         else if (options.callback)
-        //         {
-        //             options.callback.call(element, myColor.position, "#" + myColor.toString(), myColor);
-        //         }
-        //     });
+            // Update values in rgb format
+            input_element.addEventListener("change", (e: any) =>
+            {
+                const rgbelement = element.querySelector(".rgb-color");
+                if (rgbelement)
+                {rgbelement.innerHTML = LiteGUI.Inspector.parseColor(myColor.rgb);}
+            });
+            input_element.addEventListener("focusin", (e: any) =>
+            {
+                input_element.focused = true;
+            });
+            input_element.addEventListener("focusout", (e: any) =>
+            {
+                input_element.focused = false;
+                if (options.finalCallback)
+                {
+                    options.finalCallback.call(element, myColor.position, "#" + myColor.toString(), myColor);
+                }
+                else if (options.callback)
+                {
+                    options.callback.call(element, myColor.position, "#" + myColor.toString(), myColor);
+                }
+            });
     
-        //     if (options.add_dragger)
-        //     {
-        //         myColor.onImmediateChange = function(dragging: any)
-        //         {
-        //             const v = [ myColor.rgb[0], myColor.rgb[1], myColor.rgb[2] ];
-        //             // Inspector.onWidgetChange.call(that,element,name,v, options);
-        //             const event_data = [v.concat(), myColor.toString()];
-        //             LiteGUI.trigger(element, "wbeforechange", event_data);
-        //             this.values.set(name, v);
-        //             if (options.callback && dragging)
-        //             {
-        //                 options.callback.call(element, myColor.position, "#" + myColor.toString(), myColor);
-        //             }
-        //             else if ((options.callback || options.finalCallback) && !dragging)
-        //             {
-        //                 if (options.finalCallback)
-        //                 {
-        //                     options.finalCallback.call(element, myColor.position, "#" + myColor.toString(), myColor);
-        //                 }
-        //                 else if (options.callback)
-        //                 {
-        //                     options.callback.call(element, myColor.position, "#" + myColor.toString(), myColor);
-        //                 }
-        //             }
-        //             LiteGUI.trigger(element, "wchange", event_data);
-        //             if (that.onchange) {that.onchange(name, v.concat(), element);}
-        //         };
+            if (options.add_dragger)
+            {
+                myColor.onImmediateChange = function(dragging: any)
+                {
+                    const v = [ myColor.rgb[0], myColor.rgb[1], myColor.rgb[2] ];
+                    // Inspector.onWidgetChange.call(that,element,name,v, options);
+                    const event_data = [v.concat(), myColor.toString()];
+                    LiteGUI.trigger(element, "wbeforechange", event_data);
+                    this.values.set(name, v);
+                    if (options.callback && dragging)
+                    {
+                        options.callback.call(element, myColor.position, "#" + myColor.toString(), myColor);
+                    }
+                    else if ((options.callback || options.finalCallback) && !dragging)
+                    {
+                        if (options.finalCallback)
+                        {
+                            options.finalCallback.call(element, myColor.position, "#" + myColor.toString(), myColor);
+                        }
+                        else if (options.callback)
+                        {
+                            options.callback.call(element, myColor.position, "#" + myColor.toString(), myColor);
+                        }
+                    }
+                    LiteGUI.trigger(element, "wchange", event_data);
+                    if (that.onchange) {that.onchange(name, v.concat(), element);}
+                };
     
-        //         // Alpha dragger
-        //         options.step = options.step || 0.01;
-        //         options.dragger_class = "nano";
+                // Alpha dragger
+                options.step = options.step || 0.01;
+                options.dragger_class = "nano";
     
-        //         const dragger = new LiteGUI.Dragger(myColor.position, options);
-        //         element.querySelector('.wcontent').appendChild(dragger.root);
-        //         const callOnInmediateChange = function(dragging: any)
-        //         {
-        //             if (myColor.onImmediateChange)
-        //             {myColor.onImmediateChange(dragging);}
-        //         };
-        //         const callOnStopDragging = function()
-        //         {
-        //             if (!input_element.focused)
-        //             {
-        //                 callOnInmediateChange(false);
-        //             }
-        //         };
-        //         dragger.root.addEventListener("stop_dragging", callOnStopDragging);
-        //         dragger.input.addEventListener("change", (e) =>
-        //         {
-        //             const v = parseFloat(dragger.input.value);
-        //             myColor.position = v;
-        //             callOnInmediateChange(dragger.dragging);
-        //         });
+                const dragger = new LiteGUI.Dragger(myColor.position, options);
+                element.querySelector('.wcontent').appendChild(dragger.root);
+                const callOnInmediateChange = function(dragging: any)
+                {
+                    if (myColor.onImmediateChange)
+                    {myColor.onImmediateChange(dragging);}
+                };
+                const callOnStopDragging = function()
+                {
+                    if (!input_element.focused)
+                    {
+                        callOnInmediateChange(false);
+                    }
+                };
+                dragger.root.addEventListener("stop_dragging", callOnStopDragging);
+                dragger.input.addEventListener("change", (e) =>
+                {
+                    const v = parseFloat(dragger.input.value);
+                    myColor.position = v;
+                    callOnInmediateChange(dragger.dragging);
+                });
     
-        //         element.setValue = function(value: any, skip_event: any)
-        //         {
-        //             myColor.fromRGB(value[0],value[1],value[2]);
-        //             if (!skip_event)
-        //             {LiteGUI.trigger(dragger.input, "change");}
-        //         };
-        //     }
-        //     else
-        //     {
-        //         myColor.onImmediateChange = () =>
-        //         {
-        //             const v = [ myColor.rgb[0] * myColor.rgb_intensity, myColor.rgb[1] * myColor.rgb_intensity, myColor.rgb[2] * myColor.rgb_intensity ];
-        //             // Inspector.onWidgetChange.call(that,element,name,v, options);
-        //             const event_data = [v.concat(), myColor.toString()];
-        //             LiteGUI.trigger(element, "wbeforechange", event_data);
-        //             this.values.set(name, v);
-        //             if (options.callback)
-        //             {options.callback.call(element, v.concat(), "#" + myColor.toString(), myColor);}LiteGUI.trigger(element, "wchange", event_data);
-        //             if (that.onchange) {that.onchange(name, v.concat(), element);}
-        //         };
-        //         element.setValue = function(value: any)
-        //         {
-        //             myColor.fromRGB(value[0],value[1],value[2]);
-        //         };
-        //     }
+                element.setValue = function(value: any, skip_event: any)
+                {
+                    myColor.fromRGB(value[0],value[1],value[2]);
+                    if (!skip_event)
+                    {LiteGUI.trigger(dragger.input, "change");}
+                };
+            }
+            else
+            {
+                myColor.onImmediateChange = () =>
+                {
+                    const v = [ myColor.rgb[0] * myColor.rgb_intensity, myColor.rgb[1] * myColor.rgb_intensity, myColor.rgb[2] * myColor.rgb_intensity ];
+                    // Inspector.onWidgetChange.call(that,element,name,v, options);
+                    const event_data = [v.concat(), myColor.toString()];
+                    LiteGUI.trigger(element, "wbeforechange", event_data);
+                    this.values.set(name, v);
+                    if (options.callback)
+                    {options.callback.call(element, v.concat(), "#" + myColor.toString(), myColor);}LiteGUI.trigger(element, "wchange", event_data);
+                    if (that.onchange) {that.onchange(name, v.concat(), element);}
+                };
+                element.setValue = function(value: any)
+                {
+                    myColor.fromRGB(value[0],value[1],value[2]);
+                };
+            }
     
-        //     element.getValue = function()
-        //     {
-        //         return value;
-        //     };
-        // }
-        // else
+            element.getValue = function()
+            {
+                return value;
+            };
+        }
+        else
         {
             input_element.addEventListener("change", (e: any) =>
             {
