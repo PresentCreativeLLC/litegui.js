@@ -6,7 +6,7 @@ export class Menubar
 	closing_time: number;
 	options: any;
 	root: HTMLDivElementPlus;
-	menu: any[];
+	menu: SubMenu[];
 	panels: any[];
 	content: HTMLUListElement;
 	is_open: boolean;
@@ -59,7 +59,7 @@ export class Menubar
 		let current_token = 0;
 		let current_pos = 0;
 		let menu = this.menu;
-		let last_item = null;
+		let last_item = undefined;
 
 		while (menu)
 		{
@@ -67,13 +67,13 @@ export class Menubar
 			// Token not found in this menu, create it
 			if (menu.length == current_pos)
 			{
-				const v: any = { parent: last_item, children: [] };
+				const v: SubMenu = { name: "", parent: last_item, children: [], data: null,
+					disable: function() { if (this.data) {this.data.disabled = true;} },
+					enable: function() { if (this.data) {delete this.data.disabled;} }
+				};
 				last_item = v;
 				if (current_token == tokens.length - 1)
 				{v.data = data;}
-
-				v.disable = function() { if (this.data) {this.data.disabled = true;} };
-				v.enable = function() { if (this.data) {delete this.data.disabled;} };
 
 				v.name = tokens[ current_token ];
 				menu.push(v);
@@ -92,7 +92,8 @@ export class Menubar
 				if (current_token < tokens.length - 1)
 				{
 					last_item = menu[ current_pos ];
-					menu = menu[ current_pos ].children;
+					if (menu[ current_pos ].children != undefined)
+					{menu = menu[ current_pos ].children!;}
 					current_pos = 0;
 					current_token++;
 					continue;
@@ -114,6 +115,13 @@ export class Menubar
 		const menu = this.findMenu(path);
 		if (!menu)
 		{return;}
+
+		if (Array.isArray(menu))
+		{
+			// This means that it's intended to deleat a list and this is not allowed
+			return console.warn("Can't remove an entire list");
+		}
+		//We are going to remove a single menu
 		if (!menu.parent || !menu.parent.children)
 		{return console.warn("menu without parent?");}
 
@@ -127,24 +135,30 @@ export class Menubar
 		const menu = this.findMenu(path);
 		if (!menu)
 		{return;}
-		menu.children.push({separator: true, order: order || 10 });
+		if (Array.isArray(menu))
+		{
+			// This means that it's intended to deleat a list and this is not allowed
+			return console.warn("Can't separate an entire list");
+		}
+		if (menu.children)
+		menu.children.push({name: "", children: undefined, data: null, separator: true, order: order || 10 });
 	};
 
 	// Returns the menu entry that matches this path
-	findMenu(path: string)
+	findMenu(path: string): SubMenu | SubMenu[] | undefined
 	{
 		const tokens = path.split("/");
 		let current_token = 0;
 		let current_pos = 0;
 		let menu = this.menu;
 
-		while (menu)
+		while (current_pos <= 5)
 		{
 			// No more tokens, return last found menu
 			if (current_token == tokens.length) {return menu;}
 
 			// This menu doesn't have more entries
-			if (menu.length <= current_pos) {return null;}
+			if (menu.length <= current_pos) {return undefined;}
 
 			if (tokens[ current_token ] == "*") {return menu[ current_pos ].children;}
 
@@ -155,8 +169,8 @@ export class Menubar
 				{
 					return menu[ current_pos ];
 				}
-
-				menu = menu[ current_pos ].children;
+				if (menu[ current_pos ].children)
+				menu = menu[ current_pos ].children!;
 				current_pos = 0;
 				current_token++;
 				continue;
@@ -166,7 +180,7 @@ export class Menubar
 			// Check next entry in this menu
 			current_pos++;
 		}
-		return null;
+		return undefined;
 	}
 
 	// Update top main menu
@@ -425,4 +439,17 @@ export class Menubar
 		this.panels.push(element);
 		document.body.appendChild(element);
 	}
+}
+
+export interface SubMenu
+{
+	name: string;
+	parent?: SubMenu;
+	children: SubMenu[] | undefined;
+	data: any;
+	disable?: Function;
+	enable?: Function;
+	separator?: boolean;
+	order?: number;
+	element?: HTMLLIElementPlus;
 }
