@@ -1,7 +1,7 @@
 import { Menubar } from "../src/menubar";
 import { HTMLLIElementPlus } from "../src/@types/globals/index";
-
-/*function Construct (id: string, options: any)
+/*
+function Construct (id: string, options: any)
 {
     return new Menubar(id, options);
 }
@@ -78,7 +78,11 @@ describe('findMenu', () => {
 describe('Update', () => {
     const options = { auto_open: true, sort_entries: false };
     const menu = Construct("Menubar01", options);
-
+    const clickCallback = function()
+    {
+        console.log("A menu was clicked");
+    }
+    menu.add("Printeador", clickCallback);
     expect(menu.updateMenu());
 });
 
@@ -111,5 +115,4 @@ describe('HidePanels', () => {
     element.data = menu.menu[0];
     menu.menu[0].element = element;
     element.addEventListener("click", clickCallback.bind(undefined,element));
-});
-*/
+});*/

@@ -1,5 +1,5 @@
 import { Panel } from "../src/panel";
-function Construct (id: string, options: any)
+/*function Construct (id: string, options: any)
 {
     return new Panel(id, options);
 }
@@ -31,4 +31,4 @@ describe('Test de clear de panel', () => {
     it('Debería limpiar al panel01', () => {
         expect(panel0.clear());
     });
-});
+});*/
