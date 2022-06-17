@@ -13,7 +13,7 @@ import { Table } from "./table";
 
 let escapeHtmlEntities: any;
 	// Those useful HTML unicode codes that I never remeber but I always need
-	enum special_codes {
+	export enum special_codes {
 		close = "&#10005;",
 		navicon = "&#9776;",
 		refresh = "&#8634;",
