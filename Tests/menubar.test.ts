@@ -1,5 +1,5 @@
 import { Menubar } from "../src/menubar";
-import { HTMLLIElementPlus } from "../src/@types/globals/index";
+
 /*
 function Construct (id: string, options: any)
 {
@@ -36,7 +36,8 @@ describe('add in menu', () => {
     {
         console.log("A menu was clicked");
     }
-    expect(menu.add("Printeador", clickCallback));
+    menu.add("Printeador", clickCallback)
+    expect(menu.menu.length).toBeGreaterThan(0);
 });
 
 describe('remove', () => {
@@ -72,7 +73,20 @@ describe('findMenu', () => {
         console.log("A menu was clicked");
     }
     menu.add("Printeador", clickCallback);
-    expect(menu.findMenu("Printeador")).toBeDefined();
+    console.warn("menu: " + menu.menu[0].name);
+    const menu2 = menu.findMenu("Printeador");
+    if (menu2 != undefined)
+    {
+        if (Array.isArray(menu2))
+        {
+            console.warn("Findmenu: " + menu2[0].name);
+        }
+        else
+        {
+            console.warn("Findmenu: " + menu2.name);
+        }
+    }
+    expect(menu.findMenu("Printeador"));
 });
 
 describe('Update', () => {
@@ -97,22 +111,18 @@ describe('HidePanels', () => {
     const options = { auto_open: true, sort_entries: false };
     const menu = Construct("Menubar01", options);
 
-    const clickCallback = function(element: HTMLLIElementPlus, e: MouseEvent)
+    const clickCallbackmenu = function()
     {
-        const el = element;
-        const item = el.data;
+        console.log("A menu was clicked");
+    }
+    menu.add("Printeador", clickCallbackmenu);
 
-        if (item.data && item.data.callback && typeof(item.data.callback) == "function")
-        {
-            item.data.callback(item.data);
-        }
-        expect(menu.showMenu(item, e, el));
-        element.addEventListener("click", clickCallback.bind(undefined,element));
-    };
-    const element = document.createElement("li") as HTMLLIElementPlus;
-    element.innerHTML = "<span class='icon'></span><span class='name'>" + menu.menu[0].name + "</span>";
-    menu.content.appendChild(element);
-    element.data = menu.menu[0];
-    menu.menu[0].element = element;
-    element.addEventListener("click", clickCallback.bind(undefined,element));
+    const evt = new MouseEvent("click", {
+        view: window,
+        bubbles: true,
+        cancelable: true,
+        clientX: 0,
+        clientY: 0
+      });
+    expect(menu.showMenu(menu.menu[0], evt, menu.root));
 });*/
