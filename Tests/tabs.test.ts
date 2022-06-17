@@ -26,6 +26,9 @@ describe('Show', () => {
     const options = { mode: "horizontal", id: "tab01", size: "full", width: 120, height: 50,
         callback: function () {console.log("Tab is being clicked")}};
     const tab = Construct(options, false);
+    const options2 = { callback: function () {console.log("Tab is being clicked")}, title: "Este es el titulo",
+    button: true, closable: true, tab_width: 120, id: "tab02", size: "full", width: 120, height: 50, selected: true}
+    tab.addTab("tab02", options2);
     expect(tab.show());
 });
 
@@ -33,6 +36,9 @@ describe('Hide', () => {
     const options = { mode: "horizontal", id: "tab01", size: "full", width: 120, height: 50,
         callback: function () {console.log("Tab is being clicked")}};
     const tab = Construct(options, false);
+    const options2 = { callback: function () {console.log("Tab is being clicked")}, title: "Este es el titulo",
+    button: true, closable: true, tab_width: 120, id: "tab02", size: "full", width: 120, height: 50, selected: true}
+    tab.addTab("tab02", options2);
     expect(tab.hide());
 });
 
@@ -40,14 +46,22 @@ describe('selectTab', () => {
     const options = { mode: "horizontal", id: "tab01", size: "full", width: 120, height: 50,
         callback: function () {console.log("Tab is being clicked")}};
     const tab = Construct(options, false);
-    expect(tab.selectTab("tab01", false));
+
+    const options2 = { callback: function () {console.log("Tab is being clicked")}, title: "Este es el titulo",
+    button: true, closable: true, tab_width: 120, id: "tab02", size: "full", width: 120, height: 50, selected: true}
+    tab.addTab("tab02", options2);
+    expect(tab.selectTab("tab02", false));
 });
 
 describe('getCurrentTab', () => {
     const options = { mode: "horizontal", id: "tab01", size: "full", width: 120, height: 50,
         callback: function () {console.log("Tab is being clicked")}};
     const tab = Construct(options, false);
-    tab.selectTab("tab01", false);
+
+    const options2 = { callback: function () {console.log("Tab is being clicked")}, title: "Este es el titulo",
+    button: true, closable: true, tab_width: 120, id: "tab02", size: "full", width: 120, height: 50, selected: true}
+    tab.addTab("tab02", options2);
+    tab.selectTab("tab02", false);
     expect(tab.getCurrentTab());
 });
 
@@ -55,7 +69,11 @@ describe('getCurrentTabId', () => {
     const options = { mode: "horizontal", id: "tab01", size: "full", width: 120, height: 50,
         callback: function () {console.log("Tab is being clicked")}};
     const tab = Construct(options, false);
-    tab.selectTab("tab01", false);
+
+    const options2 = { callback: function () {console.log("Tab is being clicked")}, title: "Este es el titulo",
+    button: true, closable: true, tab_width: 120, id: "tab02", size: "full", width: 120, height: 50, selected: true}
+    tab.addTab("tab02", options2);
+    tab.selectTab("tab02", false);
     expect(tab.getCurrentTabId());
 });
 
@@ -63,8 +81,12 @@ describe('getPreviousTab', () => {
     const options = { mode: "horizontal", id: "tab01", size: "full", width: 120, height: 50,
         callback: function () {console.log("Tab is being clicked")}};
     const tab = Construct(options, false);
-    tab.selectTab("tab01", false);
-    tab.selectTab("tab01", false);
+
+    const options2 = { callback: function () {console.log("Tab is being clicked")}, title: "Este es el titulo",
+    button: true, closable: true, tab_width: 120, id: "tab02", size: "full", width: 120, height: 50, selected: true}
+    tab.addTab("tab02", options2);
+    tab.selectTab("tab02", false);
+    tab.selectTab("tab02", false);
     expect(tab.getPreviousTab());
 });
 
@@ -73,23 +95,34 @@ describe('appendTo', () => {
         callback: function () {console.log("Tab is being clicked")}};
     const tab = Construct(options, false);
 
-    options.id = "tab02";
-    options.callback = function () {console.log("Tab02 is being clicked")};
+    const options2 = { callback: function () {console.log("Tab is being clicked")}, title: "Este es el titulo",
+    button: true, closable: true, tab_width: 120, id: "tab02", size: "full", width: 120, height: 50, selected: true}
+    tab.addTab("tab02", options2);
+    options.id = "tab03";
+    options.callback = function () {console.log("Tab03 is being clicked")};
     const tab2 = Construct(options, false);
-    expect(tab.appendTo(tab2));
+    expect(tab.appendTo(tab2.root));
 });
 
 describe('getTab', () => {
     const options = { mode: "horizontal", id: "tab01", size: "full", width: 120, height: 50,
         callback: function () {console.log("Tab is being clicked")}};
     const tab = Construct(options, false);
-    expect(tab.getTab("tab01"));
+
+    const options2 = { callback: function () {console.log("Tab is being clicked")}, title: "Este es el titulo",
+    button: true, closable: true, tab_width: 120, id: "tab02", size: "full", width: 120, height: 50, selected: true}
+    tab.addTab("tab02", options2);
+    expect(tab.getTab("tab02"));
 });
 
 describe('getTabByIndex', () => {
     const options = { mode: "horizontal", id: "tab01", size: "full", width: 120, height: 50,
         callback: function () {console.log("Tab is being clicked")}};
     const tab = Construct(options, false);
+
+    const options2 = { callback: function () {console.log("Tab is being clicked")}, title: "Este es el titulo",
+    button: true, closable: true, tab_width: 120, id: "tab02", size: "full", width: 120, height: 50, selected: true}
+    tab.addTab("tab02", options2);
     expect(tab.getTabByIndex(0));
 });
 
@@ -97,6 +130,10 @@ describe('getNumOfTabs', () => {
     const options = { mode: "horizontal", id: "tab01", size: "full", width: 120, height: 50,
         callback: function () {console.log("Tab is being clicked")}};
     const tab = Construct(options, false);
+
+    const options2 = { callback: function () {console.log("Tab is being clicked")}, title: "Este es el titulo",
+    button: true, closable: true, tab_width: 120, id: "tab02", size: "full", width: 120, height: 50, selected: true}
+    tab.addTab("tab02", options2);
     expect(tab.getNumOfTabs()).toBe(1);
 });
 
@@ -104,14 +141,22 @@ describe('getTabContent', () => {
     const options = { mode: "horizontal", id: "tab01", size: "full", width: 120, height: 50,
         callback: function () {console.log("Tab is being clicked")}};
     const tab = Construct(options, false);
-    expect(tab.getTabContent("tab01"));
+
+    const options2 = { callback: function () {console.log("Tab is being clicked")}, title: "Este es el titulo",
+    button: true, closable: true, tab_width: 120, id: "tab02", size: "full", width: 120, height: 50, selected: true}
+    tab.addTab("tab02", options2);
+    expect(tab.getTabContent("tab02"));
 });
 
 describe('getTabIndex', () => {
     const options = { mode: "horizontal", id: "tab01", size: "full", width: 120, height: 50,
         callback: function () {console.log("Tab is being clicked")}};
     const tab = Construct(options, false);
-    expect(tab.getTabIndex("tab01"));
+
+    const options2 = { callback: function () {console.log("Tab is being clicked")}, title: "Este es el titulo",
+    button: true, closable: true, tab_width: 120, id: "tab02", size: "full", width: 120, height: 50, selected: true}
+    tab.addTab("tab02", options2);
+    expect(tab.getTabIndex("tab02"));
 });
 
 describe('addTab', () => {
@@ -174,7 +219,10 @@ describe('removeTab', () => {
         callback: function () {console.log("Tab is being clicked")}};
     const tab = Construct(options, false);
 
-    expect(tab.removeTab("tab01"));
+    const options2 = { callback: function () {console.log("Tab is being clicked")}, title: "Este es el titulo",
+    button: true, closable: true, tab_width: 120, id: "tab02", size: "full", width: 120, height: 50, selected: true}
+    tab.addTab("tab02", options2);
+    expect(tab.removeTab("tab02"));
 });
 
 describe('removeAllTabs', () => {
@@ -182,6 +230,9 @@ describe('removeAllTabs', () => {
         callback: function () {console.log("Tab is being clicked")}};
     const tab = Construct(options, false);
 
+    const options2 = { callback: function () {console.log("Tab is being clicked")}, title: "Este es el titulo",
+    button: true, closable: true, tab_width: 120, id: "tab02", size: "full", width: 120, height: 50, selected: true}
+    tab.addTab("tab02", options2);
     expect(tab.removeAllTabs());
 });
 
@@ -190,6 +241,9 @@ describe('clear', () => {
         callback: function () {console.log("Tab is being clicked")}};
     const tab = Construct(options, false);
 
+    const options2 = { callback: function () {console.log("Tab is being clicked")}, title: "Este es el titulo",
+    button: true, closable: true, tab_width: 120, id: "tab02", size: "full", width: 120, height: 50, selected: true}
+    tab.addTab("tab02", options2);
     expect(tab.clear());
 });
 
@@ -198,15 +252,22 @@ describe('hideTab', () => {
         callback: function () {console.log("Tab is being clicked")}};
     const tab = Construct(options, false);
 
-    expect(tab.hideTab("tab01"));
+    const options2 = { callback: function () {console.log("Tab is being clicked")}, title: "Este es el titulo",
+    button: true, closable: true, tab_width: 120, id: "tab02", size: "full", width: 120, height: 50, selected: true}
+    tab.addTab("tab02", options2);
+    expect(tab.hideTab("tab02"));
 });
 
 describe('showTab', () => {
     const options = { mode: "horizontal", id: "tab01", size: "full", width: 120, height: 50,
         callback: function () {console.log("Tab is being clicked")}};
     const tab = Construct(options, false);
-    tab.hideTab("tab01");
-    expect(tab.showTab("tab01"));
+
+    const options2 = { callback: function () {console.log("Tab is being clicked")}, title: "Este es el titulo",
+    button: true, closable: true, tab_width: 120, id: "tab02", size: "full", width: 120, height: 50, selected: true}
+    tab.addTab("tab02", options2);
+    tab.hideTab("tab02");
+    expect(tab.showTab("tab02"));
 });
 
 describe('transferTab', () => {
