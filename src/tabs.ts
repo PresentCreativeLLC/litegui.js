@@ -1,5 +1,6 @@
-import { LiteGUI } from "./core";
-import { HTMLDivElementPlus, HTMLLIElementPlus, HTMLParagraphElementPlus } from "./@types/globals/index"
+import { LiteGUI, special_codes } from "./core";
+import { HTMLDivElementPlus, HTMLLIElementPlus, HTMLParagraphElementPlus } from "./@types/globals/index";
+
 /**
  * Widget that contains several tabs and their content
  * Options:
@@ -71,8 +72,8 @@ export class Tabs
 		// Container of tab elements
 		const list = document.createElement("ul");
 		list.className = "wtabcontainer";
-		if (mode == "vertical") { list.style.width = LiteGUI.Tabs.tabs_width + "px"; }
-		else { list.style.height = LiteGUI.Tabs.tabs_height + "px"; }
+		if (mode == "vertical") { list.style.width = Tabs.tabs_width + "px"; }
+		else { list.style.height = Tabs.tabs_height + "px"; }
 
 		// Allows to use the wheel to see hidden tabs
 		list.addEventListener("wheel", this.onMouseWheel);
@@ -265,7 +266,7 @@ export class Tabs
 		if (options.tab_className) { element.className += options.tab_className; }
 		if (options.bigicon) { element.innerHTML = "<img class='tabbigicon' src='" + options.bigicon + "'/>" + element.innerHTML; }
 		if (options.closable) {
-			element.innerHTML += "<span class='tabclose'>" + LiteGUI.special_codes.close + "</span>";
+			element.innerHTML += "<span class='tabclose'>" + special_codes.close + "</span>";
 			element.querySelector("span.tabclose")?.addEventListener("click", (e) => {
 				that.removeTab(id);
 				e.preventDefault();
@@ -323,9 +324,9 @@ export class Tabs
 				content.style.overflow = "auto";
 				if (options.size == "full") {
 					content.style.width = "100%";
-					content.style.height = "calc( 100% - " + LiteGUI.Tabs.tabs_height + "px )"; // Minus title
-					content.style.height = "-moz-calc( 100% - " + LiteGUI.Tabs.tabs_height + "px )"; // Minus title
-					content.style.height = "-webkit-calc( 100% - " + LiteGUI.Tabs.tabs_height + "px )"; // Minus title
+					content.style.height = "calc( 100% - " + Tabs.tabs_height + "px )"; // Minus title
+					content.style.height = "-moz-calc( 100% - " + Tabs.tabs_height + "px )"; // Minus title
+					content.style.height = "-webkit-calc( 100% - " + Tabs.tabs_height + "px )"; // Minus title
 					// Content.style.height = "-webkit-calc( 90% )"; //minus title
 				}
 				else { content.style.height = options.size; }
@@ -336,9 +337,9 @@ export class Tabs
 				content.style.overflow = "auto";
 				if (options.size == "full") {
 					content.style.height = "100%";
-					content.style.width = "calc( 100% - " + LiteGUI.Tabs.tabs_width + "px )"; // Minus title
-					content.style.width = "-moz-calc( 100% - " + LiteGUI.Tabs.tabs_width + "px )"; // Minus title
-					content.style.width = "-webkit-calc( 100% - " + LiteGUI.Tabs.tabs_width + "px )"; // Minus title
+					content.style.width = "calc( 100% - " + Tabs.tabs_width + "px )"; // Minus title
+					content.style.width = "-moz-calc( 100% - " + Tabs.tabs_width + "px )"; // Minus title
+					content.style.width = "-webkit-calc( 100% - " + Tabs.tabs_width + "px )"; // Minus title
 					// Content.style.height = "-webkit-calc( 90% )"; //minus title
 				}
 				else { content.style.width = options.size; }
