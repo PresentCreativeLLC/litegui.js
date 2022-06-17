@@ -1,6 +1,6 @@
 import { LiteGUI } from "../src/core";
 
-const testRows = [
+/* const testRows = [
     { name: "test1", age: 1, address: "none" }, 
     { name: "test2", age: 2, address: "none" }, 
     { name: "test3", age: 3, address: "none" },
@@ -14,7 +14,9 @@ function Construct (options: any)
 
 describe("Table Init test", () => {
     const options = { height : "40px", scrollable: false  }; 
-    expect(Construct(options)).toBeDefined();
+    it("Should be defined", () => {
+        expect(Construct(options)).toBeDefined();
+    });
 });
 
 
@@ -23,7 +25,9 @@ describe("Table set row test", () => {
     const table = Construct(options);
 
     table.setRows(testRows, true);
-    expect(table.rows.length > 0);
+    it("Table length should be greater than 0", () => {
+        expect(table.rows.length > 0);
+    });
 });
 
 
@@ -35,7 +39,9 @@ describe("Table add row test", () => {
     const extraRow = { name: "test4", age: 4, address: "none"};
 
     table.addRow(extraRow, false);
-    expect(table.rows.length === 4);
+    it("Table length should be 4", () => {
+        expect(table.rows.length === 4);
+    });
 });
 
 describe("Table update row test", () => {
@@ -45,7 +51,9 @@ describe("Table update row test", () => {
 
     const extraRow = { name: "test4", age: 4, address: "none"};
     table.updateRow(0, extraRow);
-    expect((table.rows[0] as any).name === "test4");
+    it("Table first element should be test4", () => {
+        expect((table.rows[0] as any).name === "test4");
+    });
 });
 
 describe("Table update cell test", () => {
@@ -53,15 +61,20 @@ describe("Table update cell test", () => {
     const table = Construct(options);
 
     table.setRows(testRows, true);
-
-    expect(table.updateCell(0, 0, "fixedTest" )).toBeDefined();
+    it("Should create and return a cell", () => {
+        expect(table.updateCell(0, 0, "fixedTest" ) !== undefined);
+    });
 });
 
 describe("Table set column test", () => {
     const options = { height : "40px", scrollable: false  }; 
     const table = Construct(options);
     table.setColumns(["Name",{ name: "Age", width: 50 },"Address"]);
-    expect(true);
+
+    it("Table columns length should be greater than 0", () => {
+        expect(table.columns.length > 0);
+    });
+    
 });
 
 describe("Table update content test", () => {
@@ -69,5 +82,8 @@ describe("Table update content test", () => {
     const table = Construct(options);
     table.data = testRows;
     table.updateContent(true);
-    expect(table.rows.length > 0);
-});
+
+    it("Table row length should be greater than 0", () => {
+        expect(table.rows.length > 0);
+    });
+}); */

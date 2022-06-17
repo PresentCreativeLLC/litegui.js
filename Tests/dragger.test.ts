@@ -7,14 +7,16 @@ import { LiteGUI } from "../src/core";
 
 describe("Dragger Init test", () => {
     const options = { disabled : false };
-    expect(Construct(0.5, options)).toBeDefined();
+    it("Should be defined", () => {
+        expect(Construct(0.5, options)).toBeDefined();
+    });
 });
 
 describe("Dragger set range test", () => {
     const options = { disabled : false };
     const dragger = Construct(0.5, options);
     dragger.setRange(0.1, 0.9);
-    it("Dragger options min and max must be 0.1 and 0.9", () => {
+    it("Dragger options min and max should be 0.1 and 0.9", () => {
         expect(dragger.options.min === 0.1 && dragger.options.max === 0.9);
     });
 });
