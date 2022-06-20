@@ -22,33 +22,47 @@ describe('Construct button', () => {
 describe('click button', () => {
     const widget = Construct();
     const button = widget.createButton("Button01", {callback: () => {console.log("button clicked");}});
-    expect(button.click());
+    it(`Should click button`, () =>
+    {
+        expect(button.click());
+    });
 });
 
 describe('Construct searchbox', () => {
     const widget = Construct();
-
-    expect(widget.createSearchBox("Searchbox01", {callback: () => {console.log("searchbox clicked");}, placeholder: "type to search"}));
+    it(`Should construct searchbox`, () =>
+    {
+        expect(widget.createSearchBox("Searchbox01", {callback: () => {console.log("searchbox clicked");}, placeholder: "type to search"}));
+    });
 });
 
 describe('setValue searchbox', () => {
     const widget = Construct();
     const searchbox = widget.createSearchBox("Searchbox01", {callback: () => {console.log("searchbox clicked");}, placeholder: "type to search"});
-    expect(searchbox.setValue("busqueda genérica"));
+    it(`Should set busqueda genérica`, () =>
+    {
+        expect(searchbox.setValue("busqueda genérica"));
+    });
 });
 
 describe('getValue searchbox', () => {
     const widget = Construct();
     const searchbox = widget.createSearchBox("Searchbox01", {callback: () => {console.log("searchbox clicked");}, placeholder: "type to search"});
     searchbox.setValue("busqueda genérica");
-    expect(searchbox.getValue()).toBe("busqueda genérica");
+    it(`Should get busqueda genérica`, () =>
+    {
+        expect(searchbox.getValue()).toBe("busqueda genérica");
+    });
 });
 
 describe('Construct ContextMenu', () => {
     const widget = Construct();
     const values = ["Valor1", "Valor2", "Valor3"];
     const options = {title: "Titulo genérico"};
-    expect(widget.createContextMenu(values, options));
+    it(`Should construct contextMenu`, () =>
+    {
+        expect(widget.createContextMenu(values, options));
+    });
 });
 
 describe('close ContextMenu', () => {
@@ -56,7 +70,10 @@ describe('close ContextMenu', () => {
     const values = ["Valor1", "Valor2", "Valor3"];
     const options = {title: "Titulo genérico"};
     const context = widget.createContextMenu(values, options);
-    expect(context.close(undefined, false));
+    it(`Should close the contextMenu`, () =>
+    {
+        expect(context.close(undefined, false));
+    });
 });
 
 describe('getTopMenu ContextMenu', () => {
@@ -64,7 +81,10 @@ describe('getTopMenu ContextMenu', () => {
     const values = ["Valor1", "Valor2", "Valor3"];
     const options = {title: "Titulo genérico"};
     const context = widget.createContextMenu(values, options);
-    expect(context.getTopMenu());
+    it(`Should get the topMenu`, () =>
+    {
+        expect(context.getTopMenu());
+    });
 });
 
 describe('getFirstEvent ContextMenu', () => {
@@ -72,50 +92,73 @@ describe('getFirstEvent ContextMenu', () => {
     const values = ["Valor1", "Valor2", "Valor3"];
     const options = {title: "Titulo genérico"};
     const context = widget.createContextMenu(values, options);
-    expect(context.getFirstEvent());
+    it(`Should get Valor1`, () =>
+    {
+        expect(context.getFirstEvent());
+    });
 });
 
-describe('createCheckbox Checkbox', () => {
+describe('construct Checkbox', () => {
     const widget = Construct();
-
-    expect(widget.createCheckbox(false, () => {console.log("checkbox changed")}));
+    it(`Should construct checkbox`, () =>
+    {
+        expect(widget.createCheckbox(false, () => {console.log("checkbox changed")}));
+    });
 });
 
 describe('setValue Checkbox', () => {
     const widget = Construct();
 
     const check = widget.createCheckbox(false, () => {console.log("checkbox changed")});
-    expect(check.setValue(true));
+    it(`Should set it as true`, () =>
+    {
+        expect(check.setValue(true));
+    });
 });
 
 describe('getValue Checkbox', () => {
     const widget = Construct();
 
     const check = widget.createCheckbox(false, () => {console.log("checkbox changed")});
-    expect(check.getValue());
+    check.setValue(true);
+    it(`Should get a true`, () =>
+    {
+        expect(check.getValue());
+    });
 });
 
 describe('onClick Checkbox', () => {
     const widget = Construct();
 
     const check = widget.createCheckbox(false, () => {console.log("checkbox changed")});
-    expect(check.onClick({}));
+    it(`Should click in it`, () =>
+    {
+        expect(check.onClick({}));
+    });
 });
 
 describe('createCheckbox litebox', () => {
-
-    expect(widget.createLitebox(true, () => {console.log("litebox changed")}));
+    it(`Should create liteBox`, () =>
+    {
+        expect(widget.createLitebox(true, () => {console.log("litebox changed")}));
+    });
 });
 
 describe('setValue litebox', () => {
 
     const litebox = widget.createLitebox(true, () => {console.log("litebox changed")});
-    expect(litebox.setValue(true));
+    it(`Should set as true`, () =>
+    {
+        expect(litebox.setValue(true));
+    });
 });
 
 describe('getElement litebox', () => {
     const litebox = widget.createLitebox(true, () => {console.log("litebox changed")});
-    expect(litebox.getValue()).toBeDefined();
+    it(`Should get element`, () =>
+    {
+        expect(litebox.getValue()).toBeDefined();
+    });
 });
 
 describe('Construct List', () => {
@@ -132,7 +175,10 @@ describe('Construct List', () => {
         {name: "Pos2", title: "Title2", id: "Pos2"},
         {name: "Pos3", title: "Title3", id: "Pos3"},
     ];
-    expect(widget.createList("List01", items, {callback: () => {console.log("litebox changed")}}));
+    it(`Should construct list`, () =>
+    {
+        expect(widget.createList("List01", items, {callback: () => {console.log("litebox changed")}}));
+    });
 });
 
 describe('getSelectedItem List', () => {
@@ -150,7 +196,11 @@ describe('getSelectedItem List', () => {
         {name: "Pos3", title: "Title3", id: "Pos3"},
     ];
     const list = widget.createList("List01", items, {callback: () => {console.log("litebox changed")}});
-    expect(list.getSelectedItem());
+    list.setSelectedItem("Pos1");
+    it(`Should get Pos1, title 1`, () =>
+    {
+        expect(list.getSelectedItem());
+    });
 });
 
 describe('setSelectedItem List', () => {
@@ -168,82 +218,117 @@ describe('setSelectedItem List', () => {
         {name: "Pos3", title: "Title3", id: "Pos3"},
     ];
     const list = widget.createList("List01", items, {callback: () => {console.log("litebox changed")}});
-    expect(list.setSelectedItem("Pos1"));
+    it(`Should select Pos1`, () =>
+    {
+        expect(list.setSelectedItem("Pos1"));
+    });
 });
 
 describe('Construct Slider', () => {
     const widget = Construct();
-
-    expect(widget.createSlider(0.3, {min: 0, max: 1}));
+    it(`Should construct slider`, () =>
+    {
+        expect(widget.createSlider(0.3, {min: 0, max: 1}));
+    });
 });
 
 describe('setFromX Slider', () => {
     const widget = Construct();
 
     const slider = widget.createSlider(0.3, {min: 0, max: 1});
-    expect(slider.setFromX(1));
+    it(`Should set x in 1`, () =>
+    {
+        expect(slider.setFromX(1));
+    });
 });
 
 describe('onMouseMove Slider', () => {
     const widget = Construct();
 
     const slider = widget.createSlider(0.3, {min: 0, max: 1});
-    expect(slider.onMouseMove({e: 1}));
+    it(`Should move mouse`, () =>
+    {
+        expect(slider.onMouseMove({e: 1}));
+    });
 });
 
 describe('onMouseUp Slider', () => {
     const widget = Construct();
 
     const slider = widget.createSlider(0.3, {min: 0, max: 1});
-    expect(slider.onMouseUp({e: 1}));
+    it(`Should up the click`, () =>
+    {
+        expect(slider.onMouseUp({e: 1}));
+    });
 });
 
 describe('setValue Slider', () => {
     const widget = Construct();
 
     const slider = widget.createSlider(0.3, {min: 0, max: 1});
-    expect(slider.setValue(0.3, false));
+    it(`Should down the click`, () =>
+    {
+        expect(slider.setValue(0.3, false));
+    });
 });
 
 describe('Construct LineEditor', () => {
     const widget = Construct();
     const valuesArray = [[0,0], [50,50], [100,100], [200,200]];
-    expect(widget.createLineEditor(valuesArray,{}));
+    it(`Should construct lineEditor`, () =>
+    {
+        expect(widget.createLineEditor(valuesArray,{}));
+    });
 });
 
 describe('getValueAt LineEditor', () => {
     const widget = Construct();
     const valuesArray = [[0,0], [50,50], [100,100], [200,200]];
     const lineEditor = widget.createLineEditor(valuesArray,{});
-    expect(lineEditor.getValueAt(0.5));
+    it(`Should value at half`, () =>
+    {
+        expect(lineEditor.getValueAt(0.5));
+    });
 });
 
 describe('resample LineEditor', () => {
     const widget = Construct();
     const valuesArray = [[0,0], [50,50], [100,100], [200,200]];
     const lineEditor = widget.createLineEditor(valuesArray,{});
-    expect(lineEditor.resample(4));
+    it(`Should sample in 4`, () =>
+    {
+        expect(lineEditor.resample(4));
+    });
 });
 
 describe('addValue LineEditor', () => {
     const widget = Construct();
     const valuesArray = [[0,0], [50,50], [100,100], [200,200]];
     const lineEditor = widget.createLineEditor(valuesArray,{});
-    expect(lineEditor.addValue([300,300]));
+    it(`Should add 300,300`, () =>
+    {
+        expect(lineEditor.addValue([300,300]));
+    });
 });
 
 describe('convert LineEditor', () => {
     const widget = Construct();
     const valuesArray = [[0,0], [50,50], [100,100], [200,200]];
     const lineEditor = widget.createLineEditor(valuesArray,{});
-    expect(lineEditor.convert([300,300]));
+    it(`Should convert 300,300`, () =>
+    {
+        expect(lineEditor.convert([300,300]));
+    });
 });
 
 describe('unconvert LineEditor', () => {
     const widget = Construct();
     const valuesArray = [[0,0], [50,50], [100,100], [200,200]];
     const lineEditor = widget.createLineEditor(valuesArray,{});
-    expect(lineEditor.unconvert([300,300]));
+    it(`Should unconvert 300,300`, () =>
+    {
+        expect(lineEditor.unconvert([300,300]));
+    });
 });
 
 describe('redraw LineEditor', () => {
@@ -251,8 +336,12 @@ describe('redraw LineEditor', () => {
     const valuesArray = [[0,0], [50,50], [100,100], [200,200]];
     const lineEditor = widget.createLineEditor(valuesArray,{});
     lineEditor.redraw();
-    lineEditor.addValue([300,300]);
-    expect(lineEditor.redraw());
+    
+    it(`Should add 300,300 and redraw it`, () =>
+    {
+        lineEditor.addValue([300,300]);
+        expect(lineEditor.redraw());
+    });
 });
 
 describe('onmousedown LineEditor', () => {
@@ -265,8 +354,11 @@ describe('onmousedown LineEditor', () => {
         cancelable: true,
         clientX: 0,
         clientY: 0
-      });
-    expect(lineEditor.onmousedown(evt));
+    });
+    it(`Should mouse down`, () =>
+    {
+        expect(lineEditor.onmousedown(evt));
+    });
 });
 
 describe('onmousemove LineEditor', () => {
@@ -279,8 +371,11 @@ describe('onmousemove LineEditor', () => {
         cancelable: true,
         clientX: 0,
         clientY: 0
-      });
-    expect(lineEditor.onmousemove(evt));
+    });
+    it(`Should mouse move`, () =>
+    {
+        expect(lineEditor.onmousemove(evt));
+    });
 });
 
 describe('onmouseup LineEditor', () => {
@@ -293,77 +388,105 @@ describe('onmouseup LineEditor', () => {
         cancelable: true,
         clientX: 0,
         clientY: 0
-      });
-    expect(lineEditor.onmouseup(evt));
+    });
+    it(`Should mouse up`, () =>
+    {
+        expect(lineEditor.onmouseup(evt));
+    });
 });
 
 describe('onresize LineEditor', () => {
     const widget = Construct();
     const valuesArray = [[0,0], [50,50], [100,100], [200,200]];
     const lineEditor = widget.createLineEditor(valuesArray,{});
-
-    expect(lineEditor.onresize({}));
+    it(`Should resize it`, () =>
+    {
+        expect(lineEditor.onresize({}));
+    });
 });
 
 describe('onchange LineEditor', () => {
     const widget = Construct();
     const valuesArray = [[0,0], [50,50], [100,100], [200,200]];
     const lineEditor = widget.createLineEditor(valuesArray,{});
-
-    expect(lineEditor.onchange());
+    it(`Should trigger the on change`, () =>
+    {
+        expect(lineEditor.onchange());
+    });
 });
 
 describe('distance LineEditor', () => {
     const widget = Construct();
     const valuesArray = [[0,0], [50,50], [100,100], [200,200]];
     const lineEditor = widget.createLineEditor(valuesArray,{});
-
-    expect(lineEditor.distance(valuesArray[1], valuesArray[2]));
+    it(`Should be 70.71`, () =>
+    {
+        expect(lineEditor.distance(valuesArray[1], valuesArray[2]));
+    });
 });
 
 describe('computeSelected LineEditor', () => {
     const widget = Construct();
     const valuesArray = [[0,0], [50,50], [100,100], [200,200]];
     const lineEditor = widget.createLineEditor(valuesArray,{});
-
-    expect(lineEditor.computeSelected(0, 0));
+    it(`Should compute 0,0`, () =>
+    {
+        expect(lineEditor.computeSelected(0, 0));
+    });
 });
 
 describe('sortValues LineEditor', () => {
     const widget = Construct();
     const valuesArray = [[0,0], [50,50], [100,100], [200,200]];
     const lineEditor = widget.createLineEditor(valuesArray,{});
-
-    expect(lineEditor.sortValues());
+    it(`Should sort the values`, () =>
+    {
+        expect(lineEditor.sortValues());
+    });
 });
 
 describe('Construct ComplexList', () => {
     const widget = Construct();
-    expect(widget.createComplexList({height: 50}));
+    it(`Should construct complexList`, () =>
+    {
+        expect(widget.createComplexList({height: 50}));
+    });
 });
 
-describe('Construct ComplexList', () => {
+describe('addTitle ComplexList', () => {
     const widget = Construct();
     const list = widget.createComplexList({height: 50});
-    expect(list.addTitle("Titulo de lista"));
+    it(`Should add titulo de lista`, () =>
+    {
+        expect(list.addTitle("Titulo de lista"));
+    });
 });
 
 describe('addHTML ComplexList', () => {
     const widget = Construct();
     const list = widget.createComplexList({height: 50});
     const callableFunction: CallableFunction = () => {console.log("aditional list clicked")};
-    expect(list.addHTML("aditional list", callableFunction));
+    it(`Should aditional list`, () =>
+    {
+        expect(list.addHTML("aditional list", callableFunction));
+    });
 });
 
 describe('clear ComplexList', () => {
     const widget = Construct();
     const list = widget.createComplexList({height: 50});
-    expect(list.clear());
+    it(`Should clear it`, () =>
+    {
+        expect(list.clear());
+    });
 });
 
 describe('addItem ComplexList', () => {
     const widget = Construct();
     const list = widget.createComplexList({height: 50});
     const item = document.createElement("div") as HTMLDivElement;
-    expect(list.addItem(item, "item generico", true, true));
+    it(`Should add item generico`, () =>
+    {
+        expect(list.addItem(item, "item generico", true, true));
+    });
 });
