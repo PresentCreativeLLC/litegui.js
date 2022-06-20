@@ -1,5 +1,4 @@
 import { Menubar } from "../src/menubar";
-
 /*
 function Construct (id: string, options: any)
 {
@@ -15,7 +14,10 @@ describe("Test de creacion de menu bar", () => {
 describe('Clear the menubar', () => {
     const options = { auto_open: true, sort_entries: false };
     const menu = Construct("Menubar01", options);
-    expect(menu.clear());
+    it(`Debería limpiar el menu`, () =>
+    {
+        expect(menu.clear());
+    });
 });
 
 describe('attachToPanel in menu', () => {
@@ -25,8 +27,10 @@ describe('attachToPanel in menu', () => {
     const options2 = { className: "panel-header", title: "Hola mundo", content: "Hola, esta es una prueba de creación de panel",
     width: "300", height: "150", position: [10, 10], scroll: true};
     const panel0 = Construct("Panel01", options2);
-
-    expect(menu.attachToPanel(panel0));
+    it(`Debería attachear menu a panel0`, () =>
+    {
+        expect(menu.attachToPanel(panel0));
+    });
 });
 
 describe('add in menu', () => {
@@ -37,7 +41,10 @@ describe('add in menu', () => {
         console.log("A menu was clicked");
     }
     menu.add("Printeador", clickCallback)
-    expect(menu.menu.length).toBeGreaterThan(0);
+    it(`Debería agregar algo al menu y ser mayor que 0`, () =>
+    {
+        expect(menu.menu.length).toBeGreaterThan(0);
+    });
 });
 
 describe('remove', () => {
@@ -49,7 +56,10 @@ describe('remove', () => {
         console.log("A menu was clicked");
     }
     menu.add("Printeador", clickCallback);
-    expect(menu.remove("Printeador"));
+    it(`Debería borrar el printeador recién agregado`, () =>
+    {
+        expect(menu.remove("Printeador"));
+    });
 });
 
 describe('separator', () => {
@@ -61,7 +71,10 @@ describe('separator', () => {
         console.log("A menu was clicked");
     }
     menu.add("Printeador", clickCallback);
-    expect(menu.separator("Printeador", 2));
+    it(`Debería separar el printeador`, () =>
+    {
+        expect(menu.separator("Printeador", 2));
+    });
 });
 
 describe('findMenu', () => {
@@ -86,7 +99,10 @@ describe('findMenu', () => {
             console.warn("Findmenu: " + menu2.name);
         }
     }
-    expect(menu.findMenu("Printeador"));
+    it(`Debería encontrar printeador`, () =>
+    {
+        expect(menu.findMenu("Printeador"));
+    });
 });
 
 describe('Update', () => {
@@ -97,17 +113,22 @@ describe('Update', () => {
         console.log("A menu was clicked");
     }
     menu.add("Printeador", clickCallback);
-    expect(menu.updateMenu());
+    it(`Debería update the menu`, () =>
+    {
+        expect(menu.updateMenu());
+    });
 });
 
 describe('HidePanels', () => {
     const options = { auto_open: true, sort_entries: false };
     const menu = Construct("Menubar01", options);
-
-    expect(menu.hidePanels());
+    it(`Debería esconder los paneles`, () =>
+    {
+        expect(menu.hidePanels());
+    });
 });
 
-describe('HidePanels', () => {
+describe('showmenu', () => {
     const options = { auto_open: true, sort_entries: false };
     const menu = Construct("Menubar01", options);
 
@@ -123,6 +144,10 @@ describe('HidePanels', () => {
         cancelable: true,
         clientX: 0,
         clientY: 0
-      });
-    expect(menu.showMenu(menu.menu[0], evt, menu.root));
-});*/
+    });
+    it(`Debería mostrar el menu recién agregado`, () =>
+    {
+        expect(menu.showMenu(menu.menu[0], evt, menu.root));
+    });
+});
+*/
