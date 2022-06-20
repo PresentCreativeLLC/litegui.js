@@ -1,5 +1,5 @@
 import { widget } from "../src/widgets";
-
+/*
 function Construct ()
 {
     return new widget();
@@ -490,3 +490,4 @@ describe('addItem ComplexList', () => {
         expect(list.addItem(item, "item generico", true, true));
     });
 });
+*/
