@@ -1,12 +1,12 @@
 import { widget } from "../src/widgets";
-/*
+
 function Construct ()
 {
     return new widget();
 }
 
 describe('Construct widget', () => {
-    expect(Construct());
+    expect(Construct()).toBeDefined();
 });
 
 describe('Construct button', () => {
@@ -99,75 +99,71 @@ describe('onClick Checkbox', () => {
 });
 
 describe('createCheckbox litebox', () => {
-    const widget = Construct();
 
     expect(widget.createLitebox(true, () => {console.log("litebox changed")}));
 });
 
 describe('setValue litebox', () => {
-    const widget = Construct();
 
     const litebox = widget.createLitebox(true, () => {console.log("litebox changed")});
     expect(litebox.setValue(true));
 });
 
 describe('getElement litebox', () => {
-    const widget = Construct();
-
     const litebox = widget.createLitebox(true, () => {console.log("litebox changed")});
-    expect(litebox.getElement()).toBeDefined();
+    expect(litebox.getValue()).toBeDefined();
 });
 
 describe('Construct List', () => {
     const widget = Construct();
     interface item{
-        name,
-        title,
-        id
-    }
+        name: string,
+        title: string,
+        id: string
+    };
 
     const items: item[] = [
-        {name: "Pos0", title: "Title0", id: 0},
-        {name: "Pos1", title: "Title1", id: 1},
-        {name: "Pos2", title: "Title2", id: 2},
-        {name: "Pos3", title: "Title3", id: 3},
+        {name: "Pos0", title: "Title0", id: "Pos0"},
+        {name: "Pos1", title: "Title1", id: "Pos1"},
+        {name: "Pos2", title: "Title2", id: "Pos2"},
+        {name: "Pos3", title: "Title3", id: "Pos3"},
     ];
-    expect(widget.createList("List01", items, {callback: () => {console.log("litebox changed")}, parent: widget}));
+    expect(widget.createList("List01", items, {callback: () => {console.log("litebox changed")}}));
 });
 
 describe('getSelectedItem List', () => {
     const widget = Construct();
     interface item{
-        name,
-        title,
-        id
-    }
+        name: string,
+        title: string,
+        id: string
+    };
 
     const items: item[] = [
-        {name: "Pos0", title: "Title0", id: 0},
-        {name: "Pos1", title: "Title1", id: 1},
-        {name: "Pos2", title: "Title2", id: 2},
-        {name: "Pos3", title: "Title3", id: 3},
+        {name: "Pos0", title: "Title0", id: "Pos0"},
+        {name: "Pos1", title: "Title1", id: "Pos1"},
+        {name: "Pos2", title: "Title2", id: "Pos2"},
+        {name: "Pos3", title: "Title3", id: "Pos3"},
     ];
-    const list = widget.createList("List01", items, {callback: () => {console.log("litebox changed")}, parent: widget});
+    const list = widget.createList("List01", items, {callback: () => {console.log("litebox changed")}});
     expect(list.getSelectedItem());
 });
 
 describe('setSelectedItem List', () => {
     const widget = Construct();
     interface item{
-        name,
-        title,
-        id
-    }
+        name: string,
+        title: string,
+        id: string
+    };
 
     const items: item[] = [
-        {name: "Pos0", title: "Title0", id: 0},
-        {name: "Pos1", title: "Title1", id: 1},
-        {name: "Pos2", title: "Title2", id: 2},
-        {name: "Pos3", title: "Title3", id: 3},
+        {name: "Pos0", title: "Title0", id: "Pos0"},
+        {name: "Pos1", title: "Title1", id: "Pos1"},
+        {name: "Pos2", title: "Title2", id: "Pos2"},
+        {name: "Pos3", title: "Title3", id: "Pos3"},
     ];
-    const list = widget.createList("List01", items, {callback: () => {console.log("litebox changed")}, parent: widget});
+    const list = widget.createList("List01", items, {callback: () => {console.log("litebox changed")}});
     expect(list.setSelectedItem("Pos1"));
 });
 
@@ -208,48 +204,48 @@ describe('setValue Slider', () => {
 describe('Construct LineEditor', () => {
     const widget = Construct();
     const valuesArray = [[0,0], [50,50], [100,100], [200,200]];
-    expect(widget.createLineEditor(0.3, {valuesArray}));
+    expect(widget.createLineEditor(valuesArray,{}));
 });
 
 describe('getValueAt LineEditor', () => {
     const widget = Construct();
     const valuesArray = [[0,0], [50,50], [100,100], [200,200]];
-    const lineEditor = widget.createLineEditor(0.3, {valuesArray});
+    const lineEditor = widget.createLineEditor(valuesArray,{});
     expect(lineEditor.getValueAt(0.5));
 });
 
 describe('resample LineEditor', () => {
     const widget = Construct();
     const valuesArray = [[0,0], [50,50], [100,100], [200,200]];
-    const lineEditor = widget.createLineEditor(0.3, {valuesArray});
+    const lineEditor = widget.createLineEditor(valuesArray,{});
     expect(lineEditor.resample(4));
 });
 
 describe('addValue LineEditor', () => {
     const widget = Construct();
     const valuesArray = [[0,0], [50,50], [100,100], [200,200]];
-    const lineEditor = widget.createLineEditor(0.3, {valuesArray});
+    const lineEditor = widget.createLineEditor(valuesArray,{});
     expect(lineEditor.addValue([300,300]));
 });
 
 describe('convert LineEditor', () => {
     const widget = Construct();
     const valuesArray = [[0,0], [50,50], [100,100], [200,200]];
-    const lineEditor = widget.createLineEditor(0.3, {valuesArray});
+    const lineEditor = widget.createLineEditor(valuesArray,{});
     expect(lineEditor.convert([300,300]));
 });
 
 describe('unconvert LineEditor', () => {
     const widget = Construct();
     const valuesArray = [[0,0], [50,50], [100,100], [200,200]];
-    const lineEditor = widget.createLineEditor(0.3, {valuesArray});
+    const lineEditor = widget.createLineEditor(valuesArray,{});
     expect(lineEditor.unconvert([300,300]));
 });
 
 describe('redraw LineEditor', () => {
     const widget = Construct();
     const valuesArray = [[0,0], [50,50], [100,100], [200,200]];
-    const lineEditor = widget.createLineEditor(0.3, {valuesArray});
+    const lineEditor = widget.createLineEditor(valuesArray,{});
     lineEditor.redraw();
     lineEditor.addValue([300,300]);
     expect(lineEditor.redraw());
@@ -258,7 +254,7 @@ describe('redraw LineEditor', () => {
 describe('onmousedown LineEditor', () => {
     const widget = Construct();
     const valuesArray = [[0,0], [50,50], [100,100], [200,200]];
-    const lineEditor = widget.createLineEditor(0.3, {valuesArray});
+    const lineEditor = widget.createLineEditor(valuesArray,{});
     const evt = new MouseEvent("click", {
         view: window,
         bubbles: true,
@@ -272,7 +268,7 @@ describe('onmousedown LineEditor', () => {
 describe('onmousemove LineEditor', () => {
     const widget = Construct();
     const valuesArray = [[0,0], [50,50], [100,100], [200,200]];
-    const lineEditor = widget.createLineEditor(0.3, {valuesArray});
+    const lineEditor = widget.createLineEditor(valuesArray,{});
     const evt = new MouseEvent("click", {
         view: window,
         bubbles: true,
@@ -286,7 +282,7 @@ describe('onmousemove LineEditor', () => {
 describe('onmouseup LineEditor', () => {
     const widget = Construct();
     const valuesArray = [[0,0], [50,50], [100,100], [200,200]];
-    const lineEditor = widget.createLineEditor(0.3, {valuesArray});
+    const lineEditor = widget.createLineEditor(valuesArray,{});
     const evt = new MouseEvent("click", {
         view: window,
         bubbles: true,
@@ -300,7 +296,7 @@ describe('onmouseup LineEditor', () => {
 describe('onresize LineEditor', () => {
     const widget = Construct();
     const valuesArray = [[0,0], [50,50], [100,100], [200,200]];
-    const lineEditor = widget.createLineEditor(0.3, {valuesArray});
+    const lineEditor = widget.createLineEditor(valuesArray,{});
 
     expect(lineEditor.onresize({}));
 });
@@ -308,7 +304,7 @@ describe('onresize LineEditor', () => {
 describe('onchange LineEditor', () => {
     const widget = Construct();
     const valuesArray = [[0,0], [50,50], [100,100], [200,200]];
-    const lineEditor = widget.createLineEditor(0.3, {valuesArray});
+    const lineEditor = widget.createLineEditor(valuesArray,{});
 
     expect(lineEditor.onchange());
 });
@@ -316,7 +312,7 @@ describe('onchange LineEditor', () => {
 describe('distance LineEditor', () => {
     const widget = Construct();
     const valuesArray = [[0,0], [50,50], [100,100], [200,200]];
-    const lineEditor = widget.createLineEditor(0.3, {valuesArray});
+    const lineEditor = widget.createLineEditor(valuesArray,{});
 
     expect(lineEditor.distance(valuesArray[1], valuesArray[2]));
 });
@@ -324,7 +320,7 @@ describe('distance LineEditor', () => {
 describe('computeSelected LineEditor', () => {
     const widget = Construct();
     const valuesArray = [[0,0], [50,50], [100,100], [200,200]];
-    const lineEditor = widget.createLineEditor(0.3, {valuesArray});
+    const lineEditor = widget.createLineEditor(valuesArray,{});
 
     expect(lineEditor.computeSelected(0, 0));
 });
@@ -332,7 +328,7 @@ describe('computeSelected LineEditor', () => {
 describe('sortValues LineEditor', () => {
     const widget = Construct();
     const valuesArray = [[0,0], [50,50], [100,100], [200,200]];
-    const lineEditor = widget.createLineEditor(0.3, {valuesArray});
+    const lineEditor = widget.createLineEditor(valuesArray,{});
 
     expect(lineEditor.sortValues());
 });
@@ -367,4 +363,3 @@ describe('addItem ComplexList', () => {
     const item = document.createElement("div") as HTMLDivElement;
     expect(list.addItem(item, "item generico", true, true));
 });
-*/
