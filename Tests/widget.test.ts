@@ -6,13 +6,17 @@ function Construct ()
 }
 
 describe('Construct widget', () => {
-    expect(Construct()).toBeDefined();
+    it(`Should be defined`, () =>{
+        expect(Construct()).toBeDefined();
+    });
 });
 
 describe('Construct button', () => {
     const widget = Construct();
-
-    expect(widget.createButton("Button01", {callback: () => {console.log("button clicked");}}));
+    it(`Should create button`, () =>
+    {
+        expect(widget.createButton("Button01", {callback: () => {console.log("button clicked");}}));
+    });
 });
 
 describe('click button', () => {
