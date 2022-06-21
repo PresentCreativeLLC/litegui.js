@@ -1,7 +1,16 @@
 import { LiteGUI } from "./core";
 import { purgeElement } from "./core";
 import { Dragger } from "./dragger";
-import { jscolor } from "jscolor";
+// import jscolor from "../external/jscolor/jscolor";
+
+
+declare global
+{
+    interface Window
+    {
+        jscolor: any;
+    }
+}
 
 export class Inspector 
 {
@@ -28,7 +37,7 @@ export class Inspector
     options: any;
     height: any;
 
-    constructor(options: any) // TODO: Define the options
+    constructor(options?: any) // TODO: Define the options
     {
         // For legacy code
         if (options && options.constructor === String) {
@@ -2711,7 +2720,7 @@ export class Inspector
         return element;
     };
     
-    addColor(name: string, value: any, options: any)
+    addColor(name: string, value: any, options?: any)
     {
         options = this.processOptions(options);
     
@@ -2730,14 +2739,9 @@ export class Inspector
         // Create jsColor
         const input_element = element.querySelector("input.color");
         let myColor: jscolor.color;
-    	interface Window
-        {
-            jscolor: typeof jscolor
-        }
-        
+        console.log('is jscolor alive? ' + window.jscolor);
         if (window.jscolor)
         {
-    
             /*
              * SHOWS CONTEXTUAL MENU
              * block focusing
