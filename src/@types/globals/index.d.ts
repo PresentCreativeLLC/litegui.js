@@ -8,6 +8,7 @@ export interface HTMLDivElementPlus extends HTMLDivElement
     valuesArray: number[number[]];
     data: any;
     tabs: any;
+    dialog: any;
     bgcolor: string;
     pointscolor: string;
     linecolor: string;
@@ -62,6 +63,7 @@ export interface ChildNodePlus extends ChildNode
     data : any;
     title_element: HTMLDivElementPlus;
     id: string
+    innerHTML : any;
 }
 
 export interface HTMLParagraphElementPlus extends HTMLParagraphElement
