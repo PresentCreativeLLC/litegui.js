@@ -19,7 +19,10 @@ describe('Mouse wheel', () => {
         callback: function () {console.log("Tab is being clicked")}};
     const tab = Construct(options, false);
     const mouseSimulation = { deltaY: 3.5 };
-    expect(tab.onMouseWheel(mouseSimulation));
+    it(`Debería subir en el menú`, () =>
+    {
+        expect(tab.onMouseWheel(mouseSimulation));
+    });
 });
 
 describe('Show', () => {
@@ -29,7 +32,10 @@ describe('Show', () => {
     const options2 = { callback: function () {console.log("Tab is being clicked")}, title: "Este es el titulo",
     button: true, closable: true, tab_width: 120, id: "tab02", size: "full", width: 120, height: 50, selected: true}
     tab.addTab("tab02", options2);
-    expect(tab.show());
+    it(`Debería agregar un tab y mostrarlo`, () =>
+    {
+        expect(tab.show());
+    });
 });
 
 describe('Hide', () => {
@@ -39,7 +45,10 @@ describe('Hide', () => {
     const options2 = { callback: function () {console.log("Tab is being clicked")}, title: "Este es el titulo",
     button: true, closable: true, tab_width: 120, id: "tab02", size: "full", width: 120, height: 50, selected: true}
     tab.addTab("tab02", options2);
-    expect(tab.hide());
+    it(`Debería esconder el tab`, () =>
+    {
+        expect(tab.hide());
+    });
 });
 
 describe('selectTab', () => {
@@ -50,7 +59,10 @@ describe('selectTab', () => {
     const options2 = { callback: function () {console.log("Tab is being clicked")}, title: "Este es el titulo",
     button: true, closable: true, tab_width: 120, id: "tab02", size: "full", width: 120, height: 50, selected: true}
     tab.addTab("tab02", options2);
-    expect(tab.selectTab("tab02", false));
+    it(`Debería seleccionar tab02`, () =>
+    {
+        expect(tab.selectTab("tab02", false));
+    });
 });
 
 describe('getCurrentTab', () => {
@@ -62,7 +74,10 @@ describe('getCurrentTab', () => {
     button: true, closable: true, tab_width: 120, id: "tab02", size: "full", width: 120, height: 50, selected: true}
     tab.addTab("tab02", options2);
     tab.selectTab("tab02", false);
-    expect(tab.getCurrentTab());
+    it(`Debería seleccionar el tab02 y agarrarlo`, () =>
+    {
+        expect(tab.getCurrentTab());
+    });
 });
 
 describe('getCurrentTabId', () => {
@@ -74,7 +89,10 @@ describe('getCurrentTabId', () => {
     button: true, closable: true, tab_width: 120, id: "tab02", size: "full", width: 120, height: 50, selected: true}
     tab.addTab("tab02", options2);
     tab.selectTab("tab02", false);
-    expect(tab.getCurrentTabId());
+    it(`Debería devolver tab02`, () =>
+    {
+        expect(tab.getCurrentTabId()).toBe("tab02");
+    });
 });
 
 describe('getPreviousTab', () => {
@@ -87,7 +105,10 @@ describe('getPreviousTab', () => {
     tab.addTab("tab02", options2);
     tab.selectTab("tab02", false);
     tab.selectTab("tab02", false);
-    expect(tab.getPreviousTab());
+    it(`Debería agarrar a tab02`, () =>
+    {
+        expect(tab.getPreviousTab());
+    });
 });
 
 describe('appendTo', () => {
@@ -101,7 +122,10 @@ describe('appendTo', () => {
     options.id = "tab03";
     options.callback = function () {console.log("Tab03 is being clicked")};
     const tab2 = Construct(options, false);
-    expect(tab.appendTo(tab2.root));
+    it(`Debería appendear tab en tab2`, () =>
+    {
+        expect(tab.appendTo(tab2.root));
+    });
 });
 
 describe('getTab', () => {
@@ -112,7 +136,10 @@ describe('getTab', () => {
     const options2 = { callback: function () {console.log("Tab is being clicked")}, title: "Este es el titulo",
     button: true, closable: true, tab_width: 120, id: "tab02", size: "full", width: 120, height: 50, selected: true}
     tab.addTab("tab02", options2);
-    expect(tab.getTab("tab02"));
+    it(`Debería agarrar tab02`, () =>
+    {
+        expect(tab.getTab("tab02"));
+    });
 });
 
 describe('getTabByIndex', () => {
@@ -123,7 +150,10 @@ describe('getTabByIndex', () => {
     const options2 = { callback: function () {console.log("Tab is being clicked")}, title: "Este es el titulo",
     button: true, closable: true, tab_width: 120, id: "tab02", size: "full", width: 120, height: 50, selected: true}
     tab.addTab("tab02", options2);
-    expect(tab.getTabByIndex(0));
+    it(`Debería obtiene a tab02`, () =>
+    {
+        expect(tab.getTabByIndex(0));
+    });
 });
 
 describe('getNumOfTabs', () => {
@@ -134,7 +164,10 @@ describe('getNumOfTabs', () => {
     const options2 = { callback: function () {console.log("Tab is being clicked")}, title: "Este es el titulo",
     button: true, closable: true, tab_width: 120, id: "tab02", size: "full", width: 120, height: 50, selected: true}
     tab.addTab("tab02", options2);
-    expect(tab.getNumOfTabs()).toBe(1);
+    it(`Debería devolver 1`, () =>
+    {
+        expect(tab.getNumOfTabs()).toBe(1);
+    });
 });
 
 describe('getTabContent', () => {
@@ -145,7 +178,10 @@ describe('getTabContent', () => {
     const options2 = { callback: function () {console.log("Tab is being clicked")}, title: "Este es el titulo",
     button: true, closable: true, tab_width: 120, id: "tab02", size: "full", width: 120, height: 50, selected: true}
     tab.addTab("tab02", options2);
-    expect(tab.getTabContent("tab02"));
+    it(`Debería obtener tab02`, () =>
+    {
+        expect(tab.getTabContent("tab02"));
+    });
 });
 
 describe('getTabIndex', () => {
@@ -156,7 +192,10 @@ describe('getTabIndex', () => {
     const options2 = { callback: function () {console.log("Tab is being clicked")}, title: "Este es el titulo",
     button: true, closable: true, tab_width: 120, id: "tab02", size: "full", width: 120, height: 50, selected: true}
     tab.addTab("tab02", options2);
-    expect(tab.getTabIndex("tab02"));
+    it(`Debería ser 1`, () =>
+    {
+        expect(tab.getTabIndex("tab02"));
+    });
 });
 
 describe('addTab', () => {
@@ -166,7 +205,10 @@ describe('addTab', () => {
 
     const options2 = { callback: function () {console.log("Tab is being clicked")}, title: "Este es el titulo",
     button: true, closable: true, tab_width: 120, id: "tab02", size: "full", width: 120, height: 50, selected: true}
-    expect(tab.addTab("tab02", options2));
+    it(`Debería añadir otro tab`, () =>
+    {
+        expect(tab.addTab("tab02", options2));
+    });
 });
 
 describe('addPlusTab', () => {
@@ -175,7 +217,10 @@ describe('addPlusTab', () => {
     const tab = Construct(options, false);
 
     const callback: Function = function () {console.log("Tab is being clicked")};
-    expect(tab.addPlusTab(callback));
+    it(`Debería añadir un tab plus`, () =>
+    {
+        expect(tab.addPlusTab(callback));
+    });
 });
 
 describe('addButtonTab', () => {
@@ -184,7 +229,10 @@ describe('addButtonTab', () => {
     const tab = Construct(options, false);
 
     const callback: Function = function () {console.log("Tab is being clicked")};
-    expect(tab.addButtonTab("tab02", "titulo", callback));
+    it(`Debería añadir un tab botón`, () =>
+    {
+        expect(tab.addButtonTab("tab02", "titulo", callback));
+    });
 });
 
 describe('onTabClicked', () => {
@@ -194,24 +242,30 @@ describe('onTabClicked', () => {
 
     const element: HTMLLIElementPlus = document.createElement("li") as HTMLLIElementPlus;
     element.selected = false;
-
-    expect(tab.onTabClicked(true, element));
+    it(`Debería clickear en el tab01`, () =>
+    {
+        expect(tab.onTabClicked(true, element));
+    });
 });
 
 describe('setTabVisibility', () => {
     const options = { mode: "horizontal", id: "tab01", size: "full", width: 120, height: 50,
         callback: function () {console.log("Tab is being clicked")}};
     const tab = Construct(options, false);
-
-    expect(tab.setTabVisibility("tab01", true));
+    it(`Debería hacer visible tab01`, () =>
+    {
+        expect(tab.setTabVisibility("tab01", true));
+    });
 });
 
 describe('recomputeTabsByIndex', () => {
     const options = { mode: "horizontal", id: "tab01", size: "full", width: 120, height: 50,
         callback: function () {console.log("Tab is being clicked")}};
     const tab = Construct(options, false);
-
-    expect(tab.recomputeTabsByIndex());
+    it(`Debería recomputarizar`, () =>
+    {
+        expect(tab.recomputeTabsByIndex());
+    });
 });
 
 describe('removeTab', () => {
@@ -221,8 +275,11 @@ describe('removeTab', () => {
 
     const options2 = { callback: function () {console.log("Tab is being clicked")}, title: "Este es el titulo",
     button: true, closable: true, tab_width: 120, id: "tab02", size: "full", width: 120, height: 50, selected: true}
-    tab.addTab("tab02", options2);
-    expect(tab.removeTab("tab02"));
+    it(`Debería agregar y quitar tab02`, () =>
+    {
+        tab.addTab("tab02", options2);
+        expect(tab.removeTab("tab02"));
+    });
 });
 
 describe('removeAllTabs', () => {
@@ -232,8 +289,11 @@ describe('removeAllTabs', () => {
 
     const options2 = { callback: function () {console.log("Tab is being clicked")}, title: "Este es el titulo",
     button: true, closable: true, tab_width: 120, id: "tab02", size: "full", width: 120, height: 50, selected: true}
-    tab.addTab("tab02", options2);
-    expect(tab.removeAllTabs());
+    it(`Debería agregar y quitar todos los tabs`, () =>
+    {
+        tab.addTab("tab02", options2);
+        expect(tab.removeAllTabs());
+    });
 });
 
 describe('clear', () => {
@@ -243,8 +303,11 @@ describe('clear', () => {
 
     const options2 = { callback: function () {console.log("Tab is being clicked")}, title: "Este es el titulo",
     button: true, closable: true, tab_width: 120, id: "tab02", size: "full", width: 120, height: 50, selected: true}
-    tab.addTab("tab02", options2);
-    expect(tab.clear());
+    it(`Debería añadir otro tab y limpiar el original`, () =>
+    {
+        tab.addTab("tab02", options2);
+        expect(tab.clear());
+    });
 });
 
 describe('hideTab', () => {
@@ -254,8 +317,12 @@ describe('hideTab', () => {
 
     const options2 = { callback: function () {console.log("Tab is being clicked")}, title: "Este es el titulo",
     button: true, closable: true, tab_width: 120, id: "tab02", size: "full", width: 120, height: 50, selected: true}
-    tab.addTab("tab02", options2);
-    expect(tab.hideTab("tab02"));
+    
+    it(`Debería agregar y ocultar tab02`, () =>
+    {
+        tab.addTab("tab02", options2);
+        expect(tab.hideTab("tab02"));
+    });
 });
 
 describe('showTab', () => {
@@ -265,9 +332,12 @@ describe('showTab', () => {
 
     const options2 = { callback: function () {console.log("Tab is being clicked")}, title: "Este es el titulo",
     button: true, closable: true, tab_width: 120, id: "tab02", size: "full", width: 120, height: 50, selected: true}
-    tab.addTab("tab02", options2);
-    tab.hideTab("tab02");
-    expect(tab.showTab("tab02"));
+    it(`Debería agregar y ocultar un tab y al final mostrarlo`, () =>
+    {
+        tab.addTab("tab02", options2);
+        tab.hideTab("tab02");
+        expect(tab.showTab("tab02"));
+    });
 });
 
 describe('transferTab', () => {
@@ -278,24 +348,30 @@ describe('transferTab', () => {
     options.id = "tab02";
     options.callback = function () {console.log("Tab02 is being clicked")};
     const tab2 = Construct(options, false);
-
-    expect(tab.transferTab("tab01", tab2));
+    it(`Debería crear y transferir otro tab`, () =>
+    {
+        expect(tab.transferTab("tab01", tab2));
+    });
 });
 
 describe('detachTab', () => {
     const options = { mode: "horizontal", id: "tab01", size: "full", width: 120, height: 50,
         callback: function () {console.log("Tab is being clicked")}};
     const tab = Construct(options, false);
-
-    expect(tab.detachTab("tab01", function () {console.log("Tab complete")},
-        function () {console.log("Tab on close")}));
+    it(`Debería desatachear el tab01`, () =>
+    {
+        expect(tab.detachTab("tab01", function () {console.log("Tab complete")},
+            function () {console.log("Tab on close")}));
+    });
 });
 
-describe('detadestroychTab', () => {
+describe('destroy Tab', () => {
     const options = { mode: "horizontal", id: "tab01", size: "full", width: 120, height: 50,
         callback: function () {console.log("Tab is being clicked")}};
     const tab = Construct(options, false);
-
-    expect(tab.destroy("tab01"));
+    it(`Debería destruir tab01`, () =>
+    {
+        expect(tab.destroy("tab01"));
+    });
 });
 */
