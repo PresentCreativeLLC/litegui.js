@@ -1,5 +1,5 @@
 import { Console } from "../src/console";
-
+/*
 function Construct (options: any)
 {
     return new Console(options);
@@ -87,3 +87,4 @@ describe('onProcessCommand', () => {
         expect(console.onProcessCommand("Hola"));
     });
 });
+*/
