@@ -629,8 +629,10 @@ export class Inspector
         if (!options.skip_wchange)
         {
             if (section)
-            {LiteGUI.trigger(section, "wchange", value, element);}
-            LiteGUI.trigger(element, "wchange", value, element);
+            //{LiteGUI.trigger(section, "wchange", value, element);}
+            //LiteGUI.trigger(element, "wchange", value, element);
+            {LiteGUI.trigger(section, "wchange", value);}
+            LiteGUI.trigger(element, "wchange", value);
         }
     
         if (this.onchange)

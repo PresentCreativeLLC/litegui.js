@@ -36,7 +36,7 @@ export class Console
 		if (this._input_blocked || !this.input)
 		{return;}
 
-		if (e.keyCode == 13) // Return and exec
+		if (e.key == "enter")//(e.keyCode == 13) // Return and exec
 		{
 			
 			const value = this.input.value;
@@ -50,7 +50,7 @@ export class Console
 		}
 		else if (e.key == "up arrow" || e.key == "down arrow") // Up & down history e.keyCode == 38 || e.keyCode == 40)
 		{
-			this._history_offset += (e.keyCode == 38 ? -1 : 1);
+			this._history_offset += (e.key == "up arrow" ? -1 : 1);//(e.keyCode == 38 ? -1 : 1);
 			if (this._history_offset > 0)
 			{
 				this._history_offset = 0;

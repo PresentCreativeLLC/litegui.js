@@ -5,7 +5,7 @@ export interface HTMLDivElementPlus extends HTMLDivElement
     closingTimer: number;
     stServiceCtr: stServiceController;
     value: number;
-    valuesArray: number[number[]];
+    valuesArray: number[][];
     data: any;
     tabs: any;
     dialog: any;

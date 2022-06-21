@@ -1,4 +1,4 @@
-import { LiteGUI } from "./core";
+import { LiteGUI, special_codes } from "./core";
 import { HTMLDivElementPlus, HTMLSpanElementPlus, EventTargetPlus, HTMLLIElementPlus } from "./@types/globals/index"
 // Enclose in a scope
 export class widget {
@@ -118,8 +118,9 @@ export class SearchBox
 		this.root = element;
 	
 		this.input.onchange = function (e: any) {
-			const value = e.target.value;
-			if (options.callback) { options.callback.call(this, value); }
+			console.warn("Valor de e: " + e);
+			//const value = e.target.value;
+			//if (options.callback) { options.callback.call(this, value); }
 		};
 	}
 
@@ -455,7 +456,9 @@ export class Checkbox
 	onClick(e: any)
 	{
 		this.setValue(this.root.dataset["value"] != "true");
+		if(e.preventDefault === 'function')
 		e.preventDefault();
+		if (e.stopPropagation === 'function')
 		e.stopPropagation();
 	}
 }
@@ -673,7 +676,8 @@ export class Slider
 		const x = e.x === undefined ? e.pageX : e.x;
 		const mouseX = x - rect.left;
 		this.setFromX(mouseX);
-		e.preventDefault();
+		if (typeof e.preventDefault == 'function')
+			e.preventDefault();
 		return false;
 	}
 
@@ -682,7 +686,8 @@ export class Slider
 		this.doc_binded = null;
 		doc.removeEventListener("mousemove", this.onMouseMove);
 		doc.removeEventListener("mouseup", this.onMouseUp);
-		e.preventDefault();
+		if(typeof e.preventDefault == 'function')
+			e.preventDefault();
 		return false;
 	}
 
@@ -725,7 +730,7 @@ export class LineEditor
 	canvas: HTMLCanvasElement;
 	selected: number;
 	last_mouse: number[];
-	constructor(value: any, options: any)
+	constructor(value: number[][], options: any)
 	{
 		this.options = options || {};
 		const element = this.root = document.createElement("div") as HTMLDivElementPlus;
@@ -789,14 +794,14 @@ export class LineEditor
 		const r = [];
 		const dx = (this.root.xrange[1] - this.root.xrange[0]) / samples;
 		for (let i = this.root.xrange[0]; i <= this.root.xrange[1]; i += dx) {
-			r.push(this.root.getValueAt(i));
+			r.push(this.getValueAt(i));
 		}
 		return r;
 	}
 
 	addValue(v: number[])
 	{
-		for (let i = 0; i < this.root.valuesArray; i++) {
+		for (let i = 0; i < this.root.valuesArray.length; i++) {
 			const value = this.root.valuesArray[i];
 			if (value[0] < v[0]) { continue; }
 			this.root.valuesArray.splice(i, 0, v);
@@ -1014,7 +1019,7 @@ export class ComplexList
 		this.root = document.createElement("div");
 		this.root.className = "litecomplexlist";
 
-		this.item_code = options.item_code || "<div class='listitem'><span class='tick'><span>" + LiteGUI.special_codes.tick + "</span></span><span class='title'></span><button class='trash'>" + LiteGUI.special_codes.close + "</button></div>";
+		this.item_code = options.item_code || "<div class='listitem'><span class='tick'><span>" + special_codes.tick + "</span></span><span class='title'></span><button class='trash'>" + special_codes.close + "</button></div>";
 
 		if (options.height) {
 			this.root.style.height = LiteGUI.sizeToCSS(options.height) as string;
