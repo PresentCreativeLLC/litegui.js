@@ -66,7 +66,7 @@ let escapeHtmlEntities: any;
         LineEditor: typeof LineEditor = LineEditor;
         Slider: typeof Slider = Slider;
 		Table: typeof Table = Table;
-        special_codes: any;
+        special_codes: typeof special_codes = special_codes;
 
 		/**
 		 * Initializes the lib, must be called

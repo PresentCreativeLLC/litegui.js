@@ -703,7 +703,7 @@ export class Dialog
 		return dialog_window;
 	}
 
-	reattachWindow(on_complete : Function)
+	reattachWindow(/* on_complete : Function */)
 	{
 		if (!this.dialog_window)
 		{return;}
