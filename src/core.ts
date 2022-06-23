@@ -164,12 +164,11 @@ let escapeHtmlEntities: any;
 		 * @param {*} params it will be stored in e.detail
 		 * @param {*} origin it will be stored in e.srcElement
 		 */
-		trigger(element: any, event_name: string, params?: any, origin? : any): CustomEvent<any>
+		trigger(element: any, event_name: string, params?: any, /*origin? : any*/): CustomEvent<any>
 		{
 			// TODO: fix the deprecated elements
-			const evt = document.createEvent('CustomEvent') as any;
-			evt.initCustomEvent(event_name, true, true, params); // CanBubble, cancelable, detail
-			evt.target = origin;
+			const evt = new CustomEvent(event_name, { detail: params });
+			//event.target = origin;
 			
 			if (element.dispatchEvent)
 			{
@@ -372,7 +371,7 @@ let escapeHtmlEntities: any;
 				style!.height = "100%";
 				style!.boxShadow = "0 0 0";
 			}
-			LiteGUI.trigger(LiteGUI, "resized", undefined, undefined);
+			LiteGUI.trigger(LiteGUI, "resized", undefined);
 		}
 
 		maximizeWindow(): void

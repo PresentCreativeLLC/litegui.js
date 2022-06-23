@@ -3,10 +3,10 @@ import { LiteGUI } from "./core";
 export class Table
 {
 	root : HTMLTableElement;
-	columns : Array<any>;
-	rows : Array<any>;
+	columns : Array<object>;
+	rows : Array<object>;
 	column_fields : Array<any>;
-	data : Array<any>;
+	data : Array<object>;
 	header : any;
 
 	_must_update_header : boolean;
@@ -47,7 +47,7 @@ export class Table
 		this.updateContent(reuse);
 	}
 
-	addRow(row : Array<any>, skip_add : boolean) : HTMLTableRowElement
+	addRow(row : Array<object> | object, skip_add : boolean) : HTMLTableRowElement
 	{
 		const tr = document.createElement("tr");
 
@@ -61,13 +61,13 @@ export class Table
 			if (row.constructor === Array)
 			{value = row[ j ];}
 			else // Object
-			{value = row[ this.column_fields[j] ];}
+			{value = (row as any)[ this.column_fields[j] ];}
 			if (value === undefined)
 			{value = "";}
 
 			td.innerHTML = value;
 
-			const column = this.columns[j];
+			const column = this.columns[j] as any;
 			if (column === undefined)
 			{break;}
 
@@ -86,25 +86,25 @@ export class Table
 		return tr;
 	}
 
-	updateRow(index : number, row : Array<any>)
+	updateRow(index : number, row : Array<object> | object)
 	{
 		this.data[ index ] = row;
 
-		const tr = this.rows[index];
+		const tr = this.rows[index] as any;
 		if (!tr)
 		{return;}
 
 		const cells = tr.querySelectorAll("td");
 		for (let j = 0; j < cells.length; ++j)
 		{
-			const column = this.columns[j];
+			const column = this.columns[j] as any;
 
 			let value = null;
 
 			if (row.constructor === Array)
 			{value = row[ j ];}
 			else
-			{value = row[ column.field ];}
+			{value = (row as any)[ column.field ];}
 
 			if (value === undefined)
 			{value = "";}
@@ -114,9 +114,9 @@ export class Table
 		return tr;
 	}
 
-	updateCell(row : any, cell : number, data : any)
+	updateCell(row : number, cell : number, data : any)
 	{
-		const tr = this.rows[ row ];
+		const tr = this.rows[ row ] as any;
 		if (!tr)
 		{return;}
 		const newCell = tr.childNodes[cell];
@@ -177,7 +177,7 @@ export class Table
 			this.header = document.createElement("tr");
 			for (let i = 0; i < this.columns.length; ++i)
 			{
-				const column = this.columns[i];
+				const column = this.columns[i] as any;
 				const th = document.createElement("th");
 				th.innerHTML = column.name;
 				if (column.width)

@@ -45,7 +45,8 @@
     "*.js": "eslint --cache --fix"
   },
   "dependencies": {
-    "jest-environment-jsdom": "^28.1.1",
+    "canvas": "^2.9.1",
+    "jest-environment-jsdom": "^27.5.1",
     "jest-html-reporter": "3.5.0"
   }
 }
