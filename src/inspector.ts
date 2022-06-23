@@ -1,7 +1,7 @@
 import { LiteGUI } from "./core";
 import { purgeElement } from "./core";
 import { Dragger } from "./dragger";
-// import jscolor from "../external/jscolor/jscolor";
+import { jscolor } from "./jscolor";
 
 
 declare global
@@ -18,7 +18,7 @@ export class Inspector
     sections: Array<Object>; // TODO: Define the objects
     values: Map<string, any>;
     widgets: Array<any>;
-    widgets_by_name: Map<string, HTMLDivElement>; // TODO: I think this is a map too
+    widgets_by_name: Map<string, any>; // TODO: I think this is a map too
     row_number: number = 0;
     tab_index: number;
     name_width: number | null = null;
@@ -92,8 +92,8 @@ export class Inspector
         const r = new Map<string, any>();
         for (const i in this.widgets_by_name)
         {
-            const w = this.widgets_by_name.get(i);
-            if (!w) { continue; }
+            const w = this.widgets_by_name.get(i).getValue();
+            // if (!w) { continue; }
             r.set(i, w);
         }
         return r;
@@ -105,7 +105,7 @@ export class Inspector
         {
             if (this.widgets_by_name.get(i))
             {
-                this.widgets_by_name.set(i, v[i]);
+                this.widgets_by_name.get(i).setValue(v[i]);
             }
         }
     };
@@ -1705,7 +1705,7 @@ export class Inspector
      * @return {HTMLElement} the widget in the form of the DOM element that contains it
      *
      */
-    addInfo(name: string, value: any, options: any)
+    addInfo(name: string, value: any, options?: any)
     {
         options = this.processOptions(options);
     
@@ -1861,7 +1861,7 @@ export class Inspector
      * @return {HTMLElement} the widget in the form of the DOM element that contains it
      *
      */
-    addCheckbox(name: string, value: any, options: any)
+    addCheckbox(name: string, value: any, options?: any)
     {
         options = this.processOptions(options);
         value = Boolean(value);
@@ -1924,7 +1924,7 @@ export class Inspector
      * @return {HTMLElement} the widget in the form of the DOM element that contains it
      *
      */
-    addFlags(flags: any, force_flags: any, options: any)
+    addFlags(flags: any, force_flags: any, options?: any)
     {
         const f: any = {};
         for (const i in flags)
@@ -2738,8 +2738,8 @@ export class Inspector
     
         // Create jsColor
         const input_element = element.querySelector("input.color");
-        let myColor: jscolor.color;
-        console.log('is jscolor alive? ' + window.jscolor);
+        window.jscolor = jscolor;
+        let myColor: any = null;
         if (window.jscolor)
         {
             /*

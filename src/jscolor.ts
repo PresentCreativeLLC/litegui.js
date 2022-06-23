@@ -6,7 +6,7 @@ type Position =
 type PickerMode = 'HSV' | 'HVS';
 type PickerPosition = 'left' | 'right' | 'top' | 'bottom';
 
-export static class jscolor
+export abstract class jscolor
 {
     static dir: string | boolean = '';
     static bindClass: string = 'color';
@@ -131,14 +131,19 @@ export static class jscolor
         if(!el) {
 			return;
 		}
-		if(document.createEvent) {
-			var ev = document.createEvent('HTMLEvents');
+        var ev: any;
+		if(document.createEvent) 
+        {
+			ev = document.createEvent('HTMLEvents');
 			ev.initEvent(evnt, true, true);
 			el.dispatchEvent(ev);
-		} else if(document.createEventObject) {
-			var ev = document.createEventObject();
+		} 
+        else if((document as any).createEventObject) 
+        {
+			ev = (document as any).createEventObject();
 			el.fireEvent('on'+evnt, ev);
-		} else if(el['on'+evnt]) { // alternatively use the traditional event model (IE5)
+		} 
+        else if(el['on'+evnt]) { // alternatively use the traditional event model (IE5)
 			el['on'+evnt]();
 		}
     }
@@ -330,8 +335,6 @@ export static class jscolor
         hash: boolean;
         caps: boolean;
         slider: boolean;
-        valueElement: any;
-        styleElement: any;
         onImmediateChange: any;//string | Function;
         pickerOnfocus: boolean;
         pickerMode: PickerMode;
@@ -350,6 +353,17 @@ export static class jscolor
         pickerZIndex: number;
         hsv: Array<number>;
         rgb: Array<number>;
+        leaveValue: number;
+        leaveStyle: number;
+        leavePad: number;
+        leaveSld: number;
+        modeID: number;
+        abortBlur: boolean;
+        target: any;
+        valueElement: any;
+        styleElement: any;
+        holdPad: boolean;
+        holdSld: boolean;
         get Hsv(): Array<number>
         {
             return this.hsv;
@@ -386,68 +400,70 @@ export static class jscolor
             this.pickerInset = 1; // px
             this.pickerInsetColor = 'ThreeDShadow ThreeDHighlight ThreeDHighlight ThreeDShadow'; // CSS color
             this.pickerZIndex = 10000;
+            this.leaveValue = 1<<0,
+            this.leaveStyle = 1<<1,
+            this.leavePad = 1<<2,
+            this.leaveSld = 1<<3;
+            this.modeID = this.pickerMode.toLowerCase()==='hvs' ? 1 : 0;
+            this.abortBlur = false;
+            this.valueElement = jscolor.fetchElement(this.valueElement),
+            this.styleElement = jscolor.fetchElement(this.styleElement);
+            this.holdPad = false,
+            this.holdSld = false;
+            this.target = target;
             for(var p in prop) 
             {
                 if(prop.hasOwnProperty(p)) 
                 {
-                    this[p] = prop[p];
+                    (this as any)[p] = prop[p];
                 }
             }
-            var THIS = this;
-            var modeID = this.pickerMode.toLowerCase()==='hvs' ? 1 : 0;
-            var abortBlur = false;
-            var
-                valueElement = jscolor.fetchElement(this.valueElement),
-                styleElement = jscolor.fetchElement(this.styleElement);
-            var
-                holdPad = false,
-                holdSld = false;
-            var
-                leaveValue = 1<<0,
-                leaveStyle = 1<<1,
-                leavePad = 1<<2,
-                leaveSld = 1<<3;
             // target
-            jscolor.addEvent(target, 'focus', function() {
-                if(THIS.pickerOnfocus) { THIS.showPicker(); }
+            jscolor.addEvent(target, 'focus', ()=> 
+            {
+                if(this.pickerOnfocus) 
+                { 
+                    this.showPicker(); 
+                }
             });
             jscolor.addEvent(target, 'blur', ()=>
             {
                 this.blurTarget(); 
-                abortBlur=false; return; //tamat hack
-                if(!abortBlur) 
-                {
-                    window.setTimeout(function(){ abortBlur || this.blurTarget(); abortBlur=false; }, 0);
-                } else {
-                    abortBlur = false;
-                }
+                this.abortBlur = false; return; //tamat hack
+                // if(!abortBlur) 
+                // {
+                //     window.setTimeout(function(){ abortBlur || this.blurTarget(); abortBlur=false; }, 0);
+                // } else {
+                //     abortBlur = false;
+                // }
             });
 
             // valueElement
-            if(valueElement) 
+            if(this.valueElement) 
             {
-                var updateField = function() {
-                    THIS.fromString(valueElement.value, leaveValue);
-                    THIS.dispatchImmediateChange();
+                var updateField = () => 
+                {
+                    this.fromString(this.valueElement.value, this.leaveValue);
+                    this.dispatchImmediateChange();
                 };
-                jscolor.addEvent(valueElement, 'keyup', updateField);
-                jscolor.addEvent(valueElement, 'input', updateField);
-                jscolor.addEvent(valueElement, 'blur', this.blurValue);
+                jscolor.addEvent(this.valueElement, 'keyup', updateField);
+                jscolor.addEvent(this.valueElement, 'input', updateField);
+                jscolor.addEvent(this.valueElement, 'blur', this.blurValue);
                 this.valueElement.setAttribute('autocomplete', 'off');
             }
 
             // styleElement
-            if(styleElement) 
+            if(this.styleElement) 
             {
-                styleElement.jscStyle = {
+                this.styleElement.jscStyle = {
                     backgroundImage : this.styleElement.style.backgroundImage,
                     backgroundColor : this.styleElement.style.backgroundColor,
-                    color : styleElement.style.color
+                    color : this.styleElement.style.color
                 };
             }
 
             // require images
-            switch(modeID) {
+            switch(this.modeID) {
                 case 0: jscolor.requireImage('hs.png'); break;
                 case 1: jscolor.requireImage('hv.png'); break;
             }
@@ -467,12 +483,13 @@ export static class jscolor
 
         showPicker(): void
         {
-            if(!this.isPickerOwner()) {
-				var tp = jscolor.getElementPos(target); // target pos
-				var ts = jscolor.getElementSize(target); // target size
+            if(!this.isPickerOwner()) 
+            {
+				var tp = jscolor.getElementPos(this.target); // target pos
+				var ts = jscolor.getElementSize(this.target); // target size
 				var vp = jscolor.getViewPos(); // view pos
 				var vs = jscolor.getViewSize(); // view size
-				var ps = getPickerDims(this); // picker size
+				var ps = this.getPickerDims(this); // picker size
 				var a, b, c;
 				switch(this.pickerPosition.toLowerCase()) {
 					case 'left': a=1; b=0; c=-1; break;
@@ -483,7 +500,8 @@ export static class jscolor
 				var l = (ts[b]+ps[b])/2;
 
 				// picker pos
-				if (!this.pickerSmartPosition) {
+				if (!this.pickerSmartPosition) 
+                {
 					var pp = [
 						tp[a],
 						tp[b]+ts[b]-l+l*c
@@ -498,7 +516,7 @@ export static class jscolor
 							(tp[b]+ts[b]-l+l*c >= 0 ? tp[b]+ts[b]-l+l*c : tp[b]+ts[b]-l-l*c)
 					];
 				}
-				drawPicker(pp[a], pp[b]);
+				this.drawPicker(pp[a], pp[b]);
 			}
         }
 
@@ -512,12 +530,12 @@ export static class jscolor
             {
 				if(!this.adjust) 
                 {
-					if(!this.fromString(this.valueElement.value, leaveValue)) 
+					if(!this.fromString(this.valueElement.value, this.leaveValue)) 
                     {
 						this.styleElement.style.backgroundImage = this.styleElement.jscStyle.backgroundImage;
 						this.styleElement.style.backgroundColor = this.styleElement.jscStyle.backgroundColor;
 						this.styleElement.style.color = this.styleElement.jscStyle.color;
-						this.exportColor(leaveValue | leaveStyle);
+						this.exportColor(this.leaveValue | this.leaveStyle);
 					}
 				} 
                 else if(!this.required && /^\s*$/.test(this.valueElement.value)) 
@@ -526,7 +544,7 @@ export static class jscolor
 					this.styleElement.style.backgroundImage = this.styleElement.jscStyle.backgroundImage;
 					this.styleElement.style.backgroundColor = this.styleElement.jscStyle.backgroundColor;
 					this.styleElement.style.color = this.styleElement.jscStyle.color;
-					this.exportColor(leaveValue | leaveStyle);
+					this.exportColor(this.leaveValue | this.leaveStyle);
 
 				} 
                 else if(this.fromString(this.valueElement.value)) 
@@ -540,15 +558,16 @@ export static class jscolor
 			}
         }
 
-        exportColor(flags?: boolean)
+        exportColor(flags?: number)
         {
-            if(!(flags & leaveValue) && this.valueElement) {
+            flags = flags ? flags : 0;
+            if(!(flags & this.leaveValue!) && this.valueElement) {
 				var value = this.toString();
 				if(this.caps) { value = value.toUpperCase(); }
 				if(this.hash) { value = '#'+value; }
 				this.valueElement.value = value;
 			}
-			if(!(flags & leaveStyle) && this.styleElement) {
+			if(!(flags & this.leaveStyle) && this.styleElement) {
 				this.styleElement.style.backgroundImage = "none";
 				this.styleElement.style.backgroundColor =
 					'#'+this.toString();
@@ -558,19 +577,19 @@ export static class jscolor
 					0.072 * this.rgb[2]
 					< 0.5 ? '#FFF' : '#000';
 			}
-			if(!(flags & leavePad) && this.isPickerOwner()) {
-				redrawPad();
+			if(!(flags & this.leavePad) && this.isPickerOwner()) {
+				this.redrawPad();
 			}
-			if(!(flags & leaveSld) && this.isPickerOwner()) {
-				redrawSld();
+			if(!(flags & this.leaveSld) && this.isPickerOwner()) {
+				this.redrawSld();
 			}
         }
 
-        fromHSV(h: number, s: number, v: number, flags?: boolean)
+        fromHSV(h: number | null, s: number | null, v: number | null, flags?: number)
         {
-            h<0 && (h=0) || h>6 && (h=6);
-			s<0 && (s=0) || s>1 && (s=1);
-			v<0 && (v=0) || v>1 && (v=1);
+            h ?? (h! < 0 && (h=0) || h! > 6 && (h = 6));
+			s ?? (s!<0 && (s=0) || s!>1 && (s=1));
+			v ?? (v!<0 && (v=0) || v!>1 && (v=1));
 			this.rgb = this.HSV_RGB(
 				h===null ? this.hsv[0] : (this.hsv[0]=h),
 				s===null ? this.hsv[1] : (this.hsv[1]=s),
@@ -579,12 +598,12 @@ export static class jscolor
 			this.exportColor(flags);
         }
 
-        fromRGB(r: number, g: number, b: number, flags?: boolean)
+        fromRGB(r: number, g: number, b: number, flags?: number | undefined)
         {
             r<0 && (r=0) || r>1 && (r=1);
 			g<0 && (g=0) || g>1 && (g=1);
 			b<0 && (b=0) || b>1 && (b=1);
-			var hsv = RGB_HSV(
+			var hsv = this.RGB_HSV(
 				r===null ? this.rgb[0] : (this.rgb[0]=r),
 				g===null ? this.rgb[1] : (this.rgb[1]=g),
 				b===null ? this.rgb[2] : (this.rgb[2]=b)
@@ -599,17 +618,20 @@ export static class jscolor
 			this.exportColor(flags);
         }
         
-        fromString(hex: string, flags?: boolean): boolean
+        fromString(hex: string, flags?: number | undefined): boolean
         {
 			var m = hex.match(/^\W*([0-9A-F]{3}([0-9A-F]{3})?)\W*$/i);
-			if(!m) {
+			if(!m) 
+            {
 				return false;
-			} else {
+			} 
+            else 
+            {
 				if(m[1].length === 6) { // 6-char notation
 					this.fromRGB(
-						parseInt(m[1].substr(0,2),16) / 255,
-						parseInt(m[1].substr(2,2),16) / 255,
-						parseInt(m[1].substr(4,2),16) / 255,
+						parseInt(m[1].substring(0,2),16) / 255,
+						parseInt(m[1].substring(2,2),16) / 255,
+						parseInt(m[1].substring(4,2),16) / 255,
 						flags
 					);
 				} else { // 3-char notation
@@ -627,23 +649,23 @@ export static class jscolor
         toString(): string
         {
 			return (
-				(0x100 | Math.round(255*this.rgb[0])).toString(16).substr(1) +
-				(0x100 | Math.round(255*this.rgb[1])).toString(16).substr(1) +
-				(0x100 | Math.round(255*this.rgb[2])).toString(16).substr(1)
+				(0x100 | Math.round(255*this.rgb[0])).toString(16).substring(1) +
+				(0x100 | Math.round(255*this.rgb[1])).toString(16).substring(1) +
+				(0x100 | Math.round(255*this.rgb[2])).toString(16).substring(1)
 			);
         }
         
-        RGB_HSV(r: number, g: number, b: number): Array<number>
+        RGB_HSV(r: number, g: number, b: number): Array<any>
         {
 			var n = Math.min(Math.min(r,g),b);
 			var v = Math.max(Math.max(r,g),b);
 			var m = v - n;
 			if(m === 0) { return [ null, 0, v ]; }
 			var h = r===n ? 3+(b-g)/m : (g===n ? 5+(r-b)/m : 1+(g-r)/m);
-			return [ h===6?0:h, m/v, v ];
+			return [ h===6 ? 0 : h, m/v, v ];
         }
         
-        HSV_RGB(h: number, s: number, v: number): Array<number> | undefined
+        HSV_RGB(h: number, s: number, v: number): Array<number>
         {
 			if(h === null) { return [ v, v, v ]; }
 			var i = Math.floor(h);
@@ -684,9 +706,10 @@ export static class jscolor
 					sldM : document.createElement('div'),
 					btn : document.createElement('div'),
 					btnS : document.createElement('span'),
-					btnT : document.createTextNode(THIS.pickerCloseText)
+					btnT : document.createTextNode(this.pickerCloseText)
 				};
-				for(var i=0,segSize=4; i<jscolor.images.sld[1]; i+=segSize) {
+				for(var i=0,segSize=4; i<jscolor.images.sld[1]; i+=segSize) 
+                {
 					var seg = document.createElement('div');
 					seg.style.height = segSize+'px';
 					seg.style.fontSize = '1px';
@@ -709,37 +732,62 @@ export static class jscolor
 
 			// controls interaction
 			p.box.onmouseup =
-			p.box.onmouseout = function() { target.focus(); };
-			p.box.onmousedown = function(e) { abortBlur=true; e.preventDefault(); return false; };
-			p.box.onmousemove = function(e) {
-				if (holdPad || holdSld) {
-					holdPad && setPad(e);
-					holdSld && setSld(e);
-					if (document.selection) {
-						document.selection.empty();
-					} else if (window.getSelection) {
-						window.getSelection().removeAllRanges();
+			p.box.onmouseout = ()=> { this.target.focus(); };
+			p.box.onmousedown = (e: any)=> 
+            { 
+                this.abortBlur = true; e.preventDefault(); 
+                return false; 
+            };
+			p.box.onmousemove = (e: any)=> 
+            {
+				if (this.holdPad || this.holdSld) 
+                {
+					this.holdPad && this.setPad(e);
+					this.holdSld && this.setSld(e);
+					if (document.getSelection()) 
+                    {
+						document.getSelection()!.empty();
+					} 
+                    else if (window.getSelection) 
+                    {
+						window.getSelection()!.removeAllRanges();
 					}
-					dispatchImmediateChange();
+					this.dispatchImmediateChange();
 				}
 			};
 			p.padM.onmouseup =
-			p.padM.onmouseout = function() { if(holdPad) { holdPad=false; jscolor.fireEvent(this.valueElement,'change'); } };
-			p.padM.onmousedown = function(e) {
-				holdPad=true;
-				setPad(e);
-				dispatchImmediateChange();
+			p.padM.onmouseout = ()=> 
+            { 
+                if(this.holdPad) 
+                { 
+                    this.holdPad=false; 
+                    jscolor.fireEvent(this.valueElement,'change'); 
+                } 
+            };
+			p.padM.onmousedown = (e: any)=> 
+            {
+				this.holdPad=true;
+				this.setPad(e);
+				this.dispatchImmediateChange();
 			};
 			p.sldM.onmouseup =
-			p.sldM.onmouseout = function() { if(holdSld) { holdSld=false; jscolor.fireEvent(this.valueElement,'change'); } };
-			p.sldM.onmousedown = function(e) {
-				holdSld=true;
-				setSld(e);
-				dispatchImmediateChange();
+			p.sldM.onmouseout = function() 
+            { 
+                if(this.holdSld) 
+                { 
+                    this.holdSld=false; 
+                    jscolor.fireEvent(this.valueElement,'change'); 
+                } 
+            };
+			p.sldM.onmousedown = (e: any)=> 
+            {
+				this.holdSld=true;
+				this.setSld(e);
+				this.dispatchImmediateChange();
 			};
 
 			// picker
-			var dims = getPickerDims(THIS);
+			var dims = this.getPickerDims(this);
 			p.box.style.width = dims[0] + 'px';
 			p.box.style.height = dims[1] + 'px';
 
@@ -748,10 +796,10 @@ export static class jscolor
 			p.boxB.style.clear = 'both';
 			p.boxB.style.left = x+'px';
 			p.boxB.style.top = y+'px';
-			p.boxB.style.zIndex = THIS.pickerZIndex;
-			p.boxB.style.border = THIS.pickerBorder+'px solid';
-			p.boxB.style.borderColor = THIS.pickerBorderColor;
-			p.boxB.style.background = THIS.pickerFaceColor;
+			p.boxB.style.zIndex = this.pickerZIndex;
+			p.boxB.style.border = this.pickerBorder+'px solid';
+			p.boxB.style.borderColor = this.pickerBorderColor;
+			p.boxB.style.background = this.pickerFaceColor;
 
 			// pad image
 			p.pad.style.width = jscolor.images.pad[0]+'px';
@@ -759,16 +807,17 @@ export static class jscolor
 
 			// pad border
 			p.padB.style.position = 'absolute';
-			p.padB.style.left = THIS.pickerFace+'px';
-			p.padB.style.top = THIS.pickerFace+'px';
-			p.padB.style.border = THIS.pickerInset+'px solid';
-			p.padB.style.borderColor = THIS.pickerInsetColor;
+			p.padB.style.left = this.pickerFace+'px';
+			p.padB.style.top = this.pickerFace+'px';
+			p.padB.style.border = this.pickerInset+'px solid';
+			p.padB.style.borderColor = this.pickerInsetColor;
 
 			// pad mouse area
 			p.padM.style.position = 'absolute';
 			p.padM.style.left = '0';
 			p.padM.style.top = '0';
-			p.padM.style.width = THIS.pickerFace + 2*THIS.pickerInset + jscolor.images.pad[0] + jscolor.images.arrow[0] + 'px';
+			p.padM.style.width = this.pickerFace + 2 * this.pickerInset + jscolor.images.pad[0] +
+                jscolor.images.arrow[0] + 'px';
 			p.padM.style.height = p.box.style.height;
 			p.padM.style.cursor = 'crosshair';
 
@@ -778,41 +827,44 @@ export static class jscolor
 			p.sld.style.height = jscolor.images.sld[1]+'px';
 
 			// slider border
-			p.sldB.style.display = THIS.slider ? 'block' : 'none';
+			p.sldB.style.display = this.slider ? 'block' : 'none';
 			p.sldB.style.position = 'absolute';
-			p.sldB.style.right = THIS.pickerFace+'px';
-			p.sldB.style.top = THIS.pickerFace+'px';
-			p.sldB.style.border = THIS.pickerInset+'px solid';
-			p.sldB.style.borderColor = THIS.pickerInsetColor;
+			p.sldB.style.right = this.pickerFace+'px';
+			p.sldB.style.top = this.pickerFace+'px';
+			p.sldB.style.border = this.pickerInset+'px solid';
+			p.sldB.style.borderColor = this.pickerInsetColor;
 
 			// slider mouse area
-			p.sldM.style.display = THIS.slider ? 'block' : 'none';
+			p.sldM.style.display = this.slider ? 'block' : 'none';
 			p.sldM.style.position = 'absolute';
 			p.sldM.style.right = '0';
 			p.sldM.style.top = '0';
-			p.sldM.style.width = jscolor.images.sld[0] + jscolor.images.arrow[0] + THIS.pickerFace + 2*THIS.pickerInset + 'px';
+			p.sldM.style.width = jscolor.images.sld[0] + jscolor.images.arrow[0] + this.pickerFace + 2*this.pickerInset + 'px';
 			p.sldM.style.height = p.box.style.height;
 			try {
 				p.sldM.style.cursor = 'pointer';
 			} catch(eOldIE) {
 				p.sldM.style.cursor = 'hand';
 			}
-
+            var THIS = this;
 			// "close" button
-			function setBtnBorder() {
+			function setBtnBorder() 
+            {
 				var insetColors = THIS.pickerInsetColor.split(/\s+/);
-				var pickerOutsetColor = insetColors.length < 2 ? insetColors[0] : insetColors[1] + ' ' + insetColors[0] + ' ' + insetColors[0] + ' ' + insetColors[1];
+				var pickerOutsetColor = insetColors.length < 2 ? insetColors[0] :
+                    insetColors[1] + ' ' + insetColors[0] + ' ' + insetColors[0] +
+                    ' ' + insetColors[1];
 				p.btn.style.borderColor = pickerOutsetColor;
 			}
-			p.btn.style.display = THIS.pickerClosable ? 'block' : 'none';
+			p.btn.style.display = this.pickerClosable ? 'block' : 'none';
 			p.btn.style.position = 'absolute';
-			p.btn.style.left = THIS.pickerFace + 'px';
-			p.btn.style.bottom = THIS.pickerFace + 'px';
+			p.btn.style.left = this.pickerFace + 'px';
+			p.btn.style.bottom = this.pickerFace + 'px';
 			p.btn.style.padding = '0 15px';
 			p.btn.style.height = '18px';
-			p.btn.style.border = THIS.pickerInset + 'px solid';
+			p.btn.style.border = this.pickerInset + 'px solid';
 			setBtnBorder();
-			p.btn.style.color = THIS.pickerButtonColor;
+			p.btn.style.color = this.pickerButtonColor;
 			p.btn.style.font = '12px sans-serif';
 			p.btn.style.textAlign = 'center';
 			try {
@@ -821,28 +873,29 @@ export static class jscolor
 				p.btn.style.cursor = 'hand';
 			}
 			p.btn.onmousedown = function () {
-				THIS.hidePicker();
+				this.hidePicker();
 			};
 			p.btnS.style.lineHeight = p.btn.style.height;
-
+            var padImg;
 			// load images in optimal order
-			switch(modeID) {
-				case 0: var padImg = 'hs.png'; break;
-				case 1: var padImg = 'hv.png'; break;
+			switch(this.modeID) 
+            {
+				case 0: padImg = 'hs.png'; break;
+				case 1: padImg = 'hv.png'; break;
 			}
 			p.padM.style.backgroundImage = "url('"+jscolor.getDir()+"cross.gif')";
 			p.padM.style.backgroundRepeat = "no-repeat";
 			p.sldM.style.backgroundImage = "url('"+jscolor.getDir()+"arrow.gif')";
 			p.sldM.style.backgroundRepeat = "no-repeat";
-			p.pad.style.backgroundImage = "url('"+jscolor.getDir()+padImg+"')";
+			p.pad.style.backgroundImage = "url('"+jscolor.getDir() + padImg + "')";
 			p.pad.style.backgroundRepeat = "no-repeat";
 			p.pad.style.backgroundPosition = "0 0";
 
 			// place pointers
-			redrawPad();
-			redrawSld();
+			this.redrawPad();
+			this.redrawSld();
 
-			jscolor.picker.owner = THIS;
+			jscolor.picker.owner = this;
 
 			var doc = jscolor.picker.owner.valueElement.ownerDocument;
 			doc.getElementsByTagName('body')[0].appendChild(p.boxB);
@@ -852,33 +905,36 @@ export static class jscolor
         {
             var dims = [
 				2*o.pickerInset + 2*o.pickerFace + jscolor.images.pad[0] +
-					(o.slider ? 2*o.pickerInset + 2*jscolor.images.arrow[0] + jscolor.images.sld[0] : 0),
-				o.pickerClosable ?
-					4*o.pickerInset + 3*o.pickerFace + jscolor.images.pad[1] + o.pickerButtonHeight :
-					2*o.pickerInset + 2*o.pickerFace + jscolor.images.pad[1]
+                (o.slider ? 2*o.pickerInset + 2*jscolor.images.arrow[0] +
+                jscolor.images.sld[0] : 0), o.pickerClosable ?
+                4*o.pickerInset + 3*o.pickerFace + jscolor.images.pad[1] +
+                o.pickerButtonHeight : 2*o.pickerInset + 2*o.pickerFace +
+                jscolor.images.pad[1]
 			];
 			return dims;
         }
 
         redrawPad()
         {
+            var yComponent: any;
             // redraw the pad pointer
-			switch(modeID) {
-				case 0: var yComponent = 1; break;
-				case 1: var yComponent = 2; break;
+			switch(this.modeID) {
+				case 0: yComponent = 1; break;
+				case 1: yComponent = 2; break;
 			}
-			var x = Math.round((THIS.hsv[0]/6) * (jscolor.images.pad[0]-1));
-			var y = Math.round((1-THIS.hsv[yComponent]) * (jscolor.images.pad[1]-1));
+			var x = Math.round((this.hsv[0] / 6) * (jscolor.images.pad[0]-1));
+			var y = Math.round((1 - this.hsv[ yComponent ]) * (jscolor.images.pad[1]-1));
 			jscolor.picker.padM.style.backgroundPosition =
-				(THIS.pickerFace+THIS.pickerInset+x - Math.floor(jscolor.images.cross[0]/2)) + 'px ' +
-				(THIS.pickerFace+THIS.pickerInset+y - Math.floor(jscolor.images.cross[1]/2)) + 'px';
+				(this.pickerFace+this.pickerInset+x - Math.floor(jscolor.images.cross[0]/2)) + 
+                'px ' + (this.pickerFace+this.pickerInset+y - Math.floor(jscolor.images.cross[1]/2)) + 'px';
 
 			// redraw the slider image
 			var seg = jscolor.picker.sld.childNodes;
-
-			switch(modeID) {
+            var rgb, s, c;
+			switch(this.modeID) 
+            {
 				case 0:
-					var rgb = this.HSV_RGB(THIS.hsv[0], THIS.hsv[1], 1);
+					rgb = this.HSV_RGB(this.hsv[0], this.hsv[1], 1);
 					for(var i=0; i<seg.length; i+=1) {
 						seg[i].style.backgroundColor = 'rgb('+
 							(rgb[0]*(1-i/seg.length)*100)+'%,'+
@@ -887,25 +943,29 @@ export static class jscolor
 					}
 					break;
 				case 1:
-					var rgb, s, c = [ THIS.hsv[2], 0, 0 ];
-					var i = Math.floor(THIS.hsv[0]);
-					var f = i%2 ? THIS.hsv[0]-i : 1-(THIS.hsv[0]-i);
-					switch(i) {
+					rgb = [ this.hsv[2], 0, 0 ];
+                    s = [ this.hsv[2], 0, 0 ];
+                    c = [ this.hsv[2], 0, 0 ];
+					var i = Math.floor(this.hsv[0]);
+					var f = i % 2 ? this.hsv[0] - i : 1 - (this.hsv[0]-i);
+					switch(i) 
+                    {
 						case 6:
-						case 0: rgb=[0,1,2]; break;
-						case 1: rgb=[1,0,2]; break;
-						case 2: rgb=[2,0,1]; break;
-						case 3: rgb=[2,1,0]; break;
-						case 4: rgb=[1,2,0]; break;
-						case 5: rgb=[0,2,1]; break;
+						case 0: rgb = [0,1,2]; break;
+						case 1: rgb = [1,0,2]; break;
+						case 2: rgb = [2,0,1]; break;
+						case 3: rgb = [2,1,0]; break;
+						case 4: rgb = [1,2,0]; break;
+						case 5: rgb = [0,2,1]; break;
 					}
-					for(var i=0; i<seg.length; i+=1) {
-						s = 1 - 1/(seg.length-1)*i;
-						c[1] = c[0] * (1 - s*f);
+					for(var i=0; i < seg.length; i+=1) 
+                    {
+						s = 1 - 1 / (seg.length-1) * i;
+						c[1] = c[0] * (1 - s * f);
 						c[2] = c[0] * (1 - s);
-						seg[i].style.backgroundColor = 'rgb('+
-							(c[rgb[0]]*100)+'%,'+
-							(c[rgb[1]]*100)+'%,'+
+						seg[i].style.backgroundColor = 'rgb(' +
+							(c[rgb[0]]*100)+'%,' +
+							(c[rgb[1]]*100)+'%,' +
 							(c[rgb[2]]*100)+'%)';
 					}
 					break;
@@ -914,66 +974,78 @@ export static class jscolor
 
         redrawSld()
         {
+            var yComponent: any;
 			// redraw the slider pointer
-			switch(modeID) {
-				case 0: var yComponent = 2; break;
-				case 1: var yComponent = 1; break;
+			switch(this.modeID) 
+            {
+				case 0: yComponent = 2; break;
+				case 1: yComponent = 1; break;
 			}
-			var y = Math.round((1-THIS.hsv[yComponent]) * (jscolor.images.sld[1]-1));
+			var y = Math.round((1-this.hsv[yComponent]) * (jscolor.images.sld[1]-1));
 			jscolor.picker.sldM.style.backgroundPosition =
-				'0 ' + (THIS.pickerFace+THIS.pickerInset+y - Math.floor(jscolor.images.arrow[1]/2)) + 'px';
+				'0 ' + (this.pickerFace+this.pickerInset + y -
+                Math.floor(jscolor.images.arrow[1]/2)) + 'px';
         }
 
         isPickerOwner(): boolean
         {
-            return jscolor.picker && jscolor.picker.owner === THIS;
+            return jscolor.picker && jscolor.picker.owner === this;
         }
 
         blurTarget()
         {
-            if(this.valueElement === target) {
-				THIS.importColor();
+            if(this.valueElement === this.target) 
+            {
+				this.importColor();
 			}
-			if(THIS.pickerOnfocus) {
-				THIS.hidePicker();
+			if(this.pickerOnfocus) 
+            {
+				this.hidePicker();
 			}
         }
 
         blurValue()
         {
-            if(this.valueElement !== target) {
-				THIS.importColor();
+            if(this.valueElement !== this.target) 
+            {
+				this.importColor();
 			}
         }
 
         setPad(e: Position)
         {
 			var mpos = jscolor.getRelMousePos(e);
-			var x = mpos.x - THIS.pickerFace - THIS.pickerInset;
-			var y = mpos.y - THIS.pickerFace - THIS.pickerInset;
-			switch(modeID) {
-				case 0: THIS.fromHSV(x*(6/(jscolor.images.pad[0]-1)), 1 - y/(jscolor.images.pad[1]-1), null, leaveSld); break;
-				case 1: THIS.fromHSV(x*(6/(jscolor.images.pad[0]-1)), null, 1 - y/(jscolor.images.pad[1]-1), leaveSld); break;
+			var x = mpos.x - this.pickerFace - this.pickerInset;
+			var y = mpos.y - this.pickerFace - this.pickerInset;
+			switch(this.modeID) {
+				case 0: this.fromHSV(x*(6/(jscolor.images.pad[0]-1)), 1 -
+                    y/(jscolor.images.pad[1]-1), null, this.leaveSld); break;
+				case 1: this.fromHSV(x*(6/(jscolor.images.pad[0]-1)), null, 1 -
+                    y/(jscolor.images.pad[1]-1), this.leaveSld); break;
 			}
         }
 
         setSld(e: Position)
         {
 			var mpos = jscolor.getRelMousePos(e);
-			var y = mpos.y - THIS.pickerFace - THIS.pickerInset;
-			switch(modeID) {
-				case 0: THIS.fromHSV(null, null, 1 - y/(jscolor.images.sld[1]-1), leavePad); break;
-				case 1: THIS.fromHSV(null, 1 - y/(jscolor.images.sld[1]-1), null, leavePad); break;
+			var y = mpos.y - this.pickerFace - this.pickerInset;
+			switch(this.modeID) 
+            {
+				case 0: this.fromHSV(null, null, 1 - y/(jscolor.images.sld[1]-1), this.leavePad); break;
+				case 1: this.fromHSV(null, 1 - y/(jscolor.images.sld[1]-1), null, this.leavePad); break;
 			}
         }
 
         dispatchImmediateChange()
         {
-			if (THIS.onImmediateChange) {
-				if (typeof THIS.onImmediateChange === 'string') {
-					eval(THIS.onImmediateChange);
-				} else {
-					THIS.onImmediateChange(THIS);
+			if (this.onImmediateChange) {
+				if (typeof this.onImmediateChange === 'string') 
+                {
+					eval(this.onImmediateChange);
+				} 
+                else 
+                {
+					this.onImmediateChange(this);
 				}
 			}
         }

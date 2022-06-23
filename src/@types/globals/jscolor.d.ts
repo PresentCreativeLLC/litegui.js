@@ -1,40 +1,40 @@
 
-// declare module jscolor
+// declare type Position =
+// {
+//     x: number,
+//     y: number
+// }
+// declare type PickerMode = 'HSV' | 'HVS';
+// declare type PickerPosition = 'left' | 'right' | 'top' | 'bottom';
+// declare abstract class jscolor
 // {
 //     // declare var jscolor
 //     // declare namespace jscolor
 //     // {
-//         declare var dir: string;
-//         declare var bindClass: string;
-//         declare var preloading: boolean;
-//         declare var binding: boolean;
+//         dir: string;
+//         bindClass: string;
+//         preloading: boolean;
+//         binding: boolean;
         
-//         declare type Position =
-//         {
-//             x: number,
-//             y: number
-//         }
-//         declare type PickerMode = 'HSV' | 'HVS';
-//         declare type PickerPosition = 'left' | 'right' | 'top' | 'bottom';
 
-//         function install();
-//         function init();
-//         function getDir();
-//         function detectDir(): string | boolean;
-//         function bind();
-//         function preload();
-//         function requireImage(filename: string);
-//         function loadImage(filename: string);
-//         function loadImage(filename: string);
-//         function fetchElement(mixed: any): any;
-//         function addEvent(el: any, evnt: string, func: any);
-//         function fireEvent(el: any, evnt: string);
-//         function getElementPos(e: any): Array<number>;
-//         function getElementSize(e: any): Array<number>;
-//         function getRelMousePos(e: any): Position;
-//         function getViewPos(): Array<number>;
-//         function getViewSize(): Array<number>;
-//         declare class URI
+//         install();
+//         init();
+//         getDir();
+//         detectDir(): string | boolean;
+//         bind();
+//         preload();
+//         requireImage(filename: string);
+//         loadImage(filename: string);
+//         loadImage(filename: string);
+//         fetchElement(mixed: any): any;
+//         addEvent(el: any, evnt: string, func: any);
+//         fireEvent(el: any, evnt: string);
+//         getElementPos(e: any): Array<number>;
+//         getElementSize(e: any): Array<number>;
+//         getRelMousePos(e: any): Position;
+//         getViewPos(): Array<number>;
+//         getViewSize(): Array<number>;
+//         static URI = class URI
 //         {
 //             constructor(uri?: string)
 //             parse(uri: string): URI;
@@ -43,7 +43,7 @@
 //             removeDotSegments(path: string): string;
 //         }
 //         // function color(target: any, prop?: any): jscolor.color;
-//         declare class color
+//         static color = class color
 //         {
 //             constructor(target: any, prop?: any);
 //             required: boolean;
@@ -72,8 +72,6 @@
 //             pickerInset: number;
 //             pickerInsetColor: string;
 //             pickerZIndex: number;
-
-
 
 //             hidePicker(): void;
 //             showPicker(): void;
