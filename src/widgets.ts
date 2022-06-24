@@ -467,12 +467,12 @@ export class Checkbox
 // The tiny box to expand the children of a node
 export class Litebox
 {
-	element: HTMLSpanElementPlus | null;
+	element: any;
 	stopPropagation : boolean = false;
 
 	constructor(state: boolean, on_change: CallableFunction)
 	{
-		const element = document.createElement("span") as HTMLSpanElementPlus;
+		const element: any = document.createElement("span");
 		this.element = element;
 		element.className = "listbox " + (state ? "listopen" : "listclosed");
 		element.innerHTML = state ? "&#9660;" : "&#9658;";
@@ -504,6 +504,7 @@ export class Litebox
 		element.getValue = function () {
 			return this.dataset["value"];
 		};
+        return element;
 	}
 
 	setValue(v: boolean)
@@ -725,7 +726,7 @@ export class Slider
 
 export class LineEditor
 {
-	root: HTMLDivElementPlus;
+	root: any;
 	options: any;
 	canvas: HTMLCanvasElement;
 	selected: number;
@@ -733,7 +734,7 @@ export class LineEditor
 	constructor(value: number[][], options: any)
 	{
 		this.options = options || {};
-		const element = this.root = document.createElement("div") as HTMLDivElementPlus;
+		const element: any = this.root = document.createElement("div");
 		element.className = "curve " + (options.extraclass ? options.extraclass : "");
 		element.style.minHeight = "50px";
 		element.style.width = options.width || "100%";
@@ -765,7 +766,7 @@ export class LineEditor
 		this.last_mouse = [0, 0];
 
 		this.redraw();
-		//return element;
+		return element;
 	}
 
 	getValueAt(x: number)
