@@ -712,8 +712,7 @@ export class Inspector
             name = options.name;
             value = options.value;
         }
-        
-        let func = LiteGUI.Inspector.widget_constructors[type.toLowerCase()];
+        let func = Inspector.widget_constructors[type.toLowerCase()];
         if (!func)
         {
             console.warn("LiteGUI.Inspector do not have a widget called", type);
@@ -1926,25 +1925,30 @@ export class Inspector
      * @return {HTMLElement} the widget in the form of the DOM element that contains it
      *
      */
-    addFlags(flags: any, force_flags: any, options?: any)
+    addFlags(flags: any, force_flags?: any, options?: any)
     {
         const f: any = {};
         for (const i in flags)
-        {f[i] = flags[i];}
+        {
+            f[i] = flags[i];
+        }
         if (force_flags)
         {
             for (const i in force_flags)
             {
                 if (typeof(f[i]) == "undefined")
-                {f[i] = (force_flags[i] ? true : false);}
+                {
+                    f[i] = (force_flags[i] ? true : false);
+                }
             }
         }
-    
         for (const i in f)
         {
             const flag_options: any = {};
             for (const j in options)
-            {flag_options[j] = options[j];}
+            {
+                flag_options[j] = options[j];
+            }
     
             flag_options.callback = (function(j)
             {
@@ -2667,7 +2671,9 @@ export class Inspector
         const width = options.width || options.size || 20;
         const height = options.height || options.size || 20;
     
-        const element = this.createWidget(name,"<span class='icon' "+(options.title ? "title='"+options.title+"'" : "")+" tabIndex='"+ this.tab_index + "'></span>", options);
+        const element = this.createWidget(name,"<span class='icon' " +
+            (options.title ? "title='"+options.title+"'" : "") +
+            " tabIndex='"+ this.tab_index + "'></span>", options);
         this.tab_index++;
         const content = element.querySelector("span.wcontent");
         const icon = element.querySelector("span.icon");
@@ -3197,10 +3203,10 @@ export class Inspector
         const that = this;
         this.values.set(name, value);
     
-        const element = this.createWidget(name,"<span class='line-editor'></span>", options);
+        const element: any = this.createWidget(name,"<span class='line-editor'></span>", options);
         element.style.width = "100%";
     
-        const line_editor = new LiteGUI.LineEditor(value,options);
+        const line_editor: any = new LiteGUI.LineEditor(value, options);
         element.querySelector("span.line-editor").appendChild(line_editor);
     
         LiteGUI.bind(line_editor, "change", (e: any) =>
@@ -3215,7 +3221,7 @@ export class Inspector
         return element;
     };
     
-    addTree(name: string, value: any, options: any)
+    addTree(name: string, value: any, options?: any)
     {
         options = this.processOptions(options);
     
@@ -3250,7 +3256,7 @@ export class Inspector
         return element;
     };
     
-    addDataTree(name: string, value: any, options: any)
+    addDataTree(name: string, value: any, options?: any)
     {
         options = this.processOptions(options);
     
@@ -3296,7 +3302,7 @@ export class Inspector
      * @return {HTMLElement} the widget in the form of the DOM element that contains it
      *
      */
-    addArray(name: string, value: any, options: any)
+    addArray(name: string, value: any, options?: any)
     {
         const that = this;
     
@@ -3358,12 +3364,14 @@ export class Inspector
                 if (value[i] !== undefined) {v = value[i];}
                 const row = document.createElement("div");
                 row.className = "array-row";
-                row.innerHTML = "<span class='row-index'>" + i + "</span><span class='row-cell'></span><button style='width: 30px;' class='litebutton single row-trash'><img src='imgs/mini-icon-trash.png'/></button>";
+                row.innerHTML = "<span class='row-index'>" + i +
+                    "</span><span class='row-cell'></span><button style='width: 30px;' class='litebutton single row-trash'><img src='imgs/mini-icon-trash.png'/></button>";
                 container.appendChild(row);
     
                 const widget_row_container = row.querySelector('.row-cell');
     
-                const item_options: any = { widget_parent: widget_row_container, callback: assign.bind(undefined,{value: container.value, index: i}) };
+                const item_options: any = { widget_parent: widget_row_container,
+                        callback: assign.bind(undefined,{value: container.value, index: i}) };
                 if (options.data_options)
                 {
                     for (const j in options.data_options)
@@ -3407,14 +3415,17 @@ export class Inspector
     addContainer(name?: any, options?: any)
     {
         if (name && name.constructor !== String)
-        {console.warn("LiteGUI.Inspector.addContainer first parameter must be a string with the name");}
+        {
+            console.warn(
+                "LiteGUI.Inspector.addContainer first parameter must be a string with the name");
+        }
         const element = this.startContainer(null, options);
         this.endContainer();
         return element;
     };
     
     // Creates an empty container and sets its as active
-    startContainer(name: string | null, options: any)
+    startContainer(name: string | null, options?: any)
     {
         options = this.processOptions(options);
     
@@ -3449,7 +3460,7 @@ export class Inspector
     };
     
     // It is like a group but they cant be nested inside containers
-    addSection(name: string, options: any)
+    addSection(name: string, options?: any)
     {
         options = this.processOptions(options);
         const that = this;
@@ -3563,7 +3574,7 @@ export class Inspector
     };
     
     // A container of widgets with a title
-    beginGroup(name: string, options: any)
+    beginGroup(name: string, options?: any)
     {
         options = this.processOptions(options);
     
