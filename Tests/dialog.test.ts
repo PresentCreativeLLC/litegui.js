@@ -2,7 +2,7 @@ import { LiteGUI } from "../src/core";
 import { Dialog } from "../src/dialog";
 import { Dragger } from "../src/dragger";
 
-function Construct (options: any)
+/* function Construct (options: any)
 {
     return new Dialog(options);
 }
@@ -74,7 +74,6 @@ describe("Dialog dock to test", () => {
         width: 300, scroll: true, resizable:true, draggable: true, detachable: true };
     LiteGUI.init({wrapped: true, width: 800, height: 800});
     const dialog = Construct(options);
-/*     LiteGUI.add(dialog); */
     it("Dialog should dock to main window", () => {
         dialog.dockTo(LiteGUI);
         expect(dialog.root!.style.width).toBe("100%");
@@ -392,3 +391,4 @@ describe("Dialog close all test", () => {
         expect(dialog.close).toHaveBeenCalledTimes(document.body.querySelectorAll("litedialog").length);
     });
 });
+ */
