@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  </head>
+  <body>
+    <div id='capture' style='padding: 10px; background: #f5da55;'><h4>Hello world!</h4></div>
+    <button id='screenClick' onclick='takeScreenshot()' style='float: right;'>Take screenshot</button>
+<script>
+    function takeScreenshot(){
+        html2canvas(document.querySelector('#capture')).then(canvas => {
+        // Cuando se resuelva la promesa traerá el canvas
+        // Crear un elemento <a>
+        let enlace = document.createElement('a');
+        enlace.download = 'Captura de página web - Parzibyte.me.png';
+        // Convertir la imagen a Base64
+        enlace.href = canvas.toDataURL();
+        // Hacer click en él
+        enlace.click();
+        });
+    }
+</script>
+</body>
+</html>

@@ -46,7 +46,9 @@
   },
   "dependencies": {
     "canvas": "^2.9.1",
+    "html2canvas": "^1.4.1",
     "jest-environment-jsdom": "^27.5.1",
-    "jest-html-reporter": "3.5.0"
+    "jest-html-reporter": "3.5.0",
+    "window-scroll": "^1.0.0"
   }
 }

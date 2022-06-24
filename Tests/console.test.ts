@@ -1,5 +1,6 @@
 import { Console } from "../src/console";
-/*
+/*require('../src/index.js');
+
 function Construct (options: any)
 {
     return new Console(options);
@@ -7,6 +8,9 @@ function Construct (options: any)
 
 describe("Test de creacion de console", () => {
     const options = { prompt: "]" };
+    //const url = "https://google.com/";
+    //const features= "resizable=yes";
+    //window.open(url, '_blank', features);
     it(`Debería crear la consola`, () =>
     {
         expect(Construct(options)).toBeDefined();
