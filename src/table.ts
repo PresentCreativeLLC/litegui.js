@@ -1,13 +1,16 @@
+import { ChildNodePlus } from "./@types/globals";
 import { LiteGUI } from "./core";
 
 export class Table
 {
 	root : HTMLTableElement;
 	columns : Array<object>;
-	rows : Array<object>;
+	rows : Array<HTMLTableRowElement>;
 	column_fields : Array<any>;
 	data : Array<object>;
 	header : any;
+
+	value : any;
 
 	_must_update_header : boolean;
 
@@ -66,6 +69,7 @@ export class Table
 			{value = "";}
 
 			td.innerHTML = value;
+			this.value = this.column_fields[j];
 
 			const column = this.columns[j] as any;
 			if (column === undefined)
@@ -90,7 +94,7 @@ export class Table
 	{
 		this.data[ index ] = row;
 
-		const tr = this.rows[index] as any;
+		const tr = this.rows[index];
 		if (!tr)
 		{return;}
 
@@ -116,17 +120,17 @@ export class Table
 
 	updateCell(row : number, cell : number, data : any)
 	{
-		const tr = this.rows[ row ] as any;
+		const tr = this.rows[ row ];
 		if (!tr)
 		{return;}
-		const newCell = tr.childNodes[cell];
+		const newCell = tr.childNodes[cell] as ChildNodePlus;
 		if (!newCell) {return;}
 		newCell.innerHTML = data;
 		return newCell;
 	}
 
 
-	setColumns(columns : Array<any>)
+	setColumns(columns : Array<string | object>)
 	{
 		this.columns.length = 0;
 		this.column_fields.length = 0;
@@ -137,7 +141,7 @@ export class Table
 
 		for (let i = 0; i < columns.length; ++i)
 		{
-			let c = columns[i];
+			let c = columns[i] as any;
 
 			if (c === null || c === undefined)
 			{continue;}
@@ -201,7 +205,7 @@ export class Table
 			{
 				const data_row = this.data[i];
 				const tr = this.updateRow(i, data_row);
-				this.root.appendChild(tr);
+				this.root.appendChild(tr!);
 			}
 		}
 		else

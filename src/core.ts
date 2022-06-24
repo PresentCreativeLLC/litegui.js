@@ -66,7 +66,7 @@ let escapeHtmlEntities: any;
         LineEditor: typeof LineEditor = LineEditor;
         Slider: typeof Slider = Slider;
 		Table: typeof Table = Table;
-        special_codes: any;
+        special_codes: typeof special_codes = special_codes;
 
 		/**
 		 * Initializes the lib, must be called
@@ -75,19 +75,15 @@ let escapeHtmlEntities: any;
 		 */
 		init(options:
 			{
-				width: number,
-				height: number,
-				container: string,
-				wrapped: boolean,
-				menubar: boolean,
-				gui_callback: () => void
+				width?: number,
+				height?: number,
+				container?: string,
+				wrapped?: boolean,
+				menubar?: boolean,
+				gui_callback?: () => void
 			}): void
 		{
 			options = options || {};
-
-			if (options.width && options.height) {
-				this.setWindowSize(options.width, options.height);
-			}
 
 			// Choose main container
 			this.container = null;
@@ -122,6 +118,10 @@ let escapeHtmlEntities: any;
 			else
 			{
 				this.root = this.content = this.container;
+			}
+
+			if (options.width && options.height) {
+				this.setWindowSize(options.width, options.height);
 			}
 
 			this.root.className = "litegui-wrap fullscreen";
