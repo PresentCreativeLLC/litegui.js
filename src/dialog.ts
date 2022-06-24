@@ -14,8 +14,8 @@ export class Dialog
 	footer: HTMLDivElement | null = null;
 	dialog_window?: Window;
 	old_box?: DOMRect;
-	minimized: any = [];
-	header?: HTMLDivElement;
+	minimized: Array<any> = [];
+	header?: HTMLDivElement | null = null;
 	detach_window: any;
 	resizable: boolean = false;
 	draggable: boolean = false;
@@ -99,6 +99,7 @@ export class Dialog
 		panel.innerHTML = code;
 
 		this.root = panel;
+		this.header = panel.querySelector(".panel-header");
 		this.content = panel.querySelector(".content");
 		this.footer = panel.querySelector(".panel-footer");
 
@@ -304,7 +305,7 @@ export class Dialog
 		corner.addEventListener("mousedown", inner_mouse, true);
 	}
 
-	dockTo(parent : any, dock_type : string)
+	dockTo(parent : any, dock_type? : string)
 	{
 		if (!parent) {return;}
 		const panel = this.root as any;
@@ -439,10 +440,10 @@ export class Dialog
 
 	minimize()
 	{
-		if (this.minimized)
+		if (this.minimized.length)
 		{return;}
 
-		this.minimized = true;
+		/* this.minimized = true; */
 		this.old_box = this.root?.getBoundingClientRect();
 
 		(this.root!.querySelector(".content") as HTMLElement)!.style.display = "none";
@@ -488,7 +489,7 @@ export class Dialog
 	{
 		if (!this.minimized)
 		{return;}
-		this.minimized = false;
+		this.minimized = [];
 
 		(this.root!.querySelector(".content") as HTMLElement).style.display = "";
 		LiteGUI.draggable(this.root);
@@ -662,9 +663,8 @@ export class Dialog
 		const w = rect.width;
 		const h = rect.height;
 		let title = "Window";
-		const header = this.root?.querySelector(".panel-header");
-		if (header)
-		{title = header.textContent as string;}
+		if (this.header)
+		{title = this.header!.textContent as string;}
 
 		const dialog_window = window.open("","","width="+w+", height="+h+", location=no, status=no, menubar=no, titlebar=no, fullscreen=yes") as Window;
 		dialog_window.document.write("<head><title>"+title+"</title>");

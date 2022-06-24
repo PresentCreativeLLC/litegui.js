@@ -50,8 +50,9 @@ describe("Dialog add test", () => {
 
 describe("Dialog enable properties test", () => {
     const options = { id: "testDialog", title:"testDialog", close: true, minimize: true, 
-        width: 300, scroll: true, resizable: false, draggable: false, detachable: true };
+    width: 300, scroll: true, resizable: false, draggable: false, detachable: true };
     const dialog = Construct(options);
+    jest.spyOn(dialog, 'setResizable');
     it("Dialog resizable and draggable should be active", () => {
         dialog.enableProperties({resizable: true, draggable: true,});
         expect(dialog.setResizable).toBeCalled();
@@ -68,15 +69,18 @@ describe("Dialog set resizable test", () => {
     });
 });
 
-/* describe("Dialog dock to test", () => {
+describe("Dialog dock to test", () => {
     const options = { id: "testDialog", title:"testDialog", close: true, minimize: true, 
         width: 300, scroll: true, resizable:true, draggable: true, detachable: true };
+    LiteGUI.init({wrapped: true, width: 800, height: 800});
     const dialog = Construct(options);
-
-    it("", () => {
-        expect();
+/*     LiteGUI.add(dialog); */
+    it("Dialog should dock to main window", () => {
+        dialog.dockTo(LiteGUI);
+        expect(dialog.root!.style.width).toBe("100%");
+        expect(dialog.root!.style.height).toBe("100%");
     });
-}); */
+});
 
 describe("Dialog add button test", () => {
     const options = { id: "testDialog", title:"testDialog", close: true, minimize: true, 
@@ -88,55 +92,58 @@ describe("Dialog add button test", () => {
     });
 });
 
-/* describe("Dialog close test", () => {
-    const options = { id: "testDialog", title:"testDialog", close: true, minimize: true, 
-        width: 300, scroll: true, resizable:true, draggable: true, detachable: true };
-    const dialog = Construct(options);
-    dialog.detachWindow();
-    it("Dialog window should close", () => {
-        dialog.close();
-        expect(dialog.dialog_window?.close).toBeCalled();
-    });
-}); */
-
 describe("Dialog highlight test", () => {
     jest.useFakeTimers();
     jest.spyOn(global, 'setTimeout');
+    const focus = window.focus;
+    window.focus = jest.fn(() => ({}));
     const options = { id: "testDialog", title:"testDialog", close: true, minimize: true, 
         width: 300, scroll: true, resizable:true, draggable: true, detachable: true };
     const highlightTime = 200;
+    LiteGUI.init({wrapped: true});
     const dialog = Construct(options);
+    LiteGUI.add(dialog);
     it("Dialog should highlight", () => {
         dialog.highlight(highlightTime);
         expect(setTimeout).toHaveBeenCalled();
         expect(setTimeout).toHaveBeenLastCalledWith(expect.any(Function), highlightTime)
+        window.focus = focus;
     });
 });
 
 describe("Dialog minimize test", () => {
     const options = { id: "testDialog", title:"testDialog", close: true, minimize: true, 
-        width: 300, scroll: true, resizable:true, draggable: true, detachable: true };
+        width: 300, scroll: true, resizable:true, draggable: true, detachable: true, fullcontent: true };
+    LiteGUI.init({wrapped: true});
     const dialog = Construct(options);
+    LiteGUI.add(dialog);
+    dialog.setSize(1000, 1200);
     dialog.minimize();
     it("Dialog should minimize", () => {
         expect(dialog.root?.style.width).toBe(Dialog.MINIMIZED_WIDTH + "px");
     });
 });
 
-/* describe("Dialog arrange minimized test", () => {
+describe("Dialog arrange minimized test", () => {
     const options = { id: "testDialog", title:"testDialog", close: true, minimize: true, 
         width: 300, scroll: true, resizable:true, draggable: true, detachable: true };
+    LiteGUI.init({wrapped: true});
     const dialog = Construct(options);
-
-    it("", () => {
-        expect();
+    LiteGUI.add(dialog);
+    dialog.setSize(1000, 1200);
+    dialog.minimize();
+    it("Dialog should have a top property", () => {
+        dialog.arrangeMinimized();
+        expect(dialog.root!.style.top).toBe("-20px");
     });
 });
- */
+
 describe("Dialog maximize test", () => {
     const options = { id: "testDialog", title:"testDialog", close: true, minimize: true, 
-        width: 300, scroll: true, resizable:true, draggable: true, detachable: true };
+        width: 300, scroll: true, resizable:true, draggable: true, detachable: true, fullcontent: true };
+    LiteGUI.init({wrapped: true});
     const dialog = Construct(options);
+    LiteGUI.add(dialog);
     dialog.minimize();
     it("Dialog should maximize", () => {
         dialog.maximize();
@@ -156,8 +163,10 @@ describe("Dialog make modal test", () => {
 
 describe("Dialog bring to front test", () => {
     const options = { id: "testDialog", title:"testDialog", close: true, minimize: true, 
-        width: 300, scroll: true, resizable:true, draggable: true, detachable: true };
+    width: 300, scroll: true, resizable:true, draggable: true, detachable: true };
+    LiteGUI.init({wrapped: true});
     const dialog = Construct(options);
+    LiteGUI.add(dialog);
     it("Dialog should bring its root to front", () => {
         dialog.bringToFront();
         expect(dialog.root?.parentNode?.childNodes[dialog.root?.parentNode?.childNodes.length - 1]).toBe(dialog.root);
@@ -202,7 +211,9 @@ describe("Dialog fade in test", () => {
 describe("Dialog set position test", () => {
     const options = { id: "testDialog", title:"testDialog", close: true, minimize: true, 
         width: 300, scroll: true, resizable:true, draggable: true, detachable: true };
+    LiteGUI.init({wrapped: true});
     const dialog = Construct(options);
+    LiteGUI.add(dialog);
     const x = 450;
     const y = 550;
     dialog.setPosition(x, y);
@@ -239,7 +250,9 @@ describe("Dialog set title test", () => {
 describe("Dialog center test", () => {
     const options = { id: "testDialog", title:"testDialog", close: true, minimize: true, 
         width: 300, scroll: true, resizable:true, draggable: true, detachable: true };
+    LiteGUI.init({wrapped: true});
     const dialog = Construct(options);
+    LiteGUI.add(dialog);
     dialog.setPosition(0,0);
     it("Dialog should be centered", () => {
         dialog.center();
@@ -254,7 +267,7 @@ describe("Dialog adjust size test", () => {
     const dialog = Construct(options);
     const dragger = new Dragger(0, { disabled : false });
     dialog.add(dragger);
-    it("", () => {
+    it("Dialog should adjust size", () => {
         dialog.adjustSize(0, true);
         expect(dialog);
     });
@@ -273,28 +286,81 @@ describe("Dialog clear test", () => {
 describe("Dialog detach window test", () => {
     const options = { id: "testDialog", title:"testDialog", close: true, minimize: true, 
         width: 300, scroll: true, resizable:true, draggable: true, detachable: true };
+    const windowOpenSpy = jest.spyOn(window, "open");
+    LiteGUI.init({wrapped: true, width: 800, height: 800});
     const dialog = Construct(options);
-    dialog.detachWindow();
+    dialog.setSize(1000, 1200);
+    LiteGUI.add(dialog);
     it("Detached window should exists", () => {
-        expect(dialog.dialog_window).toBeDefined();
+        windowOpenSpy.mockImplementation(() => ({
+            document: window.document,
+            onbeforeunload: null,
+        } as Window & typeof globalThis));
+        const clientRects = dialog.root!.getClientRects;
+        dialog.root!.getClientRects = jest.fn(()=>{ return [{width: 100, height: 100}] as any });
+        dialog.detachWindow();
+        expect(windowOpenSpy).toBeCalledWith("","","width=100, height=100, location=no, status=no, menubar=no, titlebar=no, fullscreen=yes");
+        windowOpenSpy.mockRestore();
+        dialog.root!.getClientRects = clientRects;
     });
 });
 
-/* describe("Dialog reattach window test", () => {
+describe("Dialog reattach window test", () => {
     const options = { id: "testDialog", title:"testDialog", close: true, minimize: true, 
         width: 300, scroll: true, resizable:true, draggable: true, detachable: true };
+    const windowOpenSpy = jest.spyOn(window, "open");
+    LiteGUI.init({wrapped: true, width: 800, height: 800});
     const dialog = Construct(options);
+    dialog.setSize(1000, 1200);
+    LiteGUI.add(dialog);
+    windowOpenSpy.mockImplementation(() => ({
+        document: window.document,
+        close: ()=>{},
+        onbeforeunload: null,
+    } as Window & typeof globalThis));
+    const clientRects = dialog.root!.getClientRects;
+    dialog.root!.getClientRects = jest.fn(()=>{ return [{width: 100, height: 100}] as any });
     dialog.detachWindow();
     it("Detached window should reattach", () => {
         dialog.reattachWindow();
         expect(dialog.dialog_window).toBeUndefined();
+        windowOpenSpy.mockRestore();
+        dialog.root!.getClientRects = clientRects;
     });
-}); */
+});
+
+describe("Dialog close test", () => {
+    const options = { id: "testDialog", title:"testDialog", close: true, minimize: true, 
+        width: 300, scroll: true, resizable:true, draggable: true, detachable: true };
+    const openSpy = jest.spyOn(window, "open");
+    LiteGUI.init({wrapped: true, width: 800, height: 800});
+    const dialog = Construct(options);
+    dialog.setSize(1000, 1200);
+    LiteGUI.add(dialog);
+    openSpy.mockImplementation(() => ({
+        document: window.document,
+        close: ()=>{},
+        onbeforeunload: null,
+    } as Window & typeof globalThis));
+    const clientRects = dialog.root!.getClientRects;
+    dialog.root!.getClientRects = jest.fn(()=>{ return [{width: 100, height: 100}] as any });
+    dialog.detachWindow();
+    it("Dialog window should close", () => {
+        dialog.close();
+        expect(dialog.dialog_window).toBeUndefined();
+        openSpy.mockRestore();
+        openSpy.mockClear();
+        dialog.root!.getClientRects = clientRects;
+    });
+});
 
 describe("Dialog show all test", () => {
     const options = { id: "testDialog", title:"testDialog", close: true, minimize: true, 
         width: 300, scroll: true, resizable:true, draggable: true, detachable: true };
+    LiteGUI.init({wrapped: true});
     const dialog = Construct(options);
+    LiteGUI.add(dialog);
+    jest.spyOn(dialog, 'show');
     it("All dialogs should show", () => {
         dialog.showAll();
         expect(dialog.show).toHaveBeenCalledTimes(document.body.querySelectorAll("litedialog").length);
@@ -304,9 +370,12 @@ describe("Dialog show all test", () => {
 describe("Dialog hide all test", () => {
     const options = { id: "testDialog", title:"testDialog", close: true, minimize: true, 
         width: 300, scroll: true, resizable:true, draggable: true, detachable: true };
+    LiteGUI.init({wrapped: true});
     const dialog = Construct(options);
+    LiteGUI.add(dialog);
+    jest.spyOn(dialog, 'hide');
     it("All dialogs should hide", () => {
-        dialog.showAll();
+        dialog.hideAll();
         expect(dialog.hide).toHaveBeenCalledTimes(document.body.querySelectorAll("litedialog").length);
     });
 });
@@ -314,10 +383,12 @@ describe("Dialog hide all test", () => {
 describe("Dialog close all test", () => {
     const options = { id: "testDialog", title:"testDialog", close: true, minimize: true, 
         width: 300, scroll: true, resizable:true, draggable: true, detachable: true };
+    LiteGUI.init({wrapped: true});
     const dialog = Construct(options);
+    LiteGUI.add(dialog);
+    jest.spyOn(dialog, 'close');
     it("All dialogs should close", () => {
-        dialog.showAll();
-        console.log(document.body.querySelectorAll("litedialog").length);
+        dialog.closeAll();
         expect(dialog.close).toHaveBeenCalledTimes(document.body.querySelectorAll("litedialog").length);
     });
 });
