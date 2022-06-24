@@ -23,7 +23,7 @@ describe("Table Init test", () => {
 describe("Table set row test", () => {
     const options = { height : "40px", scrollable: false  }; 
     const table = Construct(options);
-
+    table.setColumns(["Name",{ name: "Age", width: 50 },"Address"]);
     table.setRows(testRows, true);
     it("Table length should be greater than 0", () => {
         expect(table.rows.length).toBeGreaterThan(0);
@@ -40,8 +40,6 @@ describe("Table add row test", () => {
 
     table.addRow(extraRow, false);
 
-    console.log(table.rows[0]);
-
     it("Table length should be 4", () => {
         expect(table.rows.length).toBe(4);
     });
@@ -50,20 +48,21 @@ describe("Table add row test", () => {
 describe("Table update row test", () => {
     const options = { height : "40px", scrollable: false  }; 
     const table = Construct(options);
-    table.setRows(testRows, true);
+    table.setColumns(["Name",{ name: "Age", width: 50 },"Address"]);
+    table.setRows(testRows, false);
 
     const extraRow = { name: "test4", age: 4, address: "none"};
     table.updateRow(0, extraRow);
     it("Table first element should be test4", () => {
-        expect((table.rows[0] as any).name).toBe("test4");
+        expect(table.rows[0].cells.item(0)!.innerHTML).toBe("test4");
     });
 });
 
 describe("Table update cell test", () => {
     const options = { height : "40px", scrollable: false  }; 
     const table = Construct(options);
-
-    table.setRows(testRows, true);
+    table.setColumns(["Name",{ name: "Age", width: 50 },"Address"]);
+    table.setRows(testRows, false);
     it("Should create and return a cell", () => {
         expect(table.updateCell(0, 0, "fixedTest" )).toBeDefined();
     });
