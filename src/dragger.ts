@@ -1,16 +1,32 @@
 import { HTMLDivElementPlus } from "./@types/globals";
 import { LiteGUI } from "./core";
 
+interface DraggerOptions
+{
+    precision: number;
+    extraclass: string;
+    full: string;
+    disabled: boolean;
+    dragger_class: string;
+    tab_index: number;
+    units: string;
+    horizontal: boolean;
+    linear: boolean;
+    step: number;
+    min: number;
+    max: number;
+}
+
 /** *** DRAGGER **********/
 export class Dragger
 {
 	value : number;
 	root : HTMLDivElementPlus;
-	options : any;
+	options : DraggerOptions;
 	input : HTMLInputElement;
 	dragging : boolean = false;
 
-	constructor(v : number, options : any)
+	constructor(v : number, options : DraggerOptions)
 	{
 		let value = v;
 		if (value === null || value === undefined)
@@ -31,7 +47,7 @@ export class Dragger
 		const precision = options.precision != undefined ? options.precision : 3; // Num decimals
 
 		this.options = options || {};
-		const element = document.createElement("div") as any;
+		const element = document.createElement("div") as HTMLDivElementPlus;
 		element.className = "dragger " + (options.extraclass ? options.extraclass : "");
 		this.root = element;
 
@@ -76,7 +92,7 @@ export class Dragger
 			return true;
 		});
 
-		const dragger = document.createElement("div") as any;
+		const dragger = document.createElement("div") as HTMLDivElementPlus;
 		dragger.className = "drag_widget";
 		if (options.disabled)
 		{dragger.className += " disabled";}
@@ -97,7 +113,7 @@ export class Dragger
 		input.addEventListener("wheel",inner_wheel.bind(input),false);
 		input.addEventListener("mousewheel",inner_wheel.bind(input),false);
 
-		let doc_binded : any = null;
+		let doc_binded : Document | null = null;
 
 		function inner_down(e : any)
 		{
@@ -194,13 +210,13 @@ export class Dragger
 		this.options.max = max;
 	}
 
-	setValue(v : any, skip_event : boolean)
+	setValue(v : string | number, skip_event : boolean)
 	{
-		let value = parseFloat(v) as any;
+		let value : number | string = parseFloat(v as string);
 		this.value = value;
 		if (this.options.precision) {value = value.toFixed(this.options.precision);}
 		if (this.options.units) {value += this.options.units;}
-		this.input.value = value;
+		this.input.value = value as string;
 		if (!skip_event) {LiteGUI.trigger(this.input, "change");}
 	}
 

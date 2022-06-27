@@ -21,6 +21,8 @@ export interface HTMLDivElementPlus extends HTMLDivElement
     canvas: canvas;
     getValueAt: Function;
     position : string;
+    input : HTMLInputElement;
+    dragger : HTMLDivElement;
 }
 
 export interface HTMLSpanElementPlus extends HTMLSpanElement
