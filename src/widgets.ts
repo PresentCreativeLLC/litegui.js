@@ -485,7 +485,7 @@ export class Litebox
 			if (e.stopPropagation) { e.stopPropagation(); }
 		};
 		//element.addEventListener("click", onclick!.bind(element));
-		element.onchange = on_change();
+		element.onchange = on_change;
 
 		element.setEmpty = function (v: boolean) {
 			if (v) { this.classList.add("empty"); }
@@ -501,10 +501,10 @@ export class Litebox
 		};
 
 
-		element.getValue = function () {
-			return this.dataset["value"];
-		};
-        return element;
+		// element.getValue = function () {
+		// 	return this.dataset["value"];
+		// };
+        // return element;
 	}
 
 	setValue(v: boolean)
@@ -529,7 +529,8 @@ export class Litebox
 
 	getValue()
 	{
-		return this.element;
+		// return this.element;
+        return this.element.dataset["value"];
 	}
 
 	setEmpty(isEmpty: boolean)

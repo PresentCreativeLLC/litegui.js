@@ -401,9 +401,9 @@ describe('Add Tree Test', () =>
                 role: "worker"
             };
         inspector.addTree(ObjName, ObjValue);
-        let a = inspector.getValue(ObjName);
+        let a = inspector.getWidget(ObjName);
         console.log('Tree: ' + a);
-        expect(a).toBe(ObjValue);
+        expect(a).toBeDefined();
     });
 });
 
