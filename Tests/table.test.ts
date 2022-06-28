@@ -1,4 +1,4 @@
-/* import { LiteGUI } from "../src/core";
+import { LiteGUI } from "../src/core";
 
 const testRows = [
     { name: "test1", age: 1, address: "none" }, 
@@ -48,7 +48,7 @@ describe("Table add row test", () => {
 describe("Table update row test", () => {
     const options = { height : "40px", scrollable: false  }; 
     const table = Construct(options);
-    table.setColumns(["Name",{ name: "Age", width: 50 },"Address"]);
+    table.setColumns(["Name",{ name: "Age", width: "50" },"Address"]);
     table.setRows(testRows, false);
 
     const extraRow = { name: "test4", age: 4, address: "none"};
@@ -88,4 +88,4 @@ describe("Table update content test", () => {
     it("Table row length should be greater than 0", () => {
         expect(table.rows.length).toBeGreaterThan(0);
     });
-}); */
+});

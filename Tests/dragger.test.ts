@@ -1,6 +1,6 @@
 import { LiteGUI } from "../src/core";
 
-/* function Construct (v: number, options: any)
+function Construct (v: number, options: any)
 {
     return new LiteGUI.Dragger(v, options);
 }
@@ -37,4 +37,4 @@ describe("Dragger get value test", () => {
     it("Value should be 0.5", () => {
         expect(dragger.getValue()).toBe(0.5);
     });
-}); */
+});
