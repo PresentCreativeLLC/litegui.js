@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+
+    <title>LiteGUI Test</title>
+    <style type='text/css'></style>
+    <link rel="stylesheet" type="text/css" href="../build/litegui.css">
+    <script type="text/javascript" src="../external/jscolor/jscolor.js"></script>
+    <script type="text/javascript" src="../build/litegui.js"></script>
+    </title>
+</head>
+
+<body>
+    <section id="consoleSection"></section>
+    <script type="text/javascript">
+		//call the init to setup 
+		LiteGUI.init();
+
+		const console = new LiteGUI.Console({ prompt: "]" });
+		console.processKeyDown(new KeyboardEvent('keydown',
+        {
+            'key': 'E'
+        }));
+		console.addMessage("Hola mundo", "msglog");
+		console.log();
+		console.warn();
+		console.error();
+		console.clear();
+		console.onAutocomplete("Hola");
+		console.onProcessCommand("Hola");
+		
+		LiteGUI.add(console);
+	</script>
+</body>
+
+</html>

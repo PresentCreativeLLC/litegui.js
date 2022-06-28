@@ -1,4 +1,5 @@
 import { HTMLElementPlus } from "./@types/globals/index"
+
 export class Console
 {
 	options: any;

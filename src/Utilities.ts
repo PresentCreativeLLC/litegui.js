@@ -1,16 +1,11 @@
-import html2canvas from "html2canvas";
+const puppeteer = require('puppeteer');
 
-export function takeAndDownloadImage(objetivo: HTMLElement)
+export async function takeScreenshot(file: string, downloadPath: string)
 {
-    html2canvas(objetivo) // Llamar a html2canvas y pasarle el elemento
-    .then(canvas => {
-      // Cuando se resuelva la promesa traerá el canvas
-      // Crear un elemento <a>
-      let enlace = document.createElement('a');
-      enlace.download = "Captura de página web - Parzibyte.me.png";
-      // Convertir la imagen a Base64
-      enlace.href = canvas.toDataURL();
-      // Hacer click en él
-      enlace.click();
-    });
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  await page.goto(file);
+  await page.screenshot({path: downloadPath, fullPage: true});
+  await page.close();
+  await browser.close();
 }

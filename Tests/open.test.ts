@@ -1,4 +1,4 @@
-let windowSpy: any;
+/*let windowSpy: any;
 
 function openStatementsReport(contactIds: string)
 {
@@ -35,3 +35,4 @@ describe('Opens an html and add stuff on it', () => {
       expect(window).toBeUndefined();
   });
 });
+*/

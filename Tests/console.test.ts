@@ -1,5 +1,5 @@
 import { Console } from "../src/console";
-/*require('../src/index.js');
+const utilities = require("../src/Utilities");
 
 function Construct (options: any)
 {
@@ -8,9 +8,6 @@ function Construct (options: any)
 
 describe("Test de creacion de console", () => {
     const options = { prompt: "]" };
-    //const url = "https://google.com/";
-    //const features= "resizable=yes";
-    //window.open(url, '_blank', features);
     it(`Debería crear la consola`, () =>
     {
         expect(Construct(options)).toBeDefined();
@@ -91,4 +88,12 @@ describe('onProcessCommand', () => {
         expect(console.onProcessCommand("Hola"));
     });
 });
-*/
+
+describe('This should try to create html', () => {
+    test('correct url is called', async () =>
+    {
+        await utilities.takeScreenshot(
+            'file:///D:/Users/Mario%20Villalvazo/Documents/GitHub/litegui.js/examples/testing.html', 'consoleTesting.png');
+        expect(1).toBe(1);
+    });
+});

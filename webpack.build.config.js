@@ -1,3 +1,4 @@
+
 const path = require("path");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const ESLintPlugin = require("eslint-webpack-plugin");
@@ -19,7 +20,8 @@ module.exports = (_env) =>
 				path.resolve(__dirname, 'src/css/style.css'),
 				path.resolve(__dirname, 'src/css/normalize.css'),
 				path.resolve(__dirname, 'src/css/widgets.css'),
-			]
+			],
+			litegui: [path.resolve(__dirname, './src/index.ts')]
 		},
 		mode: mode,
 		devtool: false,
@@ -33,25 +35,7 @@ module.exports = (_env) =>
 			new RemoveEmptyScriptsPlugin(),
 			new CleanWebpackPlugin(),
 			new ESLintPlugin(),
-			new MiniCssExtractPlugin({filename: "litegui.css"}),
-			new MergeIntoSingleFilePlugin({
-				files: {
-					"litegui.js": [
-						path.resolve(__dirname, "./src/core.js"),
-						path.resolve(__dirname, "./src/widgets.js"),
-						path.resolve(__dirname, "./src/console.js"),
-						path.resolve(__dirname, "./src/area.js"),
-						path.resolve(__dirname, "./src/menubar.js"),
-						path.resolve(__dirname, "./src/tabs.js"),
-						path.resolve(__dirname, "./src/dragger.js"),
-						path.resolve(__dirname, "./src/tree.js"),
-						path.resolve(__dirname, "./src/panel.js"),
-						path.resolve(__dirname, "./src/dialog.js"),
-						path.resolve(__dirname, "./src/table.js"),
-						path.resolve(__dirname, "./src/inspector.js")
-					]
-				}
-			})
+			new MiniCssExtractPlugin({filename: "litegui.css"})
 		],
 		module: {
 			rules: [
@@ -68,10 +52,23 @@ module.exports = (_env) =>
 		},
 		resolve: {
 			extensions: ['.ts', '.tsx', '.js'],
-			alias: {
-				stun: path.resolve(__dirname, 'src')
+			fallback: {
+			  "fs": false,
+			  "assert": false,
+			  "path": false,
+			  "polyfill": false,
+			  "buffer-util": false,
+			  "bufferutil": false,
+			  "util": false,
+			  "os": false,
+			  "stream": false,
+			  "utf-8-validate": false,
+			  "constants": false,
+			  "dns": false,
+			  "net": false,
+			  "tls": false,
 			}
-		}
+		},
 	};
 
 	return [config];

@@ -11,17 +11,8 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "@babel/core": "^7.14.8",
-    "@babel/eslint-parser": "^7.14.7",
-    "@babel/eslint-plugin": "^7.14.5",
-    "@babel/preset-env": "^7.14.8",
     "@types/jest": "27.5.2",
     "@types/node": "^17.0.41",
-    "acorn": "^8.4.1",
-    "babel-loader": "^8.2.1",
-    "babel-polyfill": "^6.26.0",
-    "browser-sync": "^2.27.4",
-    "browser-sync-webpack-plugin": "^2.2.2",
     "clean-webpack-plugin": "^4.0.0",
     "copy-webpack-plugin": "^9.0.1",
     "css-loader": "^6.4.0",
@@ -32,12 +23,13 @@
     "lint-staged": "^11.1.2",
     "mini-css-extract-plugin": "^2.4.2",
     "terser-webpack-plugin": "^5.1.4",
+		"ts-loader": "^9.2.7",
     "ts-jest": "28.0.0",
     "ts-node": "^10.8.1",
     "tslib": "^2.4.0",
     "typescript": "4.6.4",
-    "webpack": "^5.28.0",
-    "webpack-cli": "^4.6.0",
+    "webpack": "^5.73.0",
+    "webpack-cli": "^4.10.0",
     "webpack-merge-and-include-globally": "^2.3.4",
     "webpack-remove-empty-scripts": "^0.7.1"
   },
@@ -46,9 +38,10 @@
   },
   "dependencies": {
     "canvas": "^2.9.1",
-    "html2canvas": "^1.4.1",
+    "capture-website": "^2.4.0",
     "jest-environment-jsdom": "^27.5.1",
     "jest-html-reporter": "3.5.0",
-    "window-scroll": "^1.0.0"
+    "jest-puppeteer": "^6.1.0",
+    "puppeteer": "^15.1.0"
   }
 }
