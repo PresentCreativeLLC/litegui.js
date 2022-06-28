@@ -29,8 +29,53 @@
 		console.clear();
 		console.onAutocomplete("Hola");
 		console.onProcessCommand("Hola");
-		
 		LiteGUI.add(console);
+
+		const panel = new LiteGUI.Panel("Panel01", { className: "panel-header", title: "Hola mundo",
+		content: "Hola, esta es una prueba de creación de panel",
+    	width: "300", height: "150", position: [10, 10], scroll: true});
+		panel.add(new LiteGUI.Panel("Panel01_0", { className: "panel-header", title: "Hola mundo 2",
+		content: "Hola, este es el panel que se va a agregar",
+    	width: "300", height: "150", position: [10, 160], scroll: true}));
+		LiteGUI.add(panel);
+		panel.clear();
+
+		const menuBar = new LiteGUI.Menubar("Menubar01", { auto_open: true, sort_entries: false });
+		menuBar.clear();
+		menuBar.attachToPanel("panel1", { className: "panel-header", title: "Hola mundo", content: "Hola, esta es una prueba de creación de panel",
+    	width: "300", height: "150", position: [10, 10], scroll: true});
+		menuBar.add("Printeador", function(){ console.log("A menu was clicked"); });
+		//menuBar.remove("Printeador");
+		menuBar.separator("Printeador", 2);
+		const menuBar2 = menu.findMenu("Printeador");
+		if (menuBar2 != undefined)
+		{
+			if (Array.isArray(menuBar2))
+			{
+				console.warn("Findmenu: " + menuBar2[0].name);
+			}
+			else
+			{
+				console.warn("Findmenu: " + menuBar2.name);
+			}
+		}
+		menuBar.updateMenu();
+		menuBar.hidePanels();
+		const evt = new MouseEvent("click", {
+			view: window,
+			bubbles: true,
+			cancelable: true,
+			clientX: 0,
+			clientY: 0
+    	});
+		menu.showMenu(menu.menu[0], evt, menu.root);
+		LiteGUI.add(menuBar);
+
+		const tab = new LiteGUI.Tabs({ mode: "horizontal", id: "tab01", size: "full", width: 120, height: 50,
+        	callback: function () {console.log("Tab is being clicked")}}, false);
+		tab.addTab("tab02", { callback: function () {console.log("Tab is being clicked")}, title: "Este es el titulo",
+    		button: true, closable: true, tab_width: 120, id: "tab02", size: "full", width: 120, height: 50, selected: true});
+		tab.hide();
 	</script>
 </body>
 
