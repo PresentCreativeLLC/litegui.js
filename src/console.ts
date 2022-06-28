@@ -1,7 +1,12 @@
 import { HTMLElementPlus } from "./@types/globals/index"
+
+interface ConsoleOptions
+{
+	prompt: string;
+}
 export class Console
 {
-	options: any;
+	options: ConsoleOptions;
 	root: HTMLDivElement;
 	log_element: Element;
 	input: HTMLInputElement;
@@ -10,7 +15,7 @@ export class Console
 	_history_offset: number;
 	_input_blocked?: boolean;
 
-	constructor(options: any)
+	constructor(options: ConsoleOptions)
 	{
 		this.options = options || {};
 
