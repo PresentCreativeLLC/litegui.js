@@ -140,13 +140,13 @@ describe('onClick Checkbox', () => {
 describe('createCheckbox litebox', () => {
     it(`Should create liteBox`, () =>
     {
-        expect(widget.createLitebox(true, () => {console.log("litebox changed")}));
+        expect(widget.createLiteBox(true, () => {console.log("litebox changed")}));
     });
 });
 
 describe('setValue litebox', () => {
 
-    const litebox = widget.createLitebox(true, () => {console.log("litebox changed")});
+    const litebox = widget.createLiteBox(true, () => {console.log("litebox changed")});
     it(`Should set as true`, () =>
     {
         expect(litebox.setValue(true));
@@ -154,7 +154,7 @@ describe('setValue litebox', () => {
 });
 
 describe('getElement litebox', () => {
-    const litebox = widget.createLitebox(true, () => {console.log("litebox changed")});
+    const litebox = widget.createLiteBox(true, () => {console.log("litebox changed")});
     it(`Should get element`, () =>
     {
         expect(litebox.getValue()).toBeDefined();

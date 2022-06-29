@@ -10,5 +10,4 @@ export * from './panel';
 export * from './table';
 export * from './tabs';
 export * from './tree';
-export * from './Utilities';
 export * from './widgets';

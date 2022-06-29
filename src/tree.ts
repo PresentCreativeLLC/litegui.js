@@ -1306,7 +1306,7 @@ private _updateListBox(node : any, options : any = undefined, current_level : nu
 	if (!node.listbox)
 	{
 		const pre = node.title_element.querySelector(".collapsebox");
-		const box = LiteGUI.widget.createLitebox(true, (e : any) =>
+		const box = LiteGUI.widget.createLiteBox(true, (e : any) =>
 		{
 			that.onClickBox(e, node);
 			LiteGUI.trigger(that.root, "item_collapse_change", { item: node, data: box.getValue() });

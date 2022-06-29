@@ -500,7 +500,7 @@ LiteGUI.Checkbox = Checkbox;
 
 
 //the tiny box to expand the children of a node
-function createLitebox(state, on_change)
+function createLiteBox(state, on_change)
 {
 	var element = document.createElement(&quot;span&quot;);
 	element.className = &quot;listbox &quot; + (state ? &quot;listopen&quot; : &quot;listclosed&quot;);
@@ -567,7 +567,7 @@ function createLitebox(state, on_change)
 	return element;
 }	
 
-LiteGUI.createLitebox = createLitebox;
+LiteGUI.createLiteBox = createLiteBox;
 
 /**
 * List 

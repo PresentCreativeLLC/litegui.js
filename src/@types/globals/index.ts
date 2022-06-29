@@ -1,9 +1,10 @@
-import { Tabs } from "./tabs"
+import { Tabs } from "../../tabs"
+import { LiteBox } from "../../widgets"
+import { Core } from "../../core"
 
 export interface HTMLDivElementPlus extends HTMLDivElement
 {
     closingTimer: number;
-    stServiceCtr: stServiceController;
     value: number;
     valuesArray: number[][];
     data: any;
@@ -17,7 +18,7 @@ export interface HTMLDivElementPlus extends HTMLDivElement
     no_trespassing: boolean;
     show_samples: number;
     options: any;
-    canvas: canvas;
+    canvas: HTMLCanvasElement;
     getValueAt: Function;
     position : string;
 }
@@ -40,7 +41,7 @@ export interface HTMLLIElementPlus extends HTMLLIElement
 {
     data: any;
     options: any;
-    tabs: tabs;
+    tabs: Tabs;
     selected: boolean;
     title_element : HTMLDivElementPlus;
     parent_id : string;
@@ -73,6 +74,7 @@ declare global
     interface Window
     {
         tabs: Tabs;
+		LiteGUI: Core;
     }
     //declare const PubSub: any;
     //declare const Playzido: any;
