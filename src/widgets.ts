@@ -11,7 +11,7 @@ export class widget {
 		 *LiteGUI.ContextMenu = this.ContextMenu;
 		 *LiteGUI.ContextualMenu = this.ContextMenu; // LEGACY: REMOVE
 		 *LiteGUI.Checkbox = this.Checkbox;
-		 *LiteGUI.createLitebox = this.createLitebox;
+		 *LiteGUI.createLiteBox = this.createLiteBox;
 		 *LiteGUI.List = this.List;
 		 *LiteGUI.Slider = this.Slider;
 		 *LiteGUI.LineEditor = this.LineEditor;
@@ -35,9 +35,9 @@ export class widget {
 	{
 		return new Checkbox(value, on_change);
 	}
-	static createLitebox(state: boolean, on_change: CallableFunction)
+	static createLiteBox(state: boolean, on_change: CallableFunction)
 	{
-		return new Litebox(state, on_change);
+		return new LiteBox(state, on_change);
 	}
 	createList(id: string, items: any[], options: any)
 	{
@@ -465,7 +465,7 @@ export class Checkbox
 
 
 // The tiny box to expand the children of a node
-export class Litebox
+export class LiteBox
 {
 	element: any;
 	stopPropagation : boolean = false;

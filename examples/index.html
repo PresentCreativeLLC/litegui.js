@@ -5,9 +5,8 @@
 
 <title>LiteGUI Demo</title>
 	<style type='text/css'></style>
-	<link rel="stylesheet" type="text/css" href="../build/litegui.css">
-	<script type="text/javascript" src="../external/jscolor/jscolor.js"></script>
-	<script type="text/javascript" src="../build/litegui.js"></script>
+	<link rel="stylesheet" type="text/css" href="../dist/litegui.css">
+	<script type="text/javascript" src="../dist/litegui.js"></script>
 </title>
 </head>
 <body>
@@ -47,11 +46,7 @@
 		var tabs = new LiteGUI.Tabs("tabs",{ size: "full" });
 		var code_tab = tabs.addTab("Code", { size: "full" });
 
-		//show the code applying the most basic code beautify algorithm (by me!)
-		var code = escapeHtmlEntities(document.querySelector("body script").innerHTML);
-		code = beautifyCode(code);
-
-		code_tab.content.innerHTML = "<h2>Code of this example</h2><pre>" + code + "</pre>";
+		code_tab.content.innerHTML = "<h2>Code of this example</h2><pre></pre>";
 		tabs.addTab("Image", { content:"<img src='http://www.w3.org/html/logo/downloads/HTML5_Badge_512.png'/>"});
 
 		widgets.addButton(null,"Detach Code tab", function() { tabs.detachTab("Code"); });

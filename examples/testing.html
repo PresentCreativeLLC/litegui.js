@@ -5,31 +5,31 @@
 
     <title>LiteGUI Test</title>
     <style type='text/css'></style>
-    <link rel="stylesheet" type="text/css" href="../build/litegui.css">
-    <script type="text/javascript" src="../external/jscolor/jscolor.js"></script>
-    <script type="text/javascript" src="../build/litegui.js"></script>
-	<script type="text/javascript" src="../src/@types/globals"></script>
+    <link rel="stylesheet" type="text/css" href="../dist/litegui.css">
+    <script type="text/javascript" src="../dist/litegui.js"></script>
+    </title>
 </head>
 
 <body>
+    <section id="consoleSection"></section>
     <script type="text/javascript">
 		//call the init to setup 
 		LiteGUI.init();
 
-		const consoleRef = new LiteGUI.Console({ prompt: "]" });
-		consoleRef.processKeyDown(new KeyboardEvent('keydown',
+		const console = new LiteGUI.Console({ prompt: "]" });
+		console.processKeyDown(new KeyboardEvent('keydown',
         {
             'key': 'E'
         }));
-		consoleRef.addMessage("Hola mundo", "msglog");
-		consoleRef.log();
-		consoleRef.warn();
-		consoleRef.error();
-		consoleRef.clear();
-		consoleRef.onAutocomplete("Hola");
-		consoleRef.onProcessCommand("Hola");
-		LiteGUI.add(consoleRef);
-
+		console.addMessage("Hola mundo", "msglog");
+		console.log();
+		console.warn();
+		console.error();
+		console.clear();
+		console.onAutocomplete("Hola");
+		console.onProcessCommand("Hola");
+		
+		LiteGUI.add(console);
 	</script>
 </body>
 

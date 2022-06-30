@@ -1349,7 +1349,7 @@
 		if(!node.listbox)
 		{
 			var pre = node.title_element.querySelector(&quot;.collapsebox&quot;);
-			var box = LiteGUI.createLitebox(true, function(e) { 
+			var box = LiteGUI.createLiteBox(true, function(e) { 
 				that.onClickBox(e, node);
 				LiteGUI.trigger( that.root, &quot;item_collapse_change&quot;, { item: node, data: box.getValue() } );
 			});
