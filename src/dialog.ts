@@ -1,5 +1,6 @@
 import { HTMLDivElementPlus, HTMLElementPlus } from "./@types/globals";
 import { LiteGUI } from "./core";
+import { widget } from "./widgets";
 
 /** **************** DIALOG **********************/
 export class Dialog
@@ -8,18 +9,19 @@ export class Dialog
 	height?: string;
 	minWidth?: string;
 	minHeight?: string;
-	content?: HTMLDivElement;
+	content: HTMLDivElement | null = null;
 	root?: HTMLDivElementPlus = undefined;
-	footer?: HTMLDivElement;
+	footer: HTMLDivElement | null = null;
 	dialog_window?: Window;
 	old_box?: DOMRect;
-	minimized: any = [];
-	header?: HTMLDivElement;
+	minimized: Array<any> = [];
+	header?: HTMLDivElement | null = null;
 	detach_window: any;
 	resizable: boolean = false;
 	draggable: boolean = false;
 	on_resize?: Function;
 	onclose?: Function;
+	on_close?: Function;
 	on_attached_to_DOM?: Function;
 	on_detached_from_DOM?: Function;
 	private _old_height?: string;
@@ -66,7 +68,7 @@ export class Dialog
 		this.minHeight = options.minHeight || 100;
 		this.content = options.content || "";
 
-		const panel = document.createElement("div") as any;
+		const panel = document.createElement("div") as HTMLDivElementPlus;
 		if (options.id) {panel.id = options.id;}
 
 		panel.className = "litedialog " + (options.className || "");
@@ -97,6 +99,7 @@ export class Dialog
 		panel.innerHTML = code;
 
 		this.root = panel;
+		this.header = panel.querySelector(".panel-header");
 		this.content = panel.querySelector(".content");
 		this.footer = panel.querySelector(".panel-footer");
 
@@ -181,9 +184,9 @@ export class Dialog
 	 * Add widget or html to the content of the dialog
 	 * @method add
 	 */
-	add(litegui_item : any)
+	add(litegui_item : HTMLDivElementPlus | any)
 	{
-		this.content?.appendChild(litegui_item.root || litegui_item);
+		this.content?.appendChild((litegui_item as any).root || litegui_item);
 	}
 
 	// Takes the info from the parent to
@@ -302,7 +305,7 @@ export class Dialog
 		corner.addEventListener("mousedown", inner_mouse, true);
 	}
 
-	dockTo(parent : any, dock_type : string)
+	dockTo(parent : any, dock_type? : string)
 	{
 		if (!parent) {return;}
 		const panel = this.root as any;
@@ -421,12 +424,6 @@ export class Dialog
 			this.dialog_window = undefined;
 		}
 	}
-	
-	on_close() 
-	{
-		throw new Error("Method not implemented.");
-	}
-
 
 	highlight(time : number)
 	{
@@ -443,10 +440,10 @@ export class Dialog
 
 	minimize()
 	{
-		if (this.minimized)
+		if (this.minimized.length)
 		{return;}
 
-		this.minimized = true;
+		/* this.minimized = true; */
 		this.old_box = this.root?.getBoundingClientRect();
 
 		(this.root!.querySelector(".content") as HTMLElement)!.style.display = "none";
@@ -492,7 +489,7 @@ export class Dialog
 	{
 		if (!this.minimized)
 		{return;}
-		this.minimized = false;
+		this.minimized = [];
 
 		(this.root!.querySelector(".content") as HTMLElement).style.display = "";
 		LiteGUI.draggable(this.root);
@@ -540,7 +537,7 @@ export class Dialog
 	 * Shows a hidden dialog
 	 * @method show
 	 */
-	show(v : any = undefined, reference_element : any = undefined)
+	show(/* v : any = undefined, */ reference_element? : any)
 	{
 		if (!this.root?.parentNode)
 		{
@@ -568,7 +565,7 @@ export class Dialog
 	 * Hides the dialog
 	 * @method hide
 	 */
-	hide(v : any)
+	hide(/* v : any */)
 	{
 		this.root!.style.display = "none";
 		LiteGUI.trigger(this, "hidden");
@@ -656,7 +653,7 @@ export class Dialog
 		this.content!.innerHTML = "";
 	}
 
-	detachWindow(on_complete : Function | undefined, on_close : Function | undefined) : Window | undefined
+	detachWindow(on_complete? : Function, on_close? : Function) : Window | undefined
 	{
 		if (this.dialog_window)
 		{return;}
@@ -666,9 +663,8 @@ export class Dialog
 		const w = rect.width;
 		const h = rect.height;
 		let title = "Window";
-		const header = this.root?.querySelector(".panel-header");
-		if (header)
-		{title = header.textContent as string;}
+		if (this.header)
+		{title = this.header!.textContent as string;}
 
 		const dialog_window = window.open("","","width="+w+", height="+h+", location=no, status=no, menubar=no, titlebar=no, fullscreen=yes") as Window;
 		dialog_window.document.write("<head><title>"+title+"</title>");
@@ -707,7 +703,7 @@ export class Dialog
 		return dialog_window;
 	}
 
-	reattachWindow(on_complete : Function)
+	reattachWindow(/* on_complete : Function */)
 	{
 		if (!this.dialog_window)
 		{return;}
@@ -733,7 +729,7 @@ export class Dialog
 			const dialog = dialogs[i] as any;
 			dialog.dialog.show();
 		}
-	};
+	}
 
 	hideAll()
 	{
@@ -743,7 +739,7 @@ export class Dialog
 			const dialog = dialogs[i] as any;
 			dialog.dialog.hide();
 		}
-	};
+	}
 
 	closeAll()
 	{
@@ -753,6 +749,6 @@ export class Dialog
 			const dialog = dialogs[i] as any;
 			dialog.dialog.close();
 		}
-	};
+	}
 
 }
