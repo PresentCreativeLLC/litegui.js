@@ -1,3 +1,4 @@
+/*
 import { Console } from "../src/console";
 const utilities = require("../src/Utilities");
 
@@ -97,3 +98,4 @@ describe('This should try to create html', () => {
         expect(1).toBe(1);
     });
 });
+*/
