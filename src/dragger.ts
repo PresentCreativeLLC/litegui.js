@@ -3,18 +3,18 @@ import { LiteGUI } from "./core";
 
 interface DraggerOptions
 {
-    precision: number;
-    extraclass: string;
-    full: string;
-    disabled: boolean;
-    dragger_class: string;
-    tab_index: number;
-    units: string;
-    horizontal: boolean;
-    linear: boolean;
-    step: number;
-    min: number;
-    max: number;
+    precision?: number;
+    extraclass?: string;
+    full?: string;
+    disabled?: boolean;
+    dragger_class?: string;
+    tab_index?: number;
+    units?: string;
+    horizontal?: boolean;
+    linear?: boolean;
+    step?: number;
+    min?: number;
+    max?: number;
 }
 
 /** *** DRAGGER **********/
@@ -102,20 +102,20 @@ export class Dragger
 
 		dragger.addEventListener("mousedown",inner_down);
 
-		const inner_wheel = function(e : any)
+		const inner_wheel = function(e : WheelEvent)
 		{
 			if (document.activeElement !== input) {return;}
-			const delta = e.wheelDelta !== undefined ? e.wheelDelta : (e.deltaY ? -e.deltaY/3 : 0);
+			const delta = /* e.wheelDelta !== undefined ? e.wheelDelta : */ (e.deltaY ? -e.deltaY/3 : 0);
 			inner_inc(delta > 0 ? 1 : -1, e);
 			e.stopPropagation();
 			e.preventDefault();
 		};
 		input.addEventListener("wheel",inner_wheel.bind(input),false);
-		input.addEventListener("mousewheel",inner_wheel.bind(input),false);
+		/* input.addEventListener("mousewheel",inner_wheel.bind(input),false); */ //Deprecated
 
 		let doc_binded : Document | null = null;
 
-		function inner_down(e : any)
+		function inner_down(e : MouseEvent)
 		{
 			doc_binded = input.ownerDocument;
 
@@ -139,7 +139,7 @@ export class Dragger
 			e.preventDefault();
 		}
 
-		function inner_move(e : any)
+		function inner_move(e : MouseEvent)
 		{
 			const deltax = e.screenX - dragger.data[0];
 			const deltay = dragger.data[1] - e.screenY;
@@ -156,7 +156,7 @@ export class Dragger
 			return false;
 		}
 
-		function inner_up(e : any)
+		function inner_up(e : MouseEvent)
 		{
 			that.dragging = false;
 			LiteGUI.trigger(element, "stop_dragging");
@@ -172,7 +172,7 @@ export class Dragger
 			return false;
 		}
 
-		function inner_inc(v : number, e : any)
+		function inner_inc(v : number, e : KeyboardEvent | MouseEvent)
 		{
 			let value = v;
 			if (!options?.linear)

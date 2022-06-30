@@ -1,6 +1,6 @@
 import { LiteGUI } from "../src/core";
 
-const testRows = [
+/* const testRows = [
     { name: "test1", age: 1, address: "none" }, 
     { name: "test2", age: 2, address: "none" }, 
     { name: "test3", age: 3, address: "none" },
@@ -88,4 +88,4 @@ describe("Table update content test", () => {
     it("Table row length should be greater than 0", () => {
         expect(table.rows.length).toBeGreaterThan(0);
     });
-});
+}); */

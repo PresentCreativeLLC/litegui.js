@@ -1,4 +1,4 @@
-import { LiteGUI } from "../src/core";
+/* import { LiteGUI } from "../src/core";
 
 function Construct (v: number, options: any)
 {
@@ -37,4 +37,4 @@ describe("Dragger get value test", () => {
     it("Value should be 0.5", () => {
         expect(dragger.getValue()).toBe(0.5);
     });
-});
+}); */

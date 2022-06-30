@@ -1,3 +1,10 @@
+import { Dialog } from "stun/dialog";
+import { Inspector } from "stun/inspector";
+import { Menubar } from "stun/menubar";
+import { Panel } from "stun/panel";
+import { Table } from "stun/table";
+import { Tree } from "stun/tree";
+import { widget } from "stun/widgets";
 import { Tabs } from "./tabs"
 
 export interface HTMLDivElementPlus extends HTMLDivElement
@@ -68,10 +75,24 @@ export interface ChildNodePlus extends ChildNode
     innerHTML : any;
 }
 
+export interface ParentNodePlus extends ParentNode
+{
+    offsetWidth : number;
+    offsetHeight : number;
+}
+
+export interface DocumentPlus extends Document
+{
+    parentWindow : Window;
+}
+
 export interface HTMLParagraphElementPlus extends HTMLParagraphElement
 {
     data: any;
 }
+
+type LiteguiObject = Area | Console | Dialog | Dragger | Inspector | Menubar | Panel | Tabs | Table | Tree | widget;
+
 declare global
 {
     interface Window

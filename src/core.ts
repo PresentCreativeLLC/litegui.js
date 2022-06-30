@@ -1035,8 +1035,8 @@ let escapeHtmlEntities: any;
 			options.noclose = true;
 
 			const dialog = this.showMessage(content,options);
-			dialog.content!.style.paddingBottom = "10px";
-			const buttons = dialog.content!.querySelectorAll("button");
+			(dialog.content as HTMLDivElement).style.paddingBottom = "10px";
+			const buttons = (dialog.content as HTMLDivElement).querySelectorAll("button");
 
 			const inner = (v : any) =>
 			{
@@ -1111,13 +1111,13 @@ let escapeHtmlEntities: any;
 				return;
 			};
 
-			const buttons = dialog.content!.querySelectorAll("button");
+			const buttons = (dialog.content as HTMLDivElement).querySelectorAll("button");
 			for (let i = 0; i < buttons.length; i++)
 			{
 				buttons[i].addEventListener("click", inner);
 			}
 
-			const input = dialog.content!.querySelector("input,textarea");
+			const input = (dialog.content as HTMLDivElement).querySelector("input,textarea");
 			input!.addEventListener("keydown", inner_key, true);
 
 			(input as any).focus();
@@ -1151,8 +1151,8 @@ let escapeHtmlEntities: any;
 			options.noclose = true;
 
 			const dialog = this.showMessage(content,options);
-			dialog.content!.style.paddingBottom = "10px";
-			const buttons = dialog.content!.querySelectorAll("button");
+			(dialog.content as HTMLDivElement).style.paddingBottom = "10px";
+			const buttons = (dialog.content as HTMLDivElement).querySelectorAll("button");
 
 			const inner = (v : any) =>
 			{

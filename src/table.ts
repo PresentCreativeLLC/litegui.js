@@ -3,12 +3,12 @@ import { LiteGUI } from "./core";
 
 interface TableOptions
 {
-	data: Array<object>;//Array<HTMLTableRowElement>;
-	rows: Array<HTMLTableRowElement>;
-	height: number;
-	scrollable: boolean;
-	columns: Array<string | TableColumn>;
-	colums: Array<string | TableColumn>;
+	data?: Array<object>;
+	rows?: Array<HTMLTableRowElement>;
+	height?: number;
+	scrollable?: boolean;
+	columns?: Array<string | TableColumn>;
+	colums?: Array<string | TableColumn>;
 }
 
 interface TableColumn
@@ -59,7 +59,7 @@ export class Table
 		if (options.columns)
 		{this.setColumns(options.columns);}
 
-		if (options.rows)
+		if (options.rows && options.data)
 		{this.setRows(options.data);}
 	}
 
