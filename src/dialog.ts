@@ -10,7 +10,7 @@ export class Dialog
 	minWidth?: string;
 	minHeight?: string;
 	content: HTMLDivElement | null = null;
-	root?: HTMLDivElementPlus = undefined;
+	root?: HTMLDivElementPlus;
 	footer: HTMLDivElement | null = null;
 	dialog_window?: Window;
 	old_box?: DOMRect;

@@ -73,7 +73,7 @@ let escapeHtmlEntities: any;
 		 * @method init
 		 * @param {object} options some options are container, menubar,
 		 */
-		init(options:
+		init(options?:
 			{
 				width?: number,
 				height?: number,

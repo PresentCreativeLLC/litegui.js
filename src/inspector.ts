@@ -1,3 +1,4 @@
+import { HTMLDivElementPlus, HTMLElementPlus, InspectorOptions, InstanceObject, ParentNodePlus } from "./@types/globals";
 import { LiteGUI } from "./core";
 import { purgeElement } from "./core";
 import { Dragger } from "./dragger";
@@ -14,11 +15,11 @@ declare global
 
 export class Inspector 
 {
-    root: any;
-    sections: Array<Object>; // TODO: Define the objects
+    root: HTMLDivElementPlus;
+    sections: Array<HTMLDivElementPlus>;
     values: Map<string, any>;
     widgets: Array<any>;
-    widgets_by_name: Map<string, any>; // TODO: I think this is a map too
+    widgets_by_name: Map<string, any>;
     row_number: number = 0;
     tab_index: number;
     name_width: number | null = null;
@@ -28,37 +29,34 @@ export class Inspector
     widgets_per_row: number;
     one_line: Boolean | null = null;
     current_section: any;
-    _current_container_stack: any;
+    _current_container_stack: any[] = [];
     private _current_container: any;
-    on_refresh: any;
-    on_addProperty: any;
-    instance: any;
-    name: any;
-    options: any;
-    height: any;
+    on_refresh: Function | undefined;
+    on_addProperty: Function | undefined;
+    instance: {[key: string]: any} | undefined;
+    name: string = "";
+    options: InspectorOptions;
+    height: string | number | undefined | null;
 
-    constructor(options?: any) // TODO: Define the options
+    constructor(options?: InspectorOptions) // TODO: Define the options
     {
-        // For legacy code
-        if (options && options.constructor === String) {
-            const id = options;
-            options = arguments[1] || {};
-            options.id = id;
-            console.warn("LiteGUI.Inspector legacy parameter, use options as first parameter instead of id.");
-        }
-
-        options = options || {};
-        const root = document.createElement("DIV") as HTMLDivElement;
+        this.options = options || {};
+        const root = document.createElement("DIV") as HTMLDivElementPlus;
         this.root = root;
-        this.root.className = "inspector " + (options.full ? "full" : "") + (options.className || "");
-        if (options.one_line) {
+        this.root.className = "inspector " + (this.options.full ? "full" : "") +
+            (this.options.className || "");
+        if (this.options.one_line) 
+        {
             this.one_line = true;
             this.root.className += " one_line";
         }
 
-        if (options.id) { this.root.id = options.id; }
+        if (this.options.id)
+        {
+            this.root.id = (options as InspectorOptions).id || ""; 
+        }
 
-        this.sections = new Array<Object>();
+        this.sections = new Array<HTMLDivElementPlus>();
         this.values = new Map<string, any>();
         this.widgets = new Array();
         this.widgets_by_name = new Map<string, any>();
@@ -67,24 +65,24 @@ export class Inspector
         this.addContainer("", {}); // Add empty container
         this.tab_index = Math.floor(Math.random() * 10000);
 
-        if (options.width) { this.root.style.width = LiteGUI.sizeToCSS(options.width)!.toString(); }
-        if (options.height) {
-            this.root.style.height = LiteGUI.sizeToCSS(options.height)!.toString();
-            if (!options.one_line) { this.root.style.overflow = "auto"; }
+        if (this.options.width) { this.root.style.width = LiteGUI.sizeToCSS(this.options.width)!.toString(); }
+        if (this.options.height) {
+            this.root.style.height = LiteGUI.sizeToCSS(this.options.height)!.toString();
+            if (!this.options.one_line) { this.root.style.overflow = "auto"; }
         }
 
-        if (options.name_width) { this.name_width = options.name_width; }
-        if (options.widgets_width) { this.widgets_width = options.widgets_width; }
+        if (this.options.name_width) { this.name_width = this.options.name_width; }
+        if (this.options.widgets_width) { this.widgets_width = this.options.widgets_width; }
 
-        if (options.noscroll) { this.root.style.overflow = "hidden"; }
+        if (this.options.noscroll) { this.root.style.overflow = "hidden"; }
 
-        if (options.onchange) { this.onchange = options.onchange; }
+        if (this.options.onchange) { this.onchange = this.options.onchange; }
 
-        if (options.parent) { this.appendTo(options.parent, null); }
+        if (this.options.parent) { this.appendTo(this.options.parent, null); }
 
         this.className = this.root.className;
 
-        this.widgets_per_row = options.widgets_per_row || 1;
+        this.widgets_per_row = this.options.widgets_per_row || 1;
     }
 
     getValues()
@@ -111,18 +109,22 @@ export class Inspector
     };
 
     // Append the inspector to a parent
-    appendTo(parent: any, at_front: any)
+    appendTo(parent: HTMLElementPlus | string | null, at_front: boolean | null)
     {
         if (!parent)
         {return;}
         if (parent.constructor === String)
-        {parent = document.querySelector(parent as string);}
+        {
+            parent = document.querySelector(parent as string) as HTMLElementPlus;
+        }
         if (!parent)
         {return;}
         if (at_front)
-        {parent.insertBefore(this.root, parent.firstChild);}
+        {
+            (parent as HTMLElementPlus).insertBefore(this.root, (parent as HTMLElementPlus).firstChild);
+        }
         else
-        {parent.appendChild(this.root);}
+        {(parent as HTMLElementPlus).appendChild(this.root);}
     };
     
     /**
@@ -134,7 +136,7 @@ export class Inspector
         purgeElement(this.root, true); // Hack, but doesnt seem to work
     
         while (this.root.hasChildNodes())
-        {this.root.removeChild(this.root.lastChild);}
+        {this.root.removeChild(this.root.lastChild!);}
     
         this.root.className = this.className;
     
@@ -145,7 +147,7 @@ export class Inspector
         this.sections = [];
         this.current_section = null;
         this._current_container = null;
-        this._current_container_stack = null;
+        this._current_container_stack = [];
         this.addContainer();
     };
     
@@ -155,7 +157,10 @@ export class Inspector
      */
     refresh()
     {
-        if (this.on_refresh) {this.on_refresh();}
+        if (this.on_refresh)
+        {
+            this.on_refresh();
+        }
     }
     
     /*
@@ -261,23 +266,28 @@ export class Inspector
      * @param {Object} properties_info_example it overwrites the info about properties found in the object (in case the automaticaly guessed type is wrong)
      * @param {Array} properties_to_skip this properties will be ignored
      */
-    inspectInstance(instance: any, properties: any,
-        properties_info_example: any, properties_to_skip: any)
+    inspectInstance(instance: InstanceObject | {[key: string]: any}, properties?: any,
+        properties_info_example?: any, properties_to_skip?: any)
     {
-        if (!instance)
-        {return;}
+        if (!instance) {return;}
     
         if (!properties)
         {
-            if (instance.getProperties)
-            {properties = instance.getProperties();}
+            if ((instance as InstanceObject).getProperties)
+            {
+                properties = (instance as InstanceObject).getProperties();
+            }
             else
-            {properties = this.collectProperties(instance);}
+            {
+                properties = this.collectProperties(instance);
+            }
         }
     
-        const classObject = instance.constructor;
+        const classObject: any = instance.constructor;
         if (!properties_info_example && classObject.properties)
-        {properties_info_example = classObject.properties;}
+        {
+            properties_info_example = classObject.properties;
+        }
     
         /*
          * Properties info contains  name:type for every property
@@ -285,8 +295,10 @@ export class Inspector
          */
         let properties_info: any = {};
     
-        if (instance.getInspectorProperties)
-        {properties_info = instance.getInspectorProperties();}
+        if ((instance as InstanceObject).getInspectorProperties)
+        {
+            properties_info = (instance as InstanceObject).getInspectorProperties();
+        }
         else
         {
             // Add to properties_info the ones that are not specified
@@ -308,8 +320,8 @@ export class Inspector
                     {continue;} // Skip
                     properties_info[i] = inner_clone(shared_options);
                 }
-                else if (instance["@" + i]) // Guess from instance info
-                {properties_info[i] = instance["@" + i];}
+                else if ((instance as {[key: string]: any})["@" + i]) // Guess from instance info
+                {properties_info[i] = (instance as {[key: string]: any})["@" + i];}
                 else if (v === null || v === undefined) // Are you sure?
                 {continue;}
                 else
@@ -401,7 +413,7 @@ export class Inspector
             properties[i] = v;
         }
         return properties;
-    };
+    }
     
     /**
      * Adds the widgets for the properties specified in properties_info of instance, it will create callback and callback_update
@@ -435,7 +447,7 @@ export class Inspector
                 const o = { instance: instance, name: varname };
                 options.callback_update = (() => 
                 { 
-                    return this.instance[this.name]; 
+                    return this.instance![this.name]; 
                 }).bind(o);
             }
     
@@ -468,16 +480,16 @@ export class Inspector
         {
             instance.constructor.onShowProperties(instance, this);
         }
-    };
+    }
     
     /**
-     * Tryes to assigns a value to the instance stored in this.instance
+     * Tries to assign a value to the instance stored in this.instance
      * @method assignValue
      */
-    assignValue(value: any)
+    assignValue(value: string | null | any[] | any)
     {
-        const instance = this.instance;
-        const current_value = instance[ this.name ];
+        const instance = this.instance!;
+        const current_value = instance![this.name];
     
         if (current_value == null || value == null || this.options.type == "enum")
         {
@@ -485,7 +497,7 @@ export class Inspector
         }
         else if (typeof(current_value) == "number")
         {
-            instance[this.name] = parseFloat(value);
+            instance[this.name] = parseFloat(value.toString());
         }
         else if (typeof(current_value) == "string")
         {
@@ -498,10 +510,15 @@ export class Inspector
             !Object.getOwnPropertyDescriptor(Object.getPrototypeOf(instance), this.name)?.set))
         {
             for (let i = 0; i < value.length; ++i)
-            {current_value[i] = value[i];}
+            {
+                current_value[i] = value[i];
+            }
         }
-        else { instance[this.name] = value };
-    };
+        else 
+        { 
+            instance[this.name] = value 
+        }
+    }
     
     /**
      * Used by all widgets to create the container of one widget
@@ -520,7 +537,7 @@ export class Inspector
     {
         options = options || {};
         content = (content === undefined || content === null) ? "" : content;
-        const element: any = document.createElement("DIV");
+        const element: any = (document.createElement("DIV"));
         element.className = "widget " + (options.className || "");
         element.inspector = this;
         element.options = options;
@@ -533,7 +550,7 @@ export class Inspector
         const width = options.width || this.widgets_width;
         if (width)
         {
-            element.style.width = LiteGUI.sizeToCSS(width);
+            element.style.width = LiteGUI.sizeToCSS(width)?.toString()!;
             if (!element.style.width)
             {element.style.width = "calc(" + LiteGUI.sizeToCSS(width) + ")";}
             element.style.minWidth = "auto";
@@ -541,7 +558,7 @@ export class Inspector
         const height = options.height || this.height;
         if (height)
         {
-            element.style.height = LiteGUI.sizeToCSS(height);
+            element.style.height = LiteGUI.sizeToCSS(height)?.toString()!;
             if (!element.style.height)
             {element.style.height = "calc(" + LiteGUI.sizeToCSS(height) + ")";}
             element.style.minHeight = "auto";
@@ -603,7 +620,7 @@ export class Inspector
             {content_element.appendChild(content);}
         }
     
-        element.content = element.querySelector("span.info_content");
+        element.content = (element.querySelector("span.info_content") as HTMLElementPlus);
         element.remove = function()
         {
             if (this.parentNode)
@@ -614,7 +631,7 @@ export class Inspector
     };
     
     // Calls callback, triggers wchange, calls onchange in Inspector
-    onWidgetChange(element: any, name: any, value: any, options: any, expand_value: any, event: any)
+    onWidgetChange(element: any, name: string, value: any, options: any, expand_value: any, event: any)
     {
         const section = element.section; // This.current_section
     
@@ -803,11 +820,13 @@ export class Inspector
         {inputtype = "password";}
         const focus = options.focus ? "autofocus" : "";
     
-        const element = this.createWidget(name,"<span class='inputfield full "+(options.disabled?"disabled":"")+"'><input type='"+inputtype+"' tabIndex='"+this.tab_index+"' "+focus+" class='text string' value='"+value+"' "+(options.disabled?"disabled":"")+"/></span>", options);
-        const input = element.querySelector(".wcontent input");
+        const element = this.createWidget(name,"<span class='inputfield full "+(options.disabled?"disabled":"") +
+            "'><input type='"+inputtype+"' tabIndex='"+this.tab_index+"' "+focus+" class='text string' value='" +
+            value+"' "+(options.disabled?"disabled":"")+"/></span>", options);
+        const input = (element.querySelector(".wcontent input") as HTMLDivElementPlus)!;
     
         if (options.placeHolder)
-        {input.setAttribute("placeHolder",options.placeHolder);}
+        {input?.setAttribute("placeHolder",options.placeHolder);}
     
         if (options.align == "right")
         {
@@ -2646,7 +2665,7 @@ export class Inspector
         const buttons = element.querySelectorAll("button");
         const buttonCallback = (button: any, evt: any) =>
         {
-            this.onWidgetChange.call(that, element, name, button.innerHTML, options, null, evt);
+            this.onWidgetChange.call(that, element, name!, button.innerHTML, options, null, evt);
             LiteGUI.trigger(element, "wclick",button.innerHTML);
         };
         for (let i = 0; i < buttons.length; ++i)
@@ -3460,26 +3479,38 @@ export class Inspector
     };
     
     // It is like a group but they cant be nested inside containers
-    addSection(name: string, options?: any)
+    addSection(name: string, options?: InspectorOptions)
     {
-        options = this.processOptions(options);
+        let outOptions = this.processOptions(options);
         const that = this;
     
         if (this.current_section) {this.current_section.end();}
     
-        const element: any = document.createElement("DIV");
+        const element = (document.createElement("DIV") as HTMLDivElementPlus);
         element.className = "wsection";
         if (!name) {element.className += " notitle";}
-        if (options.className) {element.className += " " + options.className;}
-        if (options.collapsed && !options.no_collapse) {element.className += " collapsed";}
+        if ((outOptions as InspectorOptions).className) 
+        {
+            element.className += " " + (outOptions as InspectorOptions).className;
+        }
+        if ((outOptions as InspectorOptions).collapsed && !(outOptions as InspectorOptions).no_collapse) 
+        {
+            element.className += " collapsed";
+        }
     
-        if (options.id) {element.id = options.id;}
-        if (options.instance) {element.instance = options.instance;}
+        if ((outOptions as InspectorOptions).id) 
+        {
+            element.id = (outOptions as InspectorOptions).id || "";
+        }
+        if ((outOptions as InspectorOptions).instance) 
+        {
+            element.instance = (outOptions as InspectorOptions).instance || {};
+        }
     
         let code = "";
         if (name)
         {
-            code += "<div class='wsectiontitle'>"+(options.no_collapse ? "" :
+            code += "<div class='wsectiontitle'>"+((outOptions as InspectorOptions).no_collapse ? "" :
                 "<span class='switch-section-button'></span>")+name+"</div>";
         }
         code += "<div class='wsectioncontent'></div>";
@@ -3491,45 +3522,49 @@ export class Inspector
         this.root.appendChild(element);
         this.sections.push(element);
     
-        element.sectiontitle = element.querySelector(".wsectiontitle");
+        element.sectiontitle = element.querySelector(".wsectiontitle")!;
     
-        if (name && !options.no_collapse)
+        if (name && !(outOptions as InspectorOptions).no_collapse)
         {
-            element.sectiontitle.addEventListener("click", (e: any) =>
+            element.sectiontitle?.addEventListener("click", (e: any) =>
             {
                 if (e.target.localName == "button") {return;}
                 element.classList.toggle("collapsed");
-                const seccont = element.querySelector(".wsectioncontent");
-                seccont.style.display = seccont.style.display === "none" ? null : "none";
-                if (options.callback)
+                const seccont: HTMLElementPlus = element.querySelector(".wsectioncontent")!;
+                seccont.style.display = seccont.style.display === "none" ? "" : "none";
+                if ((options as {callback: Function}).callback)
                 {
-                    options.callback.call(element, element.classList.contains("collapsed"));
+                    (options as {callback: Function}).callback.call(element,
+                        element.classList.contains("collapsed"));
                 }
             });
         }
     
-        if (options.collapsed && !options.no_collapse)
+        if ((outOptions as InspectorOptions).collapsed && !(outOptions as InspectorOptions).no_collapse)
         {
-            element.querySelector(".wsectioncontent").style.display = "none";
+            (element!.querySelector(".wsectioncontent") as HTMLElementPlus)!.style.display = "none";
         }
     
         this.setCurrentSection(element);
     
-        if (options.widgets_per_row)
+        if ((outOptions as InspectorOptions).widgets_per_row)
         {
-            this.widgets_per_row = options.widgets_per_row;
+            this.widgets_per_row = (outOptions as InspectorOptions).widgets_per_row!;
         }
     
         element.refresh = function()
         {
-            if (element.on_refresh) {element.on_refresh.call(this, element);}
+            if (element.on_refresh) 
+            {
+                element.on_refresh.call(this, element);
+            }
         };
     
         element.end = function()
         {
             if (that.current_section != this) {return;}
     
-            that._current_container_stack = this._last_container_stack;
+            that._current_container_stack = this._last_container_stack!;
             that._current_container = null;
     
             const content = this.querySelector(".wsectioncontent");
@@ -3659,18 +3694,25 @@ export class Inspector
     
     scrollTo(id: any)
     {
-        const element = this.root.querySelector("#" + id);
+        const element = this.root.querySelector("#" + id) as HTMLElementPlus;
         if (!element) {return;}
         const top = this.root.offsetTop;
         const delta = element.offsetTop - top;
-        this.root.parentNode.parentNode.scrollTop = delta;
+        (this.root.parentNode!.parentNode! as ParentNodePlus).scrollTop = delta;
     };
     
-    processOptions(options: any)
+    processOptions(options: InspectorOptions | Function | undefined)
     {
+        let outOptions: InspectorOptions | { callback: Function} | undefined;
         if (typeof(options) == "function")
-        {options = { callback: options };}
-        return options || {};
+        {
+            outOptions = { callback: options };
+        }
+        else
+        {
+            outOptions = options;
+        }
+        return outOptions || {};
     };
     
     processElement(element: any, options: any)
