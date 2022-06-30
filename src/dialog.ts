@@ -758,7 +758,7 @@ export class Dialog
 		for (let i = 0; i < dialogs.length; i++)
 		{
 			const dialog = dialogs[i] as HTMLDivElementPlus;
-			dialog.dialog.show();
+			dialog.dialog?.show();
 		}
 	}
 
@@ -768,7 +768,7 @@ export class Dialog
 		for (let i = 0; i < dialogs.length; i++)
 		{
 			const dialog = dialogs[i] as HTMLDivElementPlus;
-			dialog.dialog.hide();
+			dialog.dialog?.hide();
 		}
 	}
 
@@ -778,7 +778,7 @@ export class Dialog
 		for (let i = 0; i < dialogs.length; i++)
 		{
 			const dialog = dialogs[i] as HTMLDivElementPlus;
-			dialog.dialog.close();
+			dialog.dialog?.close();
 		}
 	}
 

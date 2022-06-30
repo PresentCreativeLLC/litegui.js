@@ -1,30 +1,10 @@
 // Enclose in a scope
 /** **************** AREA **************/
 
+import { AreaOptions, HTMLDivElementPlus, ParentNodePlus } from "./@types/globals";
 import { LiteGUI } from "./core";
 
-interface AreaOptions
-{
-    minSplitSize: number;
-    immediateResize: boolean;
-    id: string,
-    className: string,
-    width: any,
-    height: any,
-    content_id: string,
-    autoresize: boolean
-}
 
-interface AreaRoot
-{
-    offsetWidth: number,
-    offsetHeight: number,
-    className: string,
-    id: string,
-    litearea: Area,
-    style: any,
-
-}
 
 /**
  * An Area is an stretched container.
@@ -36,7 +16,7 @@ interface AreaRoot
  */
 export class Area
 {
-    root: any;
+    root: HTMLDivElementPlus;
     options: AreaOptions;
     content: HTMLDivElement;
     _computed_size: number[];
@@ -45,37 +25,29 @@ export class Area
     direction: string | undefined;
     splitbar: HTMLDivElement | undefined;
     dynamic_section: Area | undefined;
-    size: any;
-    onresize: any; // Internal onResize event, currently is not being used
+    size: number | string | null | undefined;
+    onresize: Function | undefined;
     public static VERTICAL = "vertical";
 	public static HORIZONTAL = "horizontal";
 	public static splitbar_size = 4;
     
-    constructor(options?: AreaOptions | any, legacy?: any)
+    constructor(options?: AreaOptions)
     {
-        // For legacy code
-        if ((options && options.constructor === String) || legacy)
-        {
-            const id = options;
-            options = legacy || {};
-            options!.id = id;
-            console.warn("LiteGUI.Area legacy parameter, use options as first parameter instead of id.");
-        }
+        let optionsTemp: AreaOptions | undefined = options;
 
-        options = options! || {};
         /* The root element containing all sections */
-        const root: HTMLElement = document.createElement("div");
+        const root: HTMLDivElementPlus = document.createElement("div");
         root.className = "litearea";
-        if (options.id)
-        {root.id = options.id;}
-        if (options.className)
-        {root.className +=  " " + options.className;}
+        if (optionsTemp?.id)
+        {root.id = optionsTemp.id;}
+        if (optionsTemp?.className)
+        {root.className +=  " " + optionsTemp.className;}
 
         this.root = root;
         this.root.litearea = this; // Dbl link
 
-        let width = options.width || "100%";
-        let height = options.height || "100%";
+        let width = optionsTemp?.width || "100%";
+        let height = optionsTemp?.height || "100%";
 
         if (width < 0)
         {width = 'calc( 100% - '+Math.abs(width)+'px)';}
@@ -85,13 +57,13 @@ export class Area
         root.style.width = width;
         root.style.height = height;
 
-        this.options = options;
+        this.options = optionsTemp!;
 
         const thisArea = this;
         this._computed_size = [ this.root.offsetWidth, this.root.offsetHeight ];
 
         const content = document.createElement("div");
-        if (options.content_id)
+        if (options?.content_id)
         {content.id = options.content_id;}
         content.className = "liteareacontent";
         content.style.width = "100%";
@@ -102,7 +74,7 @@ export class Area
         this.split_direction = "none";
         this.sections = [];
 
-        if (options.autoresize)
+        if (options?.autoresize)
         {
             LiteGUI.bind(LiteGUI, "resized", () =>
             {
@@ -115,10 +87,13 @@ export class Area
     {
         num = num || 0;
         if (this.sections.length > num)
-        {return this.sections[num];}
+        {
+            return this.sections[num];
+        }
         return null;
     };
-    onResize(e?: any)
+
+    onResize(e?: Function)
     {
         const computed_size = [ this.root.offsetWidth, this.root.offsetHeight ];
         if (e && this._computed_size && computed_size[0] == 
@@ -127,8 +102,9 @@ export class Area
 
         this.sendResizeEvent(e);
     }
+
     // Sends the resize event to all the sections
-    sendResizeEvent(e?: any)
+    sendResizeEvent(e?: Function)
     {
         if (this.sections.length)
         {
@@ -142,7 +118,7 @@ export class Area
         {
             for (let j = 0; j < this.root.childNodes.length; j++)
             {
-                const element = this.root.childNodes[j];
+                const element: HTMLDivElementPlus = this.root.childNodes[j] as HTMLDivElementPlus;
                 if (element.litearea)
                 {element.litearea.onResize();}
                 else
@@ -151,21 +127,20 @@ export class Area
         }
         LiteGUI.sizeToCSS()
         // Inner callback
-        if (this.onresize)
-        {this.onresize();}
+        if (this.onresize) { this.onresize(); }
     }
 
-    public get getWidth(): any
+    public get getWidth(): number | null | string
     {
         return this.root.offsetWidth;
     }
 
-    public get getHeight(): any
+    public get getHeight(): number | null | string
     {
         return this.root.offsetHeight;
     }
 
-    public get isVisible(): any
+    public get isVisible(): boolean
     {
         return this.root.style.display != "none";
     }
@@ -179,7 +154,7 @@ export class Area
         }
 
         // Check parent height
-        const h = this.root.parentNode.offsetHeight;
+        const h = (this.root.parentNode as ParentNodePlus).offsetHeight;
 
         // Check position
         const y = this.root.getClientRects()[0].top;
@@ -188,7 +163,7 @@ export class Area
         this.root.style.height = "calc( 100% - " + y + "px )";
     }
 
-    split(direction: string, sizes: any[], editable: any)
+    split(direction: string, sizes: (string | null | number)[], editable: boolean)
     {
         if (!direction || direction.constructor !== String)
         {throw ("First parameter must be a string: 'vertical' or 'horizontal'");}
@@ -203,7 +178,7 @@ export class Area
         {throw "cannot split twice";}
 
         // Create areas
-        const area1 = new Area({ content_id: this.content.id });
+        const area1 = new Area({ content_id: this.content.id } as AreaOptions);
         area1.root.style.display = "inline-block";
         const area2 = new Area();
         area2.root.style.display = "inline-block";
@@ -235,12 +210,14 @@ export class Area
             {
                 let h = sizes[1];
                 if (typeof(h) == "number")
-                {h = sizes[1] + "px";}
+                {
+                    h = sizes[1] + "px";
+                }
 
                 area1.root.style.height = "-moz-calc( 100% - " + h + splitinfo + " )";
                 area1.root.style.height = "-webkit-calc( 100% - " + h + splitinfo + " )";
                 area1.root.style.height = "calc( 100% - " + h + splitinfo + " )";
-                area2.root.style.height = h;
+                area2.root.style.height = h!;
                 area2.size = h;
                 dynamic_section = area1;
             }
@@ -248,7 +225,9 @@ export class Area
             {
                 let h = sizes[0];
                 if (typeof(h) == "number")
-                {h = sizes[0] + "px";}
+                {
+                    h = sizes[0] + "px";
+                }
 
                 area1.root.style.height = h;
                 area1.size = h;
@@ -261,7 +240,9 @@ export class Area
             {
                 let h1 = sizes[0];
                 if (typeof(h1) == "number")
-                {h1 = sizes[0] + "px";}
+                {
+                    h1 = sizes[0] + "px";
+                }
                 let h2 = sizes[1];
                 if (typeof(h2) == "number")
                 {h2 = sizes[1] + "px";}
@@ -284,7 +265,7 @@ export class Area
                 area1.root.style.width = "-moz-calc( 100% - " + w + splitinfo + " )";
                 area1.root.style.width = "-webkit-calc( 100% - " + w + splitinfo + " )";
                 area1.root.style.width = "calc( 100% - " + w + splitinfo + " )";
-                area2.root.style.width = w;
+                area2.root.style.width = w!;
                 area2.size = sizes[1];
                 dynamic_section = area1;
             }
@@ -333,7 +314,7 @@ export class Area
         // SPLITTER DRAGGER INTERACTION
         const that = this;
         const last_pos = [0,0];
-        function inner_mousedown(e: any)
+        function inner_mousedown(e: MouseEvent)
         {
             const doc = that.root.ownerDocument;
             doc.addEventListener("mousemove",inner_mousemove);
@@ -344,7 +325,7 @@ export class Area
             e.preventDefault();
         }
 
-        function inner_mousemove(e: any)
+        function inner_mousemove(e: MouseEvent)
         {
             if (direction == "horizontal")
             {
@@ -365,7 +346,7 @@ export class Area
             {that.onResize();}
         }
 
-        function inner_mouseup(e: any)
+        function inner_mouseup(e: MouseEvent)
         {
             const doc = that.root.ownerDocument;
             doc.removeEventListener("mousemove",inner_mousemove);
@@ -384,10 +365,10 @@ export class Area
         this.root.style.display = "block";
     };
 
-    showSection(num: any)
+    showSection(num: number)
     {
         let section = this.sections[num];
-        let size: any = 0;
+        let size: string | number = 0;
 
         if (section && section.root.style.display != "none") {return;} // Already visible
 
@@ -406,14 +387,20 @@ export class Area
         {
             section = this.sections[i];
 
-            if (i == num)
-            {section.root.style.display = "inline-block";}
+            if (i == num.toString())
+            {
+                section.root.style.display = "inline-block";
+            }
             else
             {
                 if (this.direction == "horizontal")
-                {section.root.style.width = "calc( 100% - " + size + " - 5px)";}
+                {
+                    section.root.style.width = "calc( 100% - " + size + " - 5px)";
+                }
                 else
-                {section.root.style.height = "calc( 100% - " + size + " - 5px)";}
+                {
+                    section.root.style.height = "calc( 100% - " + size + " - 5px)";
+                }
             }
         }
 
@@ -422,14 +409,16 @@ export class Area
         this.sendResizeEvent();
     };
 
-    hideSection(num: any)
+    hideSection(num: number)
     {
         for (const i in this.sections)
         {
             const section = this.sections[i];
 
-            if (i == num)
-            {section.root.style.display = "none";}
+            if (i == num.toString())
+            {
+                section.root.style.display = "none";
+            }
             else
             {
                 if (this.direction == "horizontal")
@@ -445,7 +434,7 @@ export class Area
         this.sendResizeEvent();
     };
 
-    moveSplit(delta: any)
+    moveSplit(delta: number)
     {
         if (!this.sections) {return;}
 
@@ -510,22 +499,23 @@ export class Area
         {LiteGUI.trigger(areas[i], "split_moved");}
     };
 
-    addEventListener(a: any, b: any, c: any, d: any)
+    addEventListener(a: any, b: any, c?: any, d?: any)
     {
-        return this.root.addEventListener(a,b,c,d);
+        return this.root.addEventListener(a, b, c);
+        // return this.root.addEventListener(a, b, c, d);
     };
 
-    setAreaSize(area: any, size: any)
+    setAreaSize(area: any, size: number | string)
     {
         const element = this.sections[1];
-
+        
         const splitinfo = " - "+Area.splitbar_size+"px";
         element.root.style.width = "-moz-calc( 100% - " + size + splitinfo + " )";
         element.root.style.width = "-webkit-calc( 100% - " + size + splitinfo + " )";
         element.root.style.width = "calc( 100% - " + size + splitinfo + " )";
     };
 
-    merge(main_section: any)
+    merge(main_section?: number)
     {
         if (this.sections.length == 0) {throw "not splitted";}
 
@@ -573,7 +563,7 @@ export class Area
  */
 export class Split 
 {
-    root: any;
+    root: HTMLDivElementPlus;
     sections: any;
     constructor(sections: any, options: any, legacy: any) 
     {
@@ -608,14 +598,21 @@ export class Split
                 else { section.style.width = sections[i]; }
             }
 
-            else {
-                if (sections[i].id) { section.id = sections[i].id; }
-                if (options.vertical) {
-                    section.style.height = (typeof (sections[i].height) == "number" ? sections[i].height.toFixed(1) + "%" : sections[i].height);
+            else 
+            {
+                if (sections[i].id)
+                { 
+                    section.id = sections[i].id; 
                 }
-
-                else {
-                    section.style.width = (typeof (sections[i].width) == "number" ? sections[i].width.toFixed(1) + "%" : sections[i].width);
+                if (options.vertical) 
+                {
+                    section.style.height = (typeof (sections[i].height) == "number" ?
+                        sections[i].height.toFixed(1) + "%" : sections[i].height);
+                }
+                else 
+                {
+                    section.style.width = (typeof (sections[i].width) == "number" ?
+                        sections[i].width.toFixed(1) + "%" : sections[i].width);
                 }
             }
 
@@ -635,7 +632,7 @@ export class Split
         }
     }
     
-    getSection(n: any) 
+    getSection(n: number) 
     {
         return this.sections[n];
     };

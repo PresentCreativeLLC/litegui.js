@@ -5,31 +5,47 @@ import { Panel } from "stun/panel";
 import { Table } from "stun/table";
 import { Tree } from "stun/tree";
 import { widget } from "stun/widgets";
+import { Area } from "stun/area";
+import { Inspector } from "stun/inspector";
+import { jscolor } from "stun/jscolor";
 import { Tabs } from "./tabs"
+import { Dragger } from "stun/dragger";
 
 export interface HTMLDivElementPlus extends HTMLDivElement
 {
-    closingTimer: number;
-    stServiceCtr: stServiceController;
-    value: number;
-    valuesArray: number[][];
-    data: any;
-    tabs: any;
-    dialog: any;
-    bgcolor: string;
-    pointscolor: string;
-    linecolor: string;
-    xrange: number[];
-    yrange: number[];
-    defaulty: number;
-    no_trespassing: boolean;
-    show_samples: number;
-    options: any;
-    canvas: canvas;
-    getValueAt: Function;
-    position : string;
-    input : HTMLInputElement;
-    dragger : HTMLDivElement;
+    disabled?: boolean;
+    content?: HTMLElementPlus;
+    name?: string | null;
+    end?: () => void;
+    on_refresh?: Function;
+    refresh?: () => void;
+    closingTimer?: number;
+    stServiceCtr?: stServiceController;
+    value?: number;
+    valuesArray?: number[][];
+    data?: any;
+    tabs?: Tabs;
+    dialog?: Dialog;
+    dragger?: Dragger | HTMLDivElementPlus;
+    litearea?: Area;
+    inspector?: Inspector;
+    bgcolor?: string;
+    pointscolor?: string;
+    linecolor?: string;
+    xrange?: number[];
+    yrange?: number[];
+    defaulty?: number;
+    no_trespassing?: boolean;
+    show_samples?: number;
+    options?: any;
+    canvas?: canvas;
+    getValueAt?: Function;
+    position?: string;
+    instance?: any;
+    _last_container_stack?: any[];
+    sectiontitle?: Element;
+    input?: HTMLInputElement;
+    // parentNode?: ParentNode;
 }
 
 export interface HTMLSpanElementPlus extends HTMLSpanElement
@@ -62,6 +78,12 @@ export interface HTMLElementPlus extends HTMLElement
     dialog? : any;
 }
 
+export interface ParentNodePlus extends ParentNode
+{
+    offsetHeight: number;
+    scrollTop: number;
+}
+
 export interface ChildNodePlus extends ChildNode
 {
     listbox : LiteBox;
@@ -92,6 +114,62 @@ export interface HTMLParagraphElementPlus extends HTMLParagraphElement
 }
 
 type LiteguiObject = Area | Console | Dialog | Dragger | Inspector | Menubar | Panel | Tabs | Table | Tree | widget;
+
+interface AreaOptions
+{
+    minSplitSize?: number;
+    immediateResize?: boolean;
+    id?: string,
+    className?: string,
+    width?: any,
+    height?: any,
+    content_id?: string,
+    autoresize?: boolean,
+    id?: string,
+    main?: boolean,
+    inmediateResize?: boolean,
+}
+
+interface AreaRoot
+{
+    offsetWidth?: number,
+    offsetHeight?: number,
+    className?: string,
+    id?: string,
+    litearea?: Area,
+    style?: any,
+
+}
+
+interface InspectorOptions
+{
+    type?: string;
+    parent?: HTMLElementPlus;
+    onchange?: Function;
+    noscroll?: boolean;
+    widgets_width?: number | null;
+    name_width?: number | null;
+    height?: string | number | null | undefined;
+    width?: string | number | null | undefined;
+    one_line?: boolean;
+    full?: boolean;
+    offsetWidth?: number,
+    offsetHeight?: number,
+    className?: string,
+    id?: string,
+    collapsed?: boolean,
+    no_collapse?: boolean,
+    instance?: any,
+    widgets_per_row?: number,
+    
+}
+
+interface InstanceObject extends Object
+{
+    getProperties: Function,
+    getInspectorProperties: Function,
+
+}
 
 declare global
 {
