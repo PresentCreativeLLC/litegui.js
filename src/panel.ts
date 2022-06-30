@@ -19,7 +19,7 @@ export class Panel
 			id = "";
 		}
 
-		this.options = options || {};
+		this.options = options = options || {};
 
 		this.content = options.content || "";
 

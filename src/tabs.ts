@@ -250,7 +250,7 @@ export class Tabs
 	 */
 	addTab(id: string, options: any, skip_event: boolean = false) {
 		if (typeof (options) == "function") { options = { callback: options }; }
-		this.options = options || {};
+		this.options = options = options || {};
 		const that = this;
 		if (id === undefined || id === null) { id = "rand_" + ((Math.random() * 1000000) | 0); }
 

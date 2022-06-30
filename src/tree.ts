@@ -1,6 +1,6 @@
 import { ChildNodePlus, HTMLDivElementPlus, HTMLLIElementPlus } from "./@types/globals";
 import { LiteGUI }  from "./core";
-import { Litebox } from "./widgets";
+import { LiteBox } from "./widgets";
 
 export class Tree
 {

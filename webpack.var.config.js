@@ -3,23 +3,17 @@
 const webpackCommon = require('./webpack.build.config');
 const path = require("path");
 
-webpackCommon.entry.litegui = [path.resolve(__dirname, './src/varPackage.ts')];
+webpackCommon.entry.litegui = [path.resolve(__dirname, './src/core.ts')];
 
 module.exports = {
 	...webpackCommon,
-	devServer: {
-		static: {
-		  directory: path.join(__dirname, './examples'),
-		},
-	},
-	target: 'web',
 	output: {
-		path: path.resolve(__dirname, "./examples/dist"),
+		path: path.resolve(__dirname, "./dist"),
 		publicPath: "./",
         library:  {
 			name: 'LiteGUI',
 			type: 'var',
-			export: 'default',
+			export: 'LiteGUI',
 		},
 		filename: "[name].js"
 	},
