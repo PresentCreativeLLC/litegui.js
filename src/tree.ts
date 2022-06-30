@@ -1,5 +1,6 @@
 import { ChildNodePlus, HTMLDivElementPlus, HTMLLIElementPlus } from "./@types/globals";
 import { LiteGUI }  from "./core";
+import { Litebox } from "./widgets";
 
 export class Tree
 {
@@ -1306,15 +1307,20 @@ private _updateListBox(node : any, options : any = undefined, current_level : nu
 	if (!node.listbox)
 	{
 		const pre = node.title_element.querySelector(".collapsebox");
-		const box = LiteGUI.widget.createLitebox(true, (e : any) =>
+		const box = LiteGUI.widget.createLitebox(true, (e: Event) =>
 		{
 			that.onClickBox(e, node);
-			LiteGUI.trigger(that.root, "item_collapse_change", { item: node, data: box.getValue() });
+			LiteGUI.trigger(that.root, "item_collapse_change", 
+            { 
+                item: node, 
+                data: box.getValue() 
+            });
 		});
-		box.stopPropagation = true;
-		box.setEmpty(true);
-		pre.appendChild(box);
-		node.listbox = box;
+        const element = box.element;
+		element.stopPropagation = true;
+		element.setEmpty(true);
+		pre.appendChild(element);
+		node.listbox = element;
 	}
 
 	if ((options && options.collapsed) || current_level >= this.collapsed_depth)
