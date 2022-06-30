@@ -153,7 +153,7 @@ export class Tree
 		// Update parent collapse button
 		if (parent_id)
 		{
-			this._updateListBox(this._findElement(parent_id)); // No options here, this is the parent
+		this._updateListBox(this._findElement(parent_id)); // No options here, this is the parent
 		}
 
 		return element;
