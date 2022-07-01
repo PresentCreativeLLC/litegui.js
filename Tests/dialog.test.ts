@@ -1,8 +1,8 @@
-import { LiteGUI } from "../src/core";
+/* import { LiteGUI } from "../src/core";
 import { Dialog } from "../src/dialog";
 import { Dragger } from "../src/dragger";
 
-/* function Construct (options: any)
+function Construct (options: any)
 {
     return new Dialog(options);
 }
@@ -44,7 +44,7 @@ describe("Dialog add test", () => {
     const dragger = new Dragger(0, { disabled : false });
     dialog.add(dragger);
     it("Dialog should contain a dragger element", () => {
-        expect(dialog.content?.childNodes[0]).toBe(dragger.root);
+        expect((dialog.content as HTMLDivElement)?.childNodes[0]).toBe(dragger.root);
     });
 });
 
@@ -85,7 +85,7 @@ describe("Dialog add button test", () => {
     const options = { id: "testDialog", title:"testDialog", close: true, minimize: true, 
         width: 300, scroll: true, resizable:true, draggable: true, detachable: true };
     const dialog = Construct(options);
-    const button = dialog.addButton("myButton", {});
+    const button = dialog.addButton("myButton", { name: "myButton"});
     it("Dialog should add button", () => {
         expect(button).toBeInstanceOf(HTMLButtonElement);
     });
@@ -278,7 +278,7 @@ describe("Dialog clear test", () => {
     const dialog = Construct(options);
     dialog.clear();
     it("Dialog content should be empty", () => {
-        expect(dialog.content!.innerHTML).toBe("");
+        expect((dialog.content as HTMLDivElement).innerHTML).toBe("");
     });
 });
 
@@ -390,5 +390,4 @@ describe("Dialog close all test", () => {
         dialog.closeAll();
         expect(dialog.close).toHaveBeenCalledTimes(document.body.querySelectorAll("litedialog").length);
     });
-});
- */
+}); */
