@@ -1,9 +1,9 @@
 import { Tabs } from "../src/tabs";
 import { HTMLLIElementPlus } from "../src/@types/globals/index"
-/*
+
 function Construct (options: any, legacy: boolean)
 {
-    return new Tabs(options, legacy);
+    return new Tabs(options);
 }
 
 describe("Test de creacion de tab", () => {
@@ -18,7 +18,7 @@ describe('Mouse wheel', () => {
     const options = { mode: "horizontal", id: "tab01", size: "full", width: 120, height: 50,
         callback: function () {console.log("Tab is being clicked")}};
     const tab = Construct(options, false);
-    const mouseSimulation = { deltaY: 3.5 };
+    const mouseSimulation = { deltaY: 3.5 } as WheelEvent;
     it(`Debería subir en el menú`, () =>
     {
         expect(tab.onMouseWheel(mouseSimulation));
@@ -244,7 +244,7 @@ describe('onTabClicked', () => {
     element.selected = false;
     it(`Debería clickear en el tab01`, () =>
     {
-        expect(tab.onTabClicked(true, element));
+        expect(tab.onTabClicked({} as MouseEvent, element));
     });
 });
 
@@ -374,4 +374,3 @@ describe('destroy Tab', () => {
         expect(tab.destroy("tab01"));
     });
 });
-*/
