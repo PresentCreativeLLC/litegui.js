@@ -19,7 +19,7 @@ export interface HTMLDivElementPlus extends HTMLDivElement
     end?: () => void;
     on_refresh?: Function;
     refresh?: () => void;
-    closingTimer?: number;
+    closingTimer?: TimeOut;
     stServiceCtr?: stServiceController;
     value?: number;
     valuesArray?: number[][];
@@ -50,15 +50,24 @@ export interface HTMLDivElementPlus extends HTMLDivElement
 
 export interface HTMLSpanElementPlus extends HTMLSpanElement
 {
+	hide: () => void;
+	show: () => void;
+	setSelected: (v: boolean) => void;
+	setContent: (v: string, is_html: boolean) => void;
+	toggleEnabled: () => void;
     setValue: Function;
     getValue: Function;
     setEmpty: Function;
     expand: Function;
     collapse: Function;
+    item?: any;
 }
 
 export interface EventTargetPlus extends EventTarget
 {
+	value: any;
+	data(data: any);
+	classList: any;
     setValue: Function;
 }
 
@@ -111,6 +120,12 @@ export interface DocumentPlus extends Document
 export interface HTMLParagraphElementPlus extends HTMLParagraphElement
 {
     data: any;
+}
+
+export interface MouseEventPlus extends MouseEvent
+{
+	layerY: any;
+	layerX: any;
 }
 
 type LiteguiObject = Area | Console | Dialog | Dragger | Inspector | Menubar | Panel | Tabs | Table | Tree | widget;

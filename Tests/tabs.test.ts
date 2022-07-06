@@ -1,4 +1,4 @@
-import { Tabs } from "../src/tabs";
+/* import { Tabs } from "../src/tabs";
 import { HTMLLIElementPlus } from "../src/@types/globals/index"
 
 function Construct (options: any, legacy: boolean)
@@ -374,3 +374,4 @@ describe('destroy Tab', () => {
         expect(tab.destroy("tab01"));
     });
 });
+ */
