@@ -1316,7 +1316,7 @@ private _updateListBox(node : any, options : any = undefined, current_level : nu
                 data: box.getValue() 
             });
 		});
-        const element = box.element;
+        const element = box.root as any;
 		element.stopPropagation = true;
 		element.setEmpty(true);
 		pre.appendChild(element);

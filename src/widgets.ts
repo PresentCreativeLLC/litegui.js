@@ -1,5 +1,67 @@
 import { LiteGUI, special_codes } from "./core";
-import { HTMLDivElementPlus, HTMLSpanElementPlus, EventTargetPlus, HTMLLIElementPlus } from "./@types/globals/index"
+import { HTMLDivElementPlus, HTMLSpanElementPlus, EventTargetPlus, HTMLLIElementPlus, MouseEventPlus, LiteguiObject } from "./@types/globals/index"
+
+interface ButtonOptions
+{
+	callback? : Function;
+}
+
+interface SearchBoxOptions
+{
+	placeholder?: string;
+	callback?: Function
+}
+
+interface ContextMenuOptions
+{
+	autoopen?: boolean;
+	ignore_item_callbacks?: boolean;
+	callback?: Function;
+	top?: number;
+	left?: number;
+	title?: string;
+	event?: MouseEvent | PointerEvent | CustomEvent;
+	parentMenu?: ContextMenu;
+}
+
+interface ListOptions
+{
+	parent?: LiteguiObject | HTMLDivElementPlus;
+	callback?: Function;
+}
+
+interface ListItem
+{
+	name: string, title: string, id: string
+}
+
+interface SliderOptions
+{
+	min?: number;
+	max?: number;
+}
+
+interface LineEditorOptions
+{
+	callback?: Function;
+	height?: number;
+	width?: number;
+	show_samples?: number;
+	no_trespassing?: boolean;
+	defaulty?: number;
+	xrange?: number[];
+	linecolor?: string;
+	pointscolor?: string;
+	bgcolor?: string;
+	extraclass?: string;
+}
+
+interface ComplexListOptions
+{
+	height?: string | number;
+	item_code?: string;
+}
+
 // Enclose in a scope
 export class widget {
 
@@ -19,15 +81,15 @@ export class widget {
 		 */
 	}
 
-	createButton(value: string, options: any)
+	createButton(value: string, options: ButtonOptions)
 	{
 		return new Button(value, options);
 	}
-	createSearchBox(value: string, options: any)
+	createSearchBox(value: string, options: SearchBoxOptions)
 	{
 		return new SearchBox(value, options);
 	}
-	createContextMenu(valuesArray: any[], options: any)
+	createContextMenu(valuesArray: /* ContextMenuItem[] | ContextMenuItem */any, options: ContextMenuOptions)
 	{
 		return new ContextMenu(valuesArray, options);
 	}
@@ -39,19 +101,19 @@ export class widget {
 	{
 		return new LiteBox(state, on_change);
 	}
-	createList(id: string, items: any[], options: any)
+	createList(id: string, items: Array<ListItem | string>, options: ListOptions)
 	{
 		return new List(id, items, options);
 	}
-	createSlider(value: number, options: any)
+	createSlider(value: number, options: SliderOptions)
 	{
 		return new Slider(value, options);
 	}
-	createLineEditor(valuesArray: any, options: any)
+	createLineEditor(valuesArray: number[][], options: LineEditorOptions)
 	{
 		return new LineEditor(valuesArray, options);
 	}
-	createComplexList(options: any)
+	createComplexList(options: ComplexListOptions)
 	{
 		return new ComplexList(options);
 	}
@@ -62,7 +124,7 @@ export class Button
 	root: HTMLDivElement;
 	content: HTMLButtonElement;
 	callback?: Function;
-	constructor(value: string, options: any) {
+	constructor(value: string, options?: Function | ButtonOptions) {
 		options = options || {};
 
 		if (typeof (options) === "function") { options = { callback: options }; }
@@ -103,21 +165,21 @@ export class Button
 export class SearchBox
 {
 	root: HTMLDivElement;
-	options: any;
+	options: SearchBoxOptions;
 	value: string;
 	input: HTMLInputElement;
-	constructor(value: string, options: any)
+	constructor(value: string, options?: SearchBoxOptions)
 	{
 		this.options = options || {};
 		this.value = value || "";
 		const element = document.createElement("div") as HTMLDivElement;
 		element.className = "litegui searchbox";
-		const placeholder = (options.placeholder != null ? options.placeholder : "Search");
+		const placeholder = (options?.placeholder != null ? options.placeholder : "Search");
 		element.innerHTML = "<input value='" + value + "' placeholder='" + placeholder + "'/>";
 		this.input = element.querySelector("input")!;
 		this.root = element;
 	
-		this.input.onchange = function (e: any) {
+		this.input.onchange = function (e: Event) {
 			console.warn("Valor de e: " + e);
 			//const value = e.target.value;
 			//if (options.callback) { options.callback.call(this, value); }
@@ -136,6 +198,15 @@ export class SearchBox
 	}
 }
 
+interface ContextMenuItem
+{
+	content: string;
+	submenu: any;
+	has_submenu: boolean;
+	disabled: boolean;
+	title: string;
+}
+
 /**
 	* ContextMenu
 	*
@@ -151,31 +222,31 @@ export class SearchBox
 export class ContextMenu
 {
 	root: HTMLDivElementPlus;
-	options: any;
-	parentMenu: any;
+	options: ContextMenuOptions;
+	parentMenu?: ContextMenu;
 	lock?: boolean;
-	current_submenu: any;
-	constructor(values: any[], options: any)
+	current_submenu?: ContextMenu;
+	constructor(values:  any,/* Array<ContextMenuItem> | ContextMenuItem, */ options?: ContextMenuOptions)
 	{
-		options = options || {};
+		options = options! || {};
 		this.options = options;
 
 		// To link a menu with its parent
 		if (options.parentMenu) {
 			if (options.parentMenu.constructor !== this.constructor) {
 				console.error("parentMenu must be of class ContextMenu, ignoring it");
-				options.parentMenu = null;
+				options.parentMenu = undefined;
 			}
 			else {
 				this.parentMenu = options.parentMenu;
-				this.parentMenu.lock = true;
-				this.parentMenu.current_submenu = this;
+				this.parentMenu!.lock = true;
+				this.parentMenu!.current_submenu = this;
 			}
 		}
 
 		if (options.event && options.event.constructor.name !== "MouseEvent" && options.event.constructor.name !== "PointerEvent" && options.event.constructor.name !== "CustomEvent") {
 			console.error("Event passed to ContextMenu is not of type MouseEvent or CustomEvent. Ignoring it.");
-			options.event = null;
+			options.event = undefined;
 		}
 
 		const root = document.createElement("div") as HTMLDivElementPlus;
@@ -219,9 +290,12 @@ export class ContextMenu
 		// Entries
 		let num = 0;
 		for (const i in values) {
-			let name = values.constructor == Array ? values[i] : i;
-			if (name != null && name.constructor !== String) { name = name.content === undefined ? String(name) : name.content; }
-			const value = values[i];
+			let name = values.constructor == Array ? values[i as keyof object] : i;
+			if (name != null && name.constructor !== String) 
+			{ 
+				name = (name as ContextMenuItem).content === undefined ? String(name) : (name as ContextMenuItem).content; 
+			}
+			const value = values[i as keyof object];
 			this.addItem(name, value, options);
 			num++;
 		}
@@ -238,7 +312,7 @@ export class ContextMenu
 			if (root.closingTimer) { clearTimeout(root.closingTimer); }
 		});
 
-		function on_mouse_wheel(e: any) {
+		function on_mouse_wheel(e: WheelEvent) {
 			const pos = parseInt(root.style.top);
 			root.style.top = (pos + e.deltaY * 0.1).toFixed() + "px";
 			e.preventDefault();
@@ -246,12 +320,12 @@ export class ContextMenu
 		}
 
 		root.addEventListener("wheel", on_mouse_wheel, true);
-		root.addEventListener("mousewheel", on_mouse_wheel, true);
+/* 		root.addEventListener("mousewheel", on_mouse_wheel, true); */ //Deprecated
 
 
 		// Insert before checking position
 		let root_document = document;
-		if (options.event) { root_document = options.event.target.ownerDocument; }
+		if (options.event) { root_document = (options.event.target as HTMLInputElement).ownerDocument; }
 
 		if (!root_document) { root_document = document; }
 		root_document.body.appendChild(root);
@@ -262,11 +336,11 @@ export class ContextMenu
 		if (options.event) {
 			if (options.event.constructor.name !== "MouseEvent" && options.event.constructor.name !== "PointerEvent" && options.event.constructor.name !== "CustomEvent") {
 				console.warn("Event passed to ContextMenu is not of type MouseEvent");
-				options.event = null;
+				options.event = undefined;
 			}
 			else {
-				left = (options.event.pageX - 10);
-				top = (options.event.pageY - 10);
+				left = ((options.event as PointerEvent | MouseEvent).pageX - 10);
+				top = ((options.event as PointerEvent | MouseEvent).pageY - 10);
 				if (options.title) { top -= 20; }
 
 				if (options.parentMenu) {
@@ -286,11 +360,11 @@ export class ContextMenu
 		root.style.top = top + "px";
 	}
 
-	close(e: any, ignore_parent_menu: boolean) {
+	close(e?: MouseEvent, ignore_parent_menu?: boolean) {
 		if (this.root.parentNode) { this.root.parentNode.removeChild(this.root); }
 		if (this.parentMenu && !ignore_parent_menu) {
 			this.parentMenu.lock = false;
-			this.parentMenu.current_submenu = null;
+			this.parentMenu.current_submenu = undefined;
 			if (e === undefined) { this.parentMenu.close(); }
 			else if (e && !LiteGUI.isCursorOverElement(e, this.parentMenu.root)) { LiteGUI.trigger(this.parentMenu.root, "mouseleave", e); }
 		}
@@ -299,19 +373,22 @@ export class ContextMenu
 	};
 
 	// Returns the top most menu
-	getTopMenu() {
+	getTopMenu() : ContextMenu 
+	{
 		if (this.options.parentMenu) { return this.options.parentMenu.getTopMenu(); }
 		return this;
 	}
 
-	getFirstEvent() {
+	getFirstEvent() : MouseEvent | PointerEvent | CustomEvent | undefined
+	{
 		if (this.options.parentMenu) { return this.options.parentMenu.getFirstEvent(); }
 		return this.options.event;
 	}
 
-	addItem(name: string, value: any, options: any) {
+	addItem(name: string, value: any, options?: ContextMenuOptions) 
+	{
 		const that = this;
-		this.options = options || {};
+		this.options = options! || {};
 
 		const element = document.createElement("div") as HTMLDivElementPlus;
 		element.className = "litemenu-entry submenu";
@@ -347,9 +424,9 @@ export class ContextMenu
 		this.root.appendChild(element);
 
 		// Menu option clicked
-		const inner_onclick = function (e: any) {
+		const inner_onclick = function (e: MouseEvent) {
 			const el = e.target;
-			const value = el.value;
+			const value = (el as EventTargetPlus).value;
 			let close_parent = true;
 
 			if (that.current_submenu) {
@@ -357,14 +434,14 @@ export class ContextMenu
 			}
 
 			// global callback
-			if (options.callback) {
-				const r = options.callback.call(that, value, options, e);
+			if (options?.callback) {
+				const r = options!.callback.call(that, value, options, e);
 				if (r === true) { close_parent = false; }
 			}
 
 			// Special cases
 			if (value) {
-				if (value.callback && !options.ignore_item_callbacks && value.disabled !== true)  // Item callback
+				if (value.callback && !options?.ignore_item_callbacks && value.disabled !== true)  // Item callback
 				{
 					const r = value.callback.call(el, value, options, e, that);
 					if (r === true) { close_parent = false; }
@@ -379,7 +456,7 @@ export class ContextMenu
 						parentMenu: that,
 						ignore_item_callbacks: value.submenu.ignore_item_callbacks,
 						title: value.submenu.title,
-						autoopen: options.autoopen
+						autoopen: options?.autoopen
 					});
 					close_parent = false;
 				}
@@ -387,9 +464,9 @@ export class ContextMenu
 
 			if (close_parent && !that.lock) { that.close(e, true); }
 		};
-		const inner_over = function (e: any) {
+		const inner_over = function (e: MouseEvent) {
 			const el = e.target;
-			const value = el.value;
+			const value = (el as EventTargetPlus).value;
 			if (!value || !value.has_submenu) { return; }
 			inner_onclick.call(el, e);
 		};
@@ -397,7 +474,7 @@ export class ContextMenu
 		if (!disabled) {
 			element.addEventListener("click", inner_onclick.bind(element));
 		}
-		if (options.autoopen) {
+		if (options?.autoopen) {
 			element.addEventListener("mouseenter", inner_over.bind(element));
 		}
 
@@ -423,7 +500,7 @@ export class Checkbox
 		const element = this.element = document.createElement("span") as HTMLSpanElementPlus;
 		element.className = "fixed flag checkbox " + (value ? "on" : "off");
 		root.appendChild(element);
-		root.addEventListener("click", this.onClick);
+		root.addEventListener("click", this.onClick.bind(this));
 		this.onChange = on_change;
 	}
 
@@ -444,8 +521,8 @@ export class Checkbox
 		}
 		const old_value = this.value;
 		this.value = v;
-
-		this.onChange(v, old_value);
+		this.onChange();
+		//this.onChange(v, old_value);
 	}
 
 	getValue()
@@ -453,13 +530,9 @@ export class Checkbox
 		return this.root.dataset["value"] == "true";
 	}
 
-	onClick(e: any)
+	onClick()
 	{
 		this.setValue(this.root.dataset["value"] != "true");
-		if(e.preventDefault === 'function')
-		e.preventDefault();
-		if (e.stopPropagation === 'function')
-		e.stopPropagation();
 	}
 }
 
@@ -467,13 +540,13 @@ export class Checkbox
 // The tiny box to expand the children of a node
 export class LiteBox
 {
-	element: any;
+	root?: HTMLSpanElement;
 	stopPropagation : boolean = false;
 
-	constructor(state: boolean, on_change: CallableFunction)
+	constructor(state: boolean, on_change: Function)
 	{
-		const element: any = document.createElement("span");
-		this.element = element;
+		const element = document.createElement("span") as HTMLSpanElementPlus;
+		this.root = element;
 		element.className = "listbox " + (state ? "listopen" : "listclosed");
 		element.innerHTML = state ? "&#9660;" : "&#9658;";
 		element.dataset["value"] = state ? "open" : "closed";
@@ -485,7 +558,7 @@ export class LiteBox
 			if (e.stopPropagation) { e.stopPropagation(); }
 		};
 		//element.addEventListener("click", onclick!.bind(element));
-		element.onchange = on_change;
+		element.onchange = on_change as ((this: GlobalEventHandlers, ev: Event) => any);
 
 		element.setEmpty = function (v: boolean) {
 			if (v) { this.classList.add("empty"); }
@@ -507,37 +580,46 @@ export class LiteBox
         // return element;
 	}
 
-	setValue(v: boolean)
+	setValue(v?: boolean)
 	{
-		if (!this.element) { return; }
-		if (this.element.dataset["value"] == (v ? "open" : "closed")) { return; }
+		try 
+		{
+			if((v as unknown as PointerEvent).type == "click")
+			{
+				v = this.root!.dataset["value"] == "open" ? false : true;
+			}
+		} 
+		catch (error) {}
+
+		if (!this.root) { return; }
+		if (this.root.dataset["value"] == (v ? "open" : "closed")) { return; }
 
 		if (!v) {
-			this.element.dataset["value"] = "closed";
-			this.element.innerHTML = "&#9658;";
-			this.element.classList.remove("listopen");
-			this.element.classList.add("listclosed");
+			this.root.dataset["value"] = "closed";
+			this.root.innerHTML = "&#9658;";
+			this.root.classList.remove("listopen");
+			this.root.classList.add("listclosed");
 		}
 		else {
-			this.element.dataset["value"] = "open";
-			this.element.innerHTML = "&#9660;";
-			this.element.classList.add("listopen");
-			this.element.classList.remove("listclosed");
+			this.root.dataset["value"] = "open";
+			this.root.innerHTML = "&#9660;";
+			this.root.classList.add("listopen");
+			this.root.classList.remove("listclosed");
 		}
-		if (this.element.onchange) { this.element.onchange(new Event("change")); }
+		if (this.root.onchange) { this.root.onchange(new Event("change")); }
 	}
 
 	getValue()
 	{
 		// return this.element;
-        return this.element.dataset["value"];
+        return this.root?.dataset["value"];
 	}
 
 	setEmpty(isEmpty: boolean)
 	{
 		if (isEmpty)
 		{
-			this.element = null;
+			this.root = undefined;
 		}
 	}
 }
@@ -554,21 +636,21 @@ export class LiteBox
  export class List
 {
 	root: HTMLUListElement;
-	callback: CallableFunction;
+	callback: Function;
 
-	constructor(id: string, items: any[], options: any)
+	constructor(id: string, items: Array<string | ListItem>, options?: ListOptions)
 	{
-		options = options || {};
+		options = options! || {};
 
 		const root = this.root = document.createElement("ul") as HTMLUListElement;
 		root.id = id;
 		root.className = "litelist";
 		const that = this;
 
-		this.callback = options.callback;
+		this.callback = options.callback!;
 
-		const onClickCallback = function (e: any) {
-			const el = e.target;
+		const onClickCallback = function (e: MouseEvent) {
+			const el = e.target as EventTargetPlus;
 			const list = root.querySelectorAll(".list-item.selected");
 			for (let j = 0; j < list.length; ++j) {
 				list[j].classList.remove("selected");
@@ -582,13 +664,13 @@ export class LiteBox
 			const item = document.createElement("li") as HTMLLIElementPlus;
 			item.className = "list-item";
 			item.data = items[i];
-			item.dataset["value"] = items[i];
+			item.dataset["value"] = items[i] as string;
 
 			let content = "";
 			if (typeof (items[i]) == "string") { content = items[i] + "<span class='arrow'></span>"; }
 			else {
-				content = (items[i].name || items[i].title || "") + "<span class='arrow'></span>";
-				if (items[i].id) { item.id = items[i].id; }
+				content = ((items[i] as ListItem).name || (items[i] as ListItem).title || "") + "<span class='arrow'></span>";
+				if ((items[i] as ListItem).id) { item.id = (items[i] as ListItem).id; }
 			}
 			item.innerHTML = content;
 
@@ -614,7 +696,7 @@ export class LiteBox
 		const items = this.root.querySelectorAll(".list-item");
 		for (let i = 0; i < items.length; i++) {
 			const item: HTMLLIElementPlus = items[i] as HTMLLIElementPlus;
-			if (item.data == name) {
+			if (item.data.id == name) {
 				LiteGUI.trigger(item, "click");
 				break;
 			}
@@ -635,25 +717,26 @@ export class Slider
 {
 	root: HTMLDivElementPlus;
 	value: number;
-	options: any;
-	doc_binded: any = null
+	options: SliderOptions;
+	doc_binded?: Document;
 	onChange?: Function;
-	constructor(value: number, options: any)
+	constructor(value: number, options?: SliderOptions)
 	{
-		this.options = options || {};
+		this.options = options! || {};
 		
 		const root = this.root = document.createElement("div") as HTMLDivElementPlus;
 		this.value = value;
 		root.className = "liteslider";
 
-		root.addEventListener("mousedown", (e: any) => {
+		root.addEventListener("mousedown", (e: MouseEvent) => {
+			const event = e as MouseEventPlus;
 			let mouseX, mouseY;
-			if (e.offsetX) { mouseX = e.offsetX; mouseY = e.offsetY; }
-			else if (e.layerX) { mouseX = e.layerX; mouseY = e.layerY; }
+			if (event.offsetX) { mouseX = event.offsetX; mouseY = event.offsetY; }
+			else if (event.layerX) { mouseX = event.layerX; mouseY = event.layerY; }
 			this.setFromX(mouseX);
 			this.doc_binded = root.ownerDocument;
-			this.doc_binded.addEventListener("mousemove", this.onMouseMove);
-			this.doc_binded.addEventListener("mouseup", this.onMouseUp);
+			this.doc_binded.addEventListener("mousemove", this.onMouseMove.bind(this));
+			this.doc_binded.addEventListener("mouseup", this.onMouseUp.bind(this));
 			e.preventDefault();
 			e.stopPropagation();
 		});
@@ -672,7 +755,7 @@ export class Slider
 		this.setValue(range * norm + min);
 	}
 
-	onMouseMove(e: any) {
+	onMouseMove(e: MouseEvent) {
 		const rect = this.root.getBoundingClientRect();
 		if (!rect) { return; }
 		const x = e.x === undefined ? e.pageX : e.x;
@@ -683,9 +766,9 @@ export class Slider
 		return false;
 	}
 
-	onMouseUp(e: any) {
+	onMouseUp(e: MouseEvent) {
 		const doc = this.doc_binded || document;
-		this.doc_binded = null;
+		this.doc_binded = undefined;
 		doc.removeEventListener("mousemove", this.onMouseMove);
 		doc.removeEventListener("mouseup", this.onMouseUp);
 		if(typeof e.preventDefault == 'function')
@@ -727,57 +810,57 @@ export class Slider
 
 export class LineEditor
 {
-	root: any;
-	options: any;
+	root: HTMLDivElementPlus;
+	options: LineEditorOptions;
 	canvas: HTMLCanvasElement;
 	selected: number;
 	last_mouse: number[];
-	constructor(value: number[][], options: any)
+	constructor(value: number[][], options?: LineEditorOptions)
 	{
-		this.options = options || {};
-		const element: any = this.root = document.createElement("div");
-		element.className = "curve " + (options.extraclass ? options.extraclass : "");
+		this.options = options! || {};
+		const element = this.root = document.createElement("div") as HTMLDivElementPlus;
+		element.className = "curve " + (this.options.extraclass ? this.options.extraclass : "");
 		element.style.minHeight = "50px";
-		element.style.width = options.width || "100%";
+		element.style.width = this.options.width?.toString() || "100%";
 
-		element.bgcolor = options.bgcolor || "#222";
-		element.pointscolor = options.pointscolor || "#5AF";
-		element.linecolor = options.linecolor || "#444";
+		element.bgcolor = this.options.bgcolor || "#222";
+		element.pointscolor = this.options.pointscolor || "#5AF";
+		element.linecolor = this.options.linecolor || "#444";
 
 		element.valuesArray = value;
-		element.xrange = options.xrange || [0, 1]; // Min,max
-		element.yrange = options.yrange || [0, 1]; // Min,max
-		element.defaulty = options.defaulty != null ? options.defaulty : 0.5;
-		element.no_trespassing = options.no_trespassing || false;
-		element.show_samples = options.show_samples || 0;
+		element.xrange = this.options.xrange || [0, 1]; // Min,max
+		element.yrange = this.options.xrange || [0, 1]; // Min,max
+		element.defaulty = this.options.defaulty != null ? this.options.defaulty : 0.5;
+		element.no_trespassing = this.options.no_trespassing || false;
+		element.show_samples = this.options.show_samples || 0;
 		element.options = options;
 		element.style.minWidth = "50px";
 		element.style.minHeight = "20px";
 
 		const canvas = this.canvas = document.createElement("canvas");
-		canvas.width = options.width || 200;
-		canvas.height = options.height || 50;
+		canvas.width = this.options.width || 200;
+		canvas.height = this.options.height || 50;
 		element.appendChild(canvas);
 		element.canvas = canvas;
 
-		element.addEventListener("mousedown", this.onmousedown);
+		element.addEventListener("mousedown", this.onmousedown.bind(this));
 
 		this.selected = -1;
 
 		this.last_mouse = [0, 0];
 
 		this.redraw();
-		return element;
+		//return element;
 	}
 
 	getValueAt(x: number)
 	{
-		if (x < this.root.xrange[0] || x > this.root.xrange[1]) { return this.root.defaulty; }
+		if (x < this.root.xrange![0] || x > this.root.xrange![1]) { return this.root.defaulty; }
 
-		let last = [this.root.xrange[0], this.root.defaulty];
+		let last = [this.root.xrange![0], this.root.defaulty] as number[];
 		let f = 0, v: number[];
-		for (let i = 0; i < this.root.valuesArray.length; i++) {
-			v = this.root.valuesArray[i];
+		for (let i = 0; i < this.root.valuesArray!.length; i++) {
+			v = this.root.valuesArray![i];
 			if (x == v[0]) { return v[1]; }
 			if (x < v[0]) {
 				f = (x - last[0]) / (v[0] - last[0]);
@@ -786,7 +869,7 @@ export class LineEditor
 			last = v;
 		}
 
-		v = [this.root.xrange[1], this.root.defaulty];
+		v = [this.root.xrange![1], this.root.defaulty!];
 		f = (x - last[0]) / (v[0] - last[0]);
 		return last[1] * (1 - f) + v[1] * f;
 	}
@@ -794,8 +877,8 @@ export class LineEditor
 	resample(samples: number)
 	{
 		const r = [];
-		const dx = (this.root.xrange[1] - this.root.xrange[0]) / samples;
-		for (let i = this.root.xrange[0]; i <= this.root.xrange[1]; i += dx) {
+		const dx = (this.root.xrange![1] - this.root.xrange![0]) / samples;
+		for (let i = this.root.xrange![0]; i <= this.root.xrange![1]; i += dx) {
 			r.push(this.getValueAt(i));
 		}
 		return r;
@@ -803,28 +886,28 @@ export class LineEditor
 
 	addValue(v: number[])
 	{
-		for (let i = 0; i < this.root.valuesArray.length; i++) {
-			const value = this.root.valuesArray[i];
+		for (let i = 0; i < this.root.valuesArray!.length; i++) {
+			const value = this.root.valuesArray![i];
 			if (value[0] < v[0]) { continue; }
-			this.root.valuesArray.splice(i, 0, v);
+			this.root.valuesArray!.splice(i, 0, v);
 			this.redraw();
 			return;
 		}
 
-		this.root.valuesArray.push(v);
+		this.root.valuesArray!.push(v);
 		this.redraw();
 	}
 
 	// Value to canvas
 	convert(v: number[]) {
-		return [this.canvas.width * ((this.root.xrange[1] - this.root.xrange[0]) * v[0] + this.root.xrange[0]),
-		this.canvas.height * ((this.root.yrange[1] - this.root.yrange[0]) * v[1] + this.root.yrange[0])];
+		return [this.canvas.width * ((this.root.xrange![1] - this.root.xrange![0]) * v[0] + this.root.xrange![0]),
+		this.canvas.height * ((this.root.yrange![1] - this.root.yrange![0]) * v[1] + this.root.yrange![0])];
 	}
 
 	// Canvas to value
 	unconvert(v: number[]) {
-		return [(v[0] / this.canvas.width - this.root.xrange[0]) / (this.root.xrange[1] - this.root.xrange[0]),
-		(v[1] / this.canvas.height - this.root.yrange[0]) / (this.root.yrange[1] - this.root.yrange[0])];
+		return [(v[0] / this.canvas.width - this.root.xrange![0]) / (this.root.xrange![1] - this.root.xrange![0]),
+		(v[1] / this.canvas.height - this.root.yrange![0]) / (this.root.yrange![1] - this.root.yrange![0])];
 	}
 
 	redraw()
@@ -840,32 +923,32 @@ export class LineEditor
 		ctx.translate(0, this.canvas.height);
 		ctx.scale(1, -1);
 
-		ctx.fillStyle = this.root.bgcolor;
+		ctx.fillStyle = this.root.bgcolor as string;
 		ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-		ctx.strokeStyle = this.root.linecolor;
+		ctx.strokeStyle = this.root.linecolor as string;
 		ctx.beginPath();
 
 		// Draw line
-		let pos = this.convert([this.root.xrange[0], this.root.defaulty]);
+		let pos = this.convert([this.root.xrange![0], this.root.defaulty!]);
 		ctx.moveTo(pos[0], pos[1]);
 
 		for (const i in this.root.valuesArray) {
-			const value: number[] = this.root.valuesArray[i];
+			const value: number[] = this.root.valuesArray[parseInt(i)];
 			pos = this.convert(value);
 			ctx.lineTo(pos[0], pos[1]);
 		}
 
-		pos = this.convert([this.root.xrange[1], this.root.defaulty]);
+		pos = this.convert([this.root.xrange![1], this.root.defaulty!]);
 		ctx.lineTo(pos[0], pos[1]);
 		ctx.stroke();
 
 		// Draw points
-		for (let i = 0; i < this.root.valuesArray.length; i += 1) {
-			const value = this.root.valuesArray[i];
+		for (let i = 0; i < this.root.valuesArray!.length; i += 1) {
+			const value = this.root.valuesArray![i];
 			pos = this.convert(value);
 			if (this.selected == i) { ctx.fillStyle = "white"; }
-			else { ctx.fillStyle = this.root.pointscolor; }
+			else { ctx.fillStyle = this.root.pointscolor as string; }
 			ctx.beginPath();
 			ctx.arc(pos[0], pos[1], this.selected == i ? 4 : 2, 0, Math.PI * 2);
 			ctx.fill();
@@ -875,7 +958,7 @@ export class LineEditor
 			const samples = this.resample(this.root.show_samples);
 			ctx.fillStyle = "#888";
 			for (let i = 0; i < samples.length; i += 1) {
-				const value = [i * ((this.root.xrange[1] - this.root.xrange[0]) / this.root.show_samples) + this.root.xrange[0], samples[i]];
+				const value = [i * ((this.root.xrange![1] - this.root.xrange![0]) / this.root.show_samples) + this.root.xrange![0], samples[i]] as number[];
 				pos = this.convert(value);
 				ctx.beginPath();
 				ctx.arc(pos[0], pos[1], 2, 0, Math.PI * 2);
@@ -885,8 +968,8 @@ export class LineEditor
 	}
 
 	onmousedown(evt: MouseEvent) {
-		document.addEventListener("mousemove", this.onmousemove);
-		document.addEventListener("mouseup", this.onmouseup);
+		document.addEventListener("mousemove", this.onmousemove.bind(this));
+		document.addEventListener("mouseup", this.onmouseup.bind(this));
 
 		const rect = this.canvas.getBoundingClientRect();
 		const mousex = evt.clientX - rect.left;
@@ -896,9 +979,9 @@ export class LineEditor
 
 		if (this.selected == -1) {
 			const v = this.unconvert([mousex, this.canvas.height - mousey]);
-			this.root.valuesArray.push(v);
+			this.root.valuesArray!.push(v);
 			this.sortValues();
-			this.selected = this.root.valuesArray.indexOf(v);
+			this.selected = this.root.valuesArray!.indexOf(v);
 		}
 
 		this.last_mouse = [mousex, mousey];
@@ -919,7 +1002,7 @@ export class LineEditor
 
 		// Dragging to remove
 		if (this.selected != -1 && this.distance([evt.clientX - rect.left, evt.clientY - rect.top], [mousex, mousey]) > this.canvas.height * 0.5) {
-			this.root.valuesArray.splice(this.selected, 1);
+			this.root.valuesArray!.splice(this.selected, 1);
 			this.onmouseup(evt);
 			return;
 		}
@@ -928,21 +1011,21 @@ export class LineEditor
 		const dy = this.last_mouse[1] - mousey;
 		const delta = this.unconvert([-dx, dy]);
 		if (this.selected != -1) {
-			let minx = this.root.xrange[0];
-			let maxx = this.root.xrange[1];
+			let minx = this.root.xrange![0];
+			let maxx = this.root.xrange![1];
 
 			if (this.root.no_trespassing) {
-				if (this.selected > 0) { minx = this.root.valuesArray[this.selected - 1][0]; }
-				if (this.selected < (this.root.valuesArray.length - 1)) { maxx = this.root.valuesArray[this.selected + 1][0]; }
+				if (this.selected > 0) { minx = this.root.valuesArray![this.selected - 1][0]; }
+				if (this.selected < (this.root.valuesArray!.length - 1)) { maxx = this.root.valuesArray![this.selected + 1][0]; }
 			}
 
-			const v = this.root.valuesArray[this.selected];
+			const v = this.root.valuesArray![this.selected];
 			v[0] += delta[0];
 			v[1] += delta[1];
 			if (v[0] < minx) { v[0] = minx; }
 			else if (v[0] > maxx) { v[0] = maxx; }
-			if (v[1] < this.root.yrange[0]) { v[1] = this.root.yrange[0]; }
-			else if (v[1] > this.root.yrange[1]) { v[1] = this.root.yrange[1]; }
+			if (v[1] < this.root.yrange![0]) { v[1] = this.root.yrange![0]; }
+			else if (v[1] > this.root.yrange![1]) { v[1] = this.root.yrange![1]; }
 		}
 
 		this.sortValues();
@@ -983,8 +1066,8 @@ export class LineEditor
 		let min_dist = 100000;
 		const max_dist = 8; // Pixels
 		let selected = -1;
-		for (let i = 0; i < this.root.valuesArray.length; i++) {
-			const value = this.root.valuesArray[i];
+		for (let i = 0; i < this.root.valuesArray!.length; i++) {
+			const value = this.root.valuesArray![i];
 			const pos = this.convert(value);
 			const dist = this.distance([x, y], pos);
 			if (dist < min_dist && dist < max_dist) {
@@ -997,9 +1080,9 @@ export class LineEditor
 
 	sortValues() {
 		let v = null;
-		if (this.selected != -1) { v = this.root.valuesArray[this.selected]; }
-		this.root.valuesArray.sort((a: number[], b: number[]) => { return a[0] - b[0]; });
-		if (v) { this.selected = this.root.valuesArray.indexOf(v); }
+		if (this.selected != -1) { v = this.root.valuesArray![this.selected]; }
+		this.root.valuesArray!.sort((a: number[], b: number[]) => { return a[0] - b[0]; });
+		if (v) { this.selected = this.root.valuesArray!.indexOf(v); }
 	}
 }
 
@@ -1007,24 +1090,24 @@ export class LineEditor
 export class ComplexList
 {
 	root: HTMLDivElement;
-	options: any;
+	options: ComplexListOptions;
 	item_code: string;
 	selected: any | null;
 	onItemSelected: Function | null;
 	onItemToggled: Function | null;
 	onItemRemoved: Function | null;
 
-	constructor(options: any)
+	constructor(options?: ComplexListOptions)
 	{
-		this.options = options || {};
+		this.options = options! || {};
 
 		this.root = document.createElement("div");
 		this.root.className = "litecomplexlist";
 
-		this.item_code = options.item_code || "<div class='listitem'><span class='tick'><span>" + special_codes.tick + "</span></span><span class='title'></span><button class='trash'>" + special_codes.close + "</button></div>";
+		this.item_code = this.options.item_code || "<div class='listitem'><span class='tick'><span>" + special_codes.tick + "</span></span><span class='title'></span><button class='trash'>" + special_codes.close + "</button></div>";
 
-		if (options.height) {
-			this.root.style.height = LiteGUI.sizeToCSS(options.height) as string;
+		if (this.options.height) {
+			this.root.style.height = LiteGUI.sizeToCSS(this.options.height) as string;
 		}
 
 		this.selected = null;
@@ -1056,22 +1139,22 @@ export class ComplexList
 	addItem(item: any, text: string, is_enabled: boolean, can_be_removed: boolean)
 	{
 		const title = text || item.content || item.name;
-		const elem = LiteGUI.createListItem(this.item_code, { ".title": title });
+		const elem = LiteGUI.createListItem(this.item_code, { ".title": title }) as HTMLSpanElementPlus;
 		elem.item = item;
 
 		if (is_enabled) { elem.classList.add("enabled"); }
 
-		if (!can_be_removed) { elem.querySelector(".trash").style.display = "none"; }
+		if (!can_be_removed) { (elem.querySelector(".trash") as HTMLElement).style.display = "none"; }
 
 		const that = this;
-		elem.addEventListener("mousedown", (e: any) => {
+		elem.addEventListener("mousedown", (e: MouseEvent) => {
 			e.preventDefault();
 			elem.setSelected(true);
 			if (that.onItemSelected) {
 				that.onItemSelected(item, elem);
 			}
 		});
-		elem.querySelector(".tick").addEventListener("mousedown", (e: any) => {
+		(elem.querySelector(".tick") as HTMLElement).addEventListener("mousedown", (e: MouseEvent) => {
 			e.preventDefault();
 			elem.classList.toggle("enabled");
 			if (that.onItemToggled) {
@@ -1079,7 +1162,7 @@ export class ComplexList
 			}
 		});
 
-		elem.querySelector(".trash").addEventListener("mousedown", (e: any) => {
+		(elem.querySelector(".trash") as HTMLElement).addEventListener("mousedown", (e: MouseEvent) => {
 			e.preventDefault();
 			e.stopPropagation();
 			e.stopImmediatePropagation();
@@ -1090,10 +1173,10 @@ export class ComplexList
 
 		elem.setContent = function (v: string, is_html: boolean) {
 			if (is_html) {
-				elem.querySelector(".title").innerHTML = v;
+				elem.querySelector(".title")!.innerHTML = v;
 			}
 			else {
-				elem.querySelector(".title").innerText = v;
+				(elem.querySelector(".title") as HTMLElement).innerText = v;
 			}
 		};
 

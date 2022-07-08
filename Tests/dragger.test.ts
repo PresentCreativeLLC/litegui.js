@@ -1,6 +1,6 @@
-/*import { LiteGUI } from "../src/core";
+/* import { LiteGUI } from "../src/core";
 
- function Construct (v: number, options: any)
+function Construct (v: number, options: any)
 {
     return new LiteGUI.Dragger(v, options);
 }

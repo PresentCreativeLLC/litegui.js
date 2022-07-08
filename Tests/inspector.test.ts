@@ -1,4 +1,4 @@
-import { Inspector } from "../src/inspector";
+/* import { Inspector } from "../src/inspector";
 
 function Construct ()
 {
@@ -518,4 +518,4 @@ describe('Add Title Test', () =>
         console.log('Current Title: ' + a);
         expect(a).toBeDefined();
     });
-});
+}); */

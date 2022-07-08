@@ -1,5 +1,32 @@
 import { LiteGUI, special_codes } from "./core";
-import { HTMLDivElementPlus, HTMLLIElementPlus, HTMLParagraphElementPlus } from "./@types/globals/index";
+import { HTMLDivElementPlus, HTMLLIElementPlus, HTMLParagraphElementPlus, LiteguiObject } from "./@types/globals/index";
+
+export interface TabsOptions
+{
+	selected?: boolean;
+	onclose?: Function;
+	className?: string;
+	parent?: string | HTMLDivElement;
+	height?: string | number;
+	width?: string | number;
+	index?: number;
+	bigicon?: string;
+	title?: string;
+	callback?: Function;
+	callback_leave?: Function;
+	callback_context?: Function;
+	callback_canopen?: Function;
+	skip_callbacks?: boolean;
+	content?: HTMLDivElementPlus | string;
+	closable?: boolean;
+	tab_width?: number | string;
+	tab_className?: string;
+	id?: string;
+	size?: string | number;
+	mode?: string;
+	button?: boolean;
+	autoswitch? : boolean;
+}
 
 /**
  * Widget that contains several tabs and their content
@@ -14,7 +41,7 @@ import { HTMLDivElementPlus, HTMLLIElementPlus, HTMLParagraphElementPlus } from 
 export class Tabs
 {
 	root: HTMLDivElementPlus;
-	options: any;
+	options: TabsOptions;
 	mode: string;
 	current_tab: number;
 	previous_tab: number;
@@ -24,27 +51,28 @@ export class Tabs
 	tabs_by_index: tab_info[];
 	selected: string | null;
 	onchange: CallableFunction;
-	plus_tab: any;
+	plus_tab?: tab_info | Node;
 	_timeout_mouseover?: NodeJS.Timeout | null;
 	static tabs_width: number = 64;
 	static tabs_height: number = 26;
     
-	constructor(options: any, legacy: boolean)
+	constructor(options?: TabsOptions | string, legacy?: object)
 	{
 		if (legacy || (options && options.constructor === String))
 		{
 			const id = options;
 			options = legacy || {};
-			options.id = id;
+			(options as TabsOptions).id = id as string;
 			console.warn("LiteGUI.Tabs legacy parameter, use options as first parameter instead of id.");
 		}
 
-		this.options = options || {};
+		this.options = (options as TabsOptions) || {};
+		const op = options as TabsOptions;
 
-		const mode = this.mode = options.mode || "horizontal";
+		const mode = this.mode = op.mode || "horizontal";
 
 		const root = document.createElement("div") as HTMLDivElementPlus;
-		if (options.id) { root.id = options.id; }
+		if (op.id) { root.id = op.id; }
 		root.data = this;
 		root.className = "litetabs " + mode;
 		this.root = root;
@@ -54,20 +82,20 @@ export class Tabs
 		this.current_tab = -1;
 		this.previous_tab = -1;
 		if (mode == "horizontal") {
-			if (options.size) {
-				if (options.size == "full") { this.root.style.height = "100%"; }
-				else { this.root.style.height = options.size; }
+			if (op.size) {
+				if (op.size == "full") { this.root.style.height = "100%"; }
+				else { this.root.style.height = op.size.toString(); }
 			}
 		}
 		else if (mode == "vertical") {
-			if (options.size) {
-				if (options.size == "full") { this.root.style.width = "100%"; }
-				else { this.root.style.width = options.size; }
+			if (op.size) {
+				if (op.size == "full") { this.root.style.width = "100%"; }
+				else { this.root.style.width = op.size.toString(); }
 			}
 		}
 
-		if (options.width) { this.root.style.width = options.width.constructor === Number ? options.width.toFixed(0) + "px" : options.width; }
-		if (options.height) { this.root.style.height = options.height.constructor === Number ? options.height.toFixed(0) + "px" : options.height; }
+		if (op.width) { this.root.style.width = op.width.constructor === Number ? op.width.toFixed(0) + "px" : op.width.toString(); }
+		if (op.height) { this.root.style.height = op.height.constructor === Number ? op.height.toFixed(0) + "px" : op.height.toString(); }
 
 		// Container of tab elements
 		const list = document.createElement("ul");
@@ -77,7 +105,7 @@ export class Tabs
 
 		// Allows to use the wheel to see hidden tabs
 		list.addEventListener("wheel", this.onMouseWheel);
-		list.addEventListener("mousewheel", this.onMouseWheel);
+/* 		list.addEventListener("mousewheel", this.onMouseWheel); */ //Deprecated
 
 		this.list = list;
 		this.root.appendChild(this.list);
@@ -87,12 +115,12 @@ export class Tabs
 		this.tabs_by_index = [];
 		this.selected = null;
 
-		this.onchange = options.callback;
+		this.onchange = op.callback!;
 
-		if (options.parent) { this.appendTo(options.parent); }
+		if (op.parent) { this.appendTo(op.parent as HTMLDivElement); }
 	}
 
-	onMouseWheel(e: any) {
+	onMouseWheel(e: WheelEvent) {
 		if (e.deltaY) { this.list.scrollLeft += e.deltaY; }
 	}
 
@@ -127,7 +155,7 @@ export class Tabs
 		return this.tabs[this.previous_tab].tab;
 	}
 
-	appendTo(parent: any, at_front: any = null) {
+	appendTo(parent: HTMLElement, at_front?: boolean ) {
 		if (at_front) { parent.prepend(this.root); }
 		else { parent.appendChild(this.root); }
 	}
@@ -248,10 +276,12 @@ export class Tabs
 	 * @param {bool} skip_event prevent dispatching events
 	 * @return {Object} an object containing { id, tab, content }
 	 */
-	addTab(id: string, options: any, skip_event: boolean = false) {
+	addTab(id: string, options: TabsOptions | Function, skip_event: boolean = false) 
+	{
 		if (typeof (options) == "function") { options = { callback: options }; }
-		this.options = options = options || {};
+		this.options = options! || {};
 		const that = this;
+		const op = options as TabsOptions;
 		if (id === undefined || id === null) { id = "rand_" + ((Math.random() * 1000000) | 0); }
 
 		// The tab element
@@ -260,12 +290,12 @@ export class Tabs
 		element.className = "wtab wtab-" + safe_id + " ";
 		// If(options.selected) element.className += " selected";
 		element.dataset["id"] = id;
-		element.innerHTML = "<span class='tabtitle'>" + (options.title || id) + "</span>";
+		element.innerHTML = "<span class='tabtitle'>" + (op.title || id) + "</span>";
 
-		if (options.button) { element.className += "button "; }
-		if (options.tab_className) { element.className += options.tab_className; }
-		if (options.bigicon) { element.innerHTML = "<img class='tabbigicon' src='" + options.bigicon + "'/>" + element.innerHTML; }
-		if (options.closable) {
+		if (op.button) { element.className += "button "; }
+		if (op.tab_className) { element.className += op.tab_className; }
+		if (op.bigicon) { element.innerHTML = "<img class='tabbigicon' src='" + op.bigicon + "'/>" + element.innerHTML; }
+		if (op.closable) {
 			element.innerHTML += "<span class='tabclose'>" + special_codes.close + "</span>";
 			element.querySelector("span.tabclose")?.addEventListener("click", (e) => {
 				that.removeTab(id);
@@ -275,16 +305,16 @@ export class Tabs
 		}
 		// WARNING: do not modify element.innerHTML or events will be lost
 
-		if (options.index !== undefined) {
-			const after = this.list.childNodes[options.index];
+		if (op.index !== undefined) {
+			const after = this.list.childNodes[op.index];
 			if (after) { this.list.insertBefore(element, after); }
 			else { this.list.appendChild(element); }
 		}
-		else if (this.plus_tab) { this.list.insertBefore(element, this.plus_tab); }
+		else if (this.plus_tab) { this.list.insertBefore(element, this.plus_tab as Node); }
 		else { this.list.appendChild(element); }
 
-		if (options.tab_width) {
-			element.style.width = options.tab_width.constructor === Number ? (options.tab_width.toFixed(0) + "px") : options.tab_width;
+		if (op.tab_width) {
+			element.style.width = op.tab_width.constructor === Number ? (op.tab_width.toFixed(0) + "px") : op.tab_width.toString();
 			element.style.minWidth = "0";
 		}
 
@@ -312,61 +342,61 @@ export class Tabs
 
 		// The content of the tab
 		const content = document.createElement("div");
-		if (options.id) { content.id = options.id; }
+		if (op.id) { content.id = op.id; }
 
-		content.className = "wtabcontent " + "wtabcontent-" + safe_id + " " + (options.className || "");
+		content.className = "wtabcontent " + "wtabcontent-" + safe_id + " " + (op.className || "");
 		content.dataset["id"] = id;
 		content.style.display = "none";
 
 		// Adapt height
 		if (this.mode == "horizontal") {
-			if (options.size) {
+			if (op.size) {
 				content.style.overflow = "auto";
-				if (options.size == "full") {
+				if (op.size == "full") {
 					content.style.width = "100%";
 					content.style.height = "calc( 100% - " + Tabs.tabs_height + "px )"; // Minus title
 					content.style.height = "-moz-calc( 100% - " + Tabs.tabs_height + "px )"; // Minus title
 					content.style.height = "-webkit-calc( 100% - " + Tabs.tabs_height + "px )"; // Minus title
 					// Content.style.height = "-webkit-calc( 90% )"; //minus title
 				}
-				else { content.style.height = options.size; }
+				else { content.style.height = op.size.toString(); }
 			}
 		}
 		else if (this.mode == "vertical") {
-			if (options.size) {
+			if (op.size) {
 				content.style.overflow = "auto";
-				if (options.size == "full") {
+				if (op.size == "full") {
 					content.style.height = "100%";
 					content.style.width = "calc( 100% - " + Tabs.tabs_width + "px )"; // Minus title
 					content.style.width = "-moz-calc( 100% - " + Tabs.tabs_width + "px )"; // Minus title
 					content.style.width = "-webkit-calc( 100% - " + Tabs.tabs_width + "px )"; // Minus title
 					// Content.style.height = "-webkit-calc( 90% )"; //minus title
 				}
-				else { content.style.width = options.size; }
+				else { content.style.width = op.size.toString(); }
 			}
 		}
 
 		// Overwrite
-		if (options.width !== undefined) { content.style.width = typeof (options.width) === "string" ? options.width : options.width + "px"; }
-		if (options.height !== undefined) { content.style.height = typeof (options.height) === "string" ? options.height : options.height + "px"; }
+		if (op.width !== undefined) { content.style.width = typeof (op.width) === "string" ? op.width : op.width + "px"; }
+		if (op.height !== undefined) { content.style.height = typeof (op.height) === "string" ? op.height : op.height + "px"; }
 
 		// Add content
-		if (options.content) {
-			if (typeof (options.content) == "string") { content.innerHTML = options.content; }
-			else { content.appendChild(options.content); }
+		if (op.content) {
+			if (typeof (op.content) == "string") { content.innerHTML = op.content; }
+			else { content.appendChild(op.content); }
 		}
 
 		this.root.appendChild(content);
 
 		// When clicked
-		if (!options.button) {
+		if (!op.button) {
 			element.addEventListener("click", this.onTabClicked.call);
 		}
 		else {
-			const clickCallback = (e: any) => {
+			const clickCallback = (e: MouseEvent) => {
 				if (!e.target) {return;}
-				const tab_id = e.target.dataset["id"];
-				if (options.callback) { options.callback(tab_id, e); }
+				const tab_id = (e.target as HTMLInputElement).dataset["id"];
+				if (op.callback) { op.callback(tab_id, e); }
 			};
 			element.addEventListener("click", clickCallback.bind(element));
 		}
@@ -378,7 +408,7 @@ export class Tabs
 
 		const tabInfo: tab_info = new tab_info(id, element, content, title!);
 
-		if (options.onclose) { tabInfo.onClose = options.onclose; }
+		if (op.onclose) { tabInfo.onClose = op.onclose; }
 		let tempo = this.getTabIndexInTab(id);
 		this.tabs[tempo] = tabInfo;
 
@@ -388,11 +418,11 @@ export class Tabs
 		element.addEventListener("contextmenu", ((e) => {
 			if (e.button != 2) { return false; }// Right button
 			e.preventDefault();
-			if (options.callback_context) { options.callback_context.call(tabInfo); }
+			if (op.callback_context) { op.callback_context.call(tabInfo); }
 			return false;
 		}));
 
-		if (options.selected == true || this.selected == null) { this.selectTab(id, options.skip_callbacks); }
+		if (op.selected == true || this.selected == null) { this.selectTab(id, op.skip_callbacks); }
 
 		return tabInfo;
 	}
@@ -407,7 +437,7 @@ export class Tabs
 	}
 
 	// This is tab
-	onTabClicked(e: any, element: HTMLLIElementPlus) {
+	onTabClicked(e: MouseEvent, element: HTMLLIElementPlus) {
 		// Skip if already selected
 		if (element.selected) { return; }
 
@@ -606,7 +636,7 @@ export class Tabs
 		const that = this;
 
 		// Transfer content after a while so the window is propertly created
-		const newtabs = new LiteGUI.Tabs(null, this.options) as Tabs;
+		const newtabs = new LiteGUI.Tabs(undefined, this.options) as Tabs;
 		tab_window.tabs = newtabs;
 
 		// Closing event
@@ -651,7 +681,7 @@ class tab_info
 		this.title = title;
 	}
 
-	add(v: any)
+	add(v: LiteguiObject | HTMLDivElementPlus)
 	{
 		this.content.appendChild(v.root || v);
 	}

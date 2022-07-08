@@ -5,31 +5,16 @@
 
     <title>LiteGUI Test</title>
     <style type='text/css'></style>
-    <link rel="stylesheet" type="text/css" href="../dist/litegui.css">
+	<link rel="stylesheet" type="text/css" href="../dist/litegui.css">
     <script type="text/javascript" src="../dist/litegui.js"></script>
     </title>
 </head>
 
 <body>
-    <section id="consoleSection"></section>
     <script type="text/javascript">
 		//call the init to setup 
 		LiteGUI.init();
-
-		const console = new LiteGUI.Console({ prompt: "]" });
-		console.processKeyDown(new KeyboardEvent('keydown',
-        {
-            'key': 'E'
-        }));
-		console.addMessage("Hola mundo", "msglog");
-		console.log();
-		console.warn();
-		console.error();
-		console.clear();
-		console.onAutocomplete("Hola");
-		console.onProcessCommand("Hola");
 		
-		LiteGUI.add(console);
 	</script>
 </body>
 

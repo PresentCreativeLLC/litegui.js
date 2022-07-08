@@ -1,6 +1,6 @@
 import { widget } from "../src/widgets";
-/*
-function Construct ()
+
+/* function Construct ()
 {
     return new widget();
 }
@@ -133,7 +133,7 @@ describe('onClick Checkbox', () => {
     const check = widget.createCheckbox(false, () => {console.log("checkbox changed")});
     it(`Should click in it`, () =>
     {
-        expect(check.onClick({}));
+        expect(check.onClick(new MouseEvent("onclick")));
     });
 });
 
@@ -248,7 +248,7 @@ describe('onMouseMove Slider', () => {
     const slider = widget.createSlider(0.3, {min: 0, max: 1});
     it(`Should move mouse`, () =>
     {
-        expect(slider.onMouseMove({e: 1}));
+        expect(slider.onMouseMove(new MouseEvent("onmousemove")));
     });
 });
 
@@ -258,7 +258,7 @@ describe('onMouseUp Slider', () => {
     const slider = widget.createSlider(0.3, {min: 0, max: 1});
     it(`Should up the click`, () =>
     {
-        expect(slider.onMouseUp({e: 1}));
+        expect(slider.onMouseUp(new MouseEvent("onmouseup")));
     });
 });
 
@@ -489,5 +489,4 @@ describe('addItem ComplexList', () => {
     {
         expect(list.addItem(item, "item generico", true, true));
     });
-});
-*/
+}); */

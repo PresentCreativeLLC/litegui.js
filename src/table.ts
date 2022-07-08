@@ -1,22 +1,41 @@
 import { ChildNodePlus } from "./@types/globals";
 import { LiteGUI } from "./core";
 
+interface TableOptions
+{
+	data?: Array<object>;
+	rows?: Array<HTMLTableRowElement>;
+	height?: number;
+	scrollable?: boolean;
+	columns?: Array<string | TableColumn>;
+	colums?: Array<string | TableColumn>;
+}
+
+interface TableColumn
+{
+	th?: HTMLTableCellElement;
+	className?: string;
+	field?: string;
+	width?: string | number;
+	name?: string;
+}
+
 export class Table
 {
 	root : HTMLTableElement;
-	columns : Array<object>;
+	columns : Array<TableColumn>;
 	rows : Array<HTMLTableRowElement>;
-	column_fields : Array<any>;
+	column_fields : Array<string>;
 	data : Array<object>;
-	header : any;
+	header? : HTMLTableRowElement;
 
-	value : any;
+	value? : string;
 
 	_must_update_header : boolean;
 
-	constructor(options : any)
+	constructor(options? : TableOptions)
 	{
-		options = options || {};
+		options = options! || {};
 
 		this.root = document.createElement("table");
 		this.root.classList.add("litetable");
@@ -40,11 +59,11 @@ export class Table
 		if (options.columns)
 		{this.setColumns(options.columns);}
 
-		if (options.rows)
+		if (options.rows && options.data)
 		{this.setRows(options.data);}
 	}
 
-	setRows(data : any, reuse : boolean = false)
+	setRows(data : Array<object>, reuse : boolean = false)
 	{
 		this.data = data;
 		this.updateContent(reuse);
@@ -64,21 +83,21 @@ export class Table
 			if (row.constructor === Array)
 			{value = row[ j ];}
 			else // Object
-			{value = (row as any)[ this.column_fields[j] ];}
+			{value = row[ this.column_fields[j] as keyof object ];}
 			if (value === undefined)
 			{value = "";}
 
-			td.innerHTML = value;
+			td.innerHTML = value as string;
 			this.value = this.column_fields[j];
 
-			const column = this.columns[j] as any;
+			const column = this.columns[j] as TableColumn;
 			if (column === undefined)
 			{break;}
 
 			if (column.className)
 			{td.className = column.className;}
 			if (column.width)
-			{td.style.width = column.width;}
+			{td.style.width = column.width as string;}
 			tr.appendChild(td);
 		}
 
@@ -101,24 +120,24 @@ export class Table
 		const cells = tr.querySelectorAll("td");
 		for (let j = 0; j < cells.length; ++j)
 		{
-			const column = this.columns[j] as any;
+			const column = this.columns[j];
 
 			let value = null;
 
 			if (row.constructor === Array)
 			{value = row[ j ];}
 			else
-			{value = (row as any)[ column.field ];}
+			{value = row[ column.field as keyof object ];}
 
 			if (value === undefined)
 			{value = "";}
 
-			cells[j].innerHTML = value;
+			cells[j].innerHTML = value as string;
 		}
 		return tr;
 	}
 
-	updateCell(row : number, cell : number, data : any)
+	updateCell(row : number, cell : number, data : string)
 	{
 		const tr = this.rows[ row ];
 		if (!tr)
@@ -130,7 +149,7 @@ export class Table
 	}
 
 
-	setColumns(columns : Array<string | object>)
+	setColumns(columns : Array<string | number | TableColumn>)
 	{
 		this.columns.length = 0;
 		this.column_fields.length = 0;
@@ -141,7 +160,7 @@ export class Table
 
 		for (let i = 0; i < columns.length; ++i)
 		{
-			let c = columns[i] as any;
+			let c : string | number | object | TableColumn = columns[i];
 
 			if (c === null || c === undefined)
 			{continue;}
@@ -150,11 +169,13 @@ export class Table
 			if (c.constructor === String || c.constructor === Number)
 			{c = { name: String(c) };}
 
-			const column = {
-				name: c.name || "",
-				width: LiteGUI.sizeToCSS(c.width || avg_width),
-				field: (c.field || c.name || "").toLowerCase(),
-				className: c.className
+			const td = c as TableColumn;
+
+			const column : TableColumn = {
+				name: td.name || "",
+				width: LiteGUI.sizeToCSS(td.width || avg_width) as string,
+				field: (td.field || td.name || "").toLowerCase(),
+				className: td.className
 			};
 
 			// Last
@@ -164,7 +185,7 @@ export class Table
 			{rest.push(column.width);}
 
 			this.columns.push(column);
-			this.column_fields.push(column.field);
+			this.column_fields.push(column.field as string);
 		}
 
 		this._must_update_header = true;
@@ -181,17 +202,17 @@ export class Table
 			this.header = document.createElement("tr");
 			for (let i = 0; i < this.columns.length; ++i)
 			{
-				const column = this.columns[i] as any;
+				const column = this.columns[i] as TableColumn;
 				const th = document.createElement("th");
-				th.innerHTML = column.name;
+				th.innerHTML = column.name as string;
 				if (column.width)
-				{th.style.width = column.width;}
+				{th.style.width = column.width as string;}
 				column.th = th;
 				this.header.appendChild(th);
 			}
 			this._must_update_header = false;
 		}
-		this.root.appendChild(this.header);
+		this.root.appendChild(this.header as HTMLTableRowElement);
 
 		if (!this.data)
 		{return;}
