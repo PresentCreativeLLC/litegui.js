@@ -500,7 +500,7 @@ export class Checkbox
 		const element = this.element = document.createElement("span") as HTMLSpanElementPlus;
 		element.className = "fixed flag checkbox " + (value ? "on" : "off");
 		root.appendChild(element);
-		root.addEventListener("click", this.onClick);
+		root.addEventListener("click", this.onClick.bind(this));
 		this.onChange = on_change;
 	}
 
@@ -530,13 +530,9 @@ export class Checkbox
 		return this.root.dataset["value"] == "true";
 	}
 
-	onClick(e: MouseEvent)
+	onClick()
 	{
 		this.setValue(this.root.dataset["value"] != "true");
-		if(typeof(e.preventDefault) === 'function')
-		e.preventDefault();
-		if (typeof(e.stopPropagation) === 'function')
-		e.stopPropagation();
 	}
 }
 
