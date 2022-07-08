@@ -1,15 +1,14 @@
-import { Dialog } from "stun/dialog";
-import { Inspector } from "stun/inspector";
-import { Menubar } from "stun/menubar";
-import { Panel } from "stun/panel";
-import { Table } from "stun/table";
-import { Tree } from "stun/tree";
-import { widget } from "stun/widgets";
-import { Area } from "stun/area";
-import { Inspector } from "stun/inspector";
-import { jscolor } from "stun/jscolor";
-import { Tabs } from "./tabs"
-import { Dragger } from "stun/dragger";
+import { Dialog } from "../../dialog";
+import { Inspector } from "../../inspector";
+import { Menubar } from "../../menubar";
+import { Panel } from "../../panel";
+import { Table } from "../../table";
+import { Tree } from "../../tree";
+import { widget, LiteBox } from "../../widgets";
+import { Area } from "../../area";
+import { jscolor } from "../../jscolor";
+import { Tabs } from "../../tabs"
+import { Dragger } from "../../dragger";
 
 export interface HTMLDivElementPlus extends HTMLDivElement
 {
@@ -20,7 +19,6 @@ export interface HTMLDivElementPlus extends HTMLDivElement
     on_refresh?: Function;
     refresh?: () => void;
     closingTimer?: TimeOut;
-    stServiceCtr?: stServiceController;
     value?: number;
     valuesArray?: number[][];
     data?: any;
@@ -38,7 +36,7 @@ export interface HTMLDivElementPlus extends HTMLDivElement
     no_trespassing?: boolean;
     show_samples?: number;
     options?: any;
-    canvas?: canvas;
+    canvas?: HTMLCanvasElement;
     getValueAt?: Function;
     position?: string;
     instance?: any;
@@ -75,7 +73,7 @@ export interface HTMLLIElementPlus extends HTMLLIElement
 {
     data: any;
     options: any;
-    tabs: tabs;
+    tabs: Tabs;
     selected: boolean;
     title_element : HTMLDivElementPlus;
     parent_id : string;
@@ -128,9 +126,9 @@ export interface MouseEventPlus extends MouseEvent
 	layerX: any;
 }
 
-type LiteguiObject = Area | Console | Dialog | Dragger | Inspector | Menubar | Panel | Tabs | Table | Tree | widget;
+export type LiteguiObject = Area | Console | Dialog | Dragger | Inspector | Menubar | Panel | Tabs | Table | Tree | widget;
 
-interface AreaOptions
+export interface AreaOptions
 {
     minSplitSize?: number;
     immediateResize?: boolean;
@@ -140,12 +138,11 @@ interface AreaOptions
     height?: any,
     content_id?: string,
     autoresize?: boolean,
-    id?: string,
     main?: boolean,
     inmediateResize?: boolean,
 }
 
-interface AreaRoot
+export interface AreaRoot
 {
     offsetWidth?: number,
     offsetHeight?: number,
@@ -156,7 +153,7 @@ interface AreaRoot
 
 }
 
-interface InspectorOptions
+export interface InspectorOptions
 {
     type?: string;
     parent?: HTMLElementPlus;
@@ -179,7 +176,7 @@ interface InspectorOptions
     
 }
 
-interface InstanceObject extends Object
+export interface InstanceObject extends Object
 {
     getProperties: Function,
     getInspectorProperties: Function,

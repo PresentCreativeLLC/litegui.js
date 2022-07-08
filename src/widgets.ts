@@ -73,7 +73,7 @@ export class widget {
 		 *LiteGUI.ContextMenu = this.ContextMenu;
 		 *LiteGUI.ContextualMenu = this.ContextMenu; // LEGACY: REMOVE
 		 *LiteGUI.Checkbox = this.Checkbox;
-		 *LiteGUI.createLitebox = this.createLitebox;
+		 *LiteGUI.createLiteBox = this.createLiteBox;
 		 *LiteGUI.List = this.List;
 		 *LiteGUI.Slider = this.Slider;
 		 *LiteGUI.LineEditor = this.LineEditor;
@@ -97,9 +97,9 @@ export class widget {
 	{
 		return new Checkbox(value, on_change);
 	}
-	static createLitebox(state: boolean, on_change: CallableFunction)
+	static createLiteBox(state: boolean, on_change: CallableFunction)
 	{
-		return new Litebox(state, on_change);
+		return new LiteBox(state, on_change);
 	}
 	createList(id: string, items: Array<ListItem | string>, options: ListOptions)
 	{
@@ -542,15 +542,15 @@ export class Checkbox
 
 
 // The tiny box to expand the children of a node
-export class Litebox
+export class LiteBox
 {
-	element?: HTMLSpanElement;
+	root?: HTMLSpanElement;
 	stopPropagation : boolean = false;
 
 	constructor(state: boolean, on_change: Function)
 	{
 		const element = document.createElement("span") as HTMLSpanElementPlus;
-		this.element = element;
+		this.root = element;
 		element.className = "listbox " + (state ? "listopen" : "listclosed");
 		element.innerHTML = state ? "&#9660;" : "&#9658;";
 		element.dataset["value"] = state ? "open" : "closed";
@@ -584,37 +584,46 @@ export class Litebox
         // return element;
 	}
 
-	setValue(v: boolean)
+	setValue(v?: boolean)
 	{
-		if (!this.element) { return; }
-		if (this.element.dataset["value"] == (v ? "open" : "closed")) { return; }
+		try 
+		{
+			if((v as unknown as PointerEvent).type == "click")
+			{
+				v = this.root!.dataset["value"] == "open" ? false : true;
+			}
+		} 
+		catch (error) {}
+
+		if (!this.root) { return; }
+		if (this.root.dataset["value"] == (v ? "open" : "closed")) { return; }
 
 		if (!v) {
-			this.element.dataset["value"] = "closed";
-			this.element.innerHTML = "&#9658;";
-			this.element.classList.remove("listopen");
-			this.element.classList.add("listclosed");
+			this.root.dataset["value"] = "closed";
+			this.root.innerHTML = "&#9658;";
+			this.root.classList.remove("listopen");
+			this.root.classList.add("listclosed");
 		}
 		else {
-			this.element.dataset["value"] = "open";
-			this.element.innerHTML = "&#9660;";
-			this.element.classList.add("listopen");
-			this.element.classList.remove("listclosed");
+			this.root.dataset["value"] = "open";
+			this.root.innerHTML = "&#9660;";
+			this.root.classList.add("listopen");
+			this.root.classList.remove("listclosed");
 		}
-		if (this.element.onchange) { this.element.onchange(new Event("change")); }
+		if (this.root.onchange) { this.root.onchange(new Event("change")); }
 	}
 
 	getValue()
 	{
 		// return this.element;
-        return this.element?.dataset["value"];
+        return this.root?.dataset["value"];
 	}
 
 	setEmpty(isEmpty: boolean)
 	{
 		if (isEmpty)
 		{
-			this.element = undefined;
+			this.root = undefined;
 		}
 	}
 }
@@ -691,7 +700,7 @@ export class Litebox
 		const items = this.root.querySelectorAll(".list-item");
 		for (let i = 0; i < items.length; i++) {
 			const item: HTMLLIElementPlus = items[i] as HTMLLIElementPlus;
-			if (item.data == name) {
+			if (item.data.id == name) {
 				LiteGUI.trigger(item, "click");
 				break;
 			}
@@ -730,8 +739,8 @@ export class Slider
 			else if (event.layerX) { mouseX = event.layerX; mouseY = event.layerY; }
 			this.setFromX(mouseX);
 			this.doc_binded = root.ownerDocument;
-			this.doc_binded.addEventListener("mousemove", this.onMouseMove);
-			this.doc_binded.addEventListener("mouseup", this.onMouseUp);
+			this.doc_binded.addEventListener("mousemove", this.onMouseMove.bind(this));
+			this.doc_binded.addEventListener("mouseup", this.onMouseUp.bind(this));
 			e.preventDefault();
 			e.stopPropagation();
 		});
@@ -838,7 +847,7 @@ export class LineEditor
 		element.appendChild(canvas);
 		element.canvas = canvas;
 
-		element.addEventListener("mousedown", this.onmousedown);
+		element.addEventListener("mousedown", this.onmousedown.bind(this));
 
 		this.selected = -1;
 
@@ -963,8 +972,8 @@ export class LineEditor
 	}
 
 	onmousedown(evt: MouseEvent) {
-		document.addEventListener("mousemove", this.onmousemove);
-		document.addEventListener("mouseup", this.onmouseup);
+		document.addEventListener("mousemove", this.onmousemove.bind(this));
+		document.addEventListener("mouseup", this.onmouseup.bind(this));
 
 		const rect = this.canvas.getBoundingClientRect();
 		const mousex = evt.clientX - rect.left;
