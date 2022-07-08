@@ -88,10 +88,7 @@ module.exports = (_env) =>
 			],
 		},
 		resolve: {
-			extensions: ['.ts', '.tsx', '.js'],
-			alias: {
-				stun: path.resolve(__dirname, 'src')
-			}
+			extensions: ['.ts', '.tsx', '.js']
 		}
 	};
 

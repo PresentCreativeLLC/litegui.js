@@ -1,5 +1,7 @@
-import { Console } from "../src/console";
 /*
+import { Console } from "../src/console";
+const utilities = require("../src/Utilities");
+
 function Construct (options: any)
 {
     return new Console(options);
@@ -85,6 +87,15 @@ describe('onProcessCommand', () => {
     it(`Debería procesar "Hola" pero está vacío`, () =>
     {
         expect(console.onProcessCommand("Hola"));
+    });
+});
+
+describe('This should try to create html', () => {
+    test('correct url is called', async () =>
+    {
+        await utilities.takeScreenshot(
+            'file:///D:/Users/Mario%20Villalvazo/Documents/GitHub/litegui.js/examples/testing.html', 'consoleTesting.png');
+        expect(1).toBe(1);
     });
 });
 */

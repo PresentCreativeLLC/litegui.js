@@ -492,7 +492,7 @@
 		if(!node.listbox)
 		{
 			var pre = node.title_element.querySelector(&quot;.precontent&quot;);
-			var box = LiteGUI.createLitebox(true, Tree.onClickBox.bind(node) );
+			var box = LiteGUI.createLiteBox(true, Tree.onClickBox.bind(node) );
 			box.setEmpty(true);
 			pre.appendChild(box);
 			node.listbox = box;
@@ -513,7 +513,7 @@
 		if(child_elements.length &amp;&amp; !node.listbox)
 		{
 			var pre = node.title_element.querySelector(&quot;.precontent&quot;);
-			var box = LiteGUI.createLitebox(true, Tree.onClickBox.bind(node) );
+			var box = LiteGUI.createLiteBox(true, Tree.onClickBox.bind(node) );
 			pre.appendChild(box);
 			node.listbox = box;
 			return;

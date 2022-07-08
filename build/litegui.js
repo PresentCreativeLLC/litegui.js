@@ -7,7 +7,7 @@
  */
 
 
-const LiteGUI = {
+ const LiteGUI = {
 	root: null,
 	content: null,
 

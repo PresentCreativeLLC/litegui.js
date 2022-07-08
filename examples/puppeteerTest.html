@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+
+    <title>LiteGUI Test</title>
+    <style type='text/css'></style>
+    <script type="text/javascript" src="../external/jscolor/jscolor.js"></script>
+    </title>
+</head>
+
+<body>
+    <div id="staticDiv">Hola hola</div>
+    <script type="text/javascript">
+        const divTest = document.createElement("div");
+        divTest.id = "divTest2";
+        divTest.style.width = "100px";
+        divTest.style.height = "100px";
+        divTest.style.background = "red";
+        divTest.style.color = "white";
+        divTest.innerHTML = "Hello";
+        document.body.appendChild(divTest);
+        console.log("holiwis");
+        console.log('Inner: ' + divTest.innerHTML);
+        console.log('Text: ' + divTest.innerText);
+	</script>
+</body>
+
+</html>
