@@ -18,7 +18,7 @@ export interface HTMLDivElementPlus extends HTMLDivElement
     end?: () => void;
     on_refresh?: Function;
     refresh?: () => void;
-    closingTimer?: TimeOut;
+    closingTimer?: Number;
     value?: number;
     valuesArray?: number[][];
     data?: any;

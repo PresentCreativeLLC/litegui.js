@@ -521,8 +521,8 @@ export class Checkbox
 		}
 		const old_value = this.value;
 		this.value = v;
-
-		this.onChange(v, old_value);
+		this.onChange();
+		//this.onChange(v, old_value);
 	}
 
 	getValue()
