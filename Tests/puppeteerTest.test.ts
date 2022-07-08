@@ -24,7 +24,7 @@ describe('This should try to modify html', () => {
         }
         
         divRef.innerHTML = 'Hola puppeteado';*/
-        await page.screenshot({path: 'widgetTesting.png', fullPage: true});
+        await page.screenshot({path: 'Testing.png', fullPage: true});
         await page.close();
         await browser.close();
         expect(1);

@@ -296,7 +296,7 @@ export class ContextMenu
 		}
 		if (this.current_submenu) { this.current_submenu.close(e, true); }
 		if (this.root.closingTimer) { clearTimeout(this.root.closingTimer); }
-	};
+	}
 
 	// Returns the top most menu
 	getTopMenu() {
@@ -423,7 +423,7 @@ export class Checkbox
 		const element = this.element = document.createElement("span") as HTMLSpanElementPlus;
 		element.className = "fixed flag checkbox " + (value ? "on" : "off");
 		root.appendChild(element);
-		root.addEventListener("click", this.onClick);
+		root.addEventListener("click", this.onClick.bind(this));
 		this.onChange = on_change;
 	}
 
@@ -444,8 +444,8 @@ export class Checkbox
 		}
 		const old_value = this.value;
 		this.value = v;
-
-		this.onChange(v, old_value);
+		this.onChange();
+		//this.onChange(v, old_value);
 	}
 
 	getValue()
@@ -453,13 +453,9 @@ export class Checkbox
 		return this.root.dataset["value"] == "true";
 	}
 
-	onClick(e: any)
+	onClick()
 	{
 		this.setValue(this.root.dataset["value"] != "true");
-		if(e.preventDefault === 'function')
-		e.preventDefault();
-		if (e.stopPropagation === 'function')
-		e.stopPropagation();
 	}
 }
 
@@ -467,36 +463,40 @@ export class Checkbox
 // The tiny box to expand the children of a node
 export class LiteBox
 {
-	element: any;
+	root: any;
 	stopPropagation : boolean = false;
 
 	constructor(state: boolean, on_change: CallableFunction)
 	{
-		const element: any = document.createElement("span");
-		this.element = element;
-		element.className = "listbox " + (state ? "listopen" : "listclosed");
-		element.innerHTML = state ? "&#9660;" : "&#9658;";
-		element.dataset["value"] = state ? "open" : "closed";
+		const root: any = document.createElement("span");
+		this.root = root;
+		root.className = "listbox " + (state ? "listopen" : "listclosed");
+		root.innerHTML = state ? "&#9660;" : "&#9658;";
+		root.dataset["value"] = state ? "open" : "closed";
 
-		element.onclick = function (e: MouseEvent) {
+		root.addEventListener("click", this.setValue.bind(this));
+		//root.onclick = this.setValue.bind(this, (this.root.dataset["value"] as string) == "open" ? false : true);
+		/*root.onclick = function (e: MouseEvent) {
+			console.log(e);
+			console.log(e.target);
 			const box = e.target as EventTargetPlus;
-			box?.setValue(element.dataset["value"] == "open" ? false : true);
+			box?.setValue(root.dataset["value"] == "open" ? false : true);
 			// if (this.stopPropagation) {e.stopPropagation();}
 			if (e.stopPropagation) { e.stopPropagation(); }
-		};
+		};*/
 		//element.addEventListener("click", onclick!.bind(element));
-		element.onchange = on_change;
+		root.onchange = on_change;
 
-		element.setEmpty = function (v: boolean) {
+		root.setEmpty = function (v: boolean) {
 			if (v) { this.classList.add("empty"); }
 			else { this.classList.remove("empty"); }
 		};
 
-		element.expand = function () {
+		root.expand = function () {
 			this.setValue(true);
 		};
 
-		element.collapse = function () {
+		root.collapse = function () {
 			this.setValue(false);
 		};
 
@@ -507,37 +507,47 @@ export class LiteBox
         // return element;
 	}
 
-	setValue(v: boolean)
+	setValue(v?: boolean)
 	{
-		if (!this.element) { return; }
-		if (this.element.dataset["value"] == (v ? "open" : "closed")) { return; }
+		try {
+			if((v as unknown as PointerEvent).type == "click")
+			{
+				v = this.root.dataset["value"] == "open" ? false : true;
+			}
+		} 
+		catch (error) {
+			
+		}
 
+		if (!this.root) { return; }
+		//if (this.root.dataset["value"] == (v ? "open" : "closed")) { return; }
+		console.log(this.root.dataset["value"]);
 		if (!v) {
-			this.element.dataset["value"] = "closed";
-			this.element.innerHTML = "&#9658;";
-			this.element.classList.remove("listopen");
-			this.element.classList.add("listclosed");
+			this.root.dataset["value"] = "closed";
+			this.root.innerHTML = "&#9658;";
+			this.root.classList.remove("listopen");
+			this.root.classList.add("listclosed");
 		}
 		else {
-			this.element.dataset["value"] = "open";
-			this.element.innerHTML = "&#9660;";
-			this.element.classList.add("listopen");
-			this.element.classList.remove("listclosed");
+			this.root.dataset["value"] = "open";
+			this.root.innerHTML = "&#9660;";
+			this.root.classList.add("listopen");
+			this.root.classList.remove("listclosed");
 		}
-		if (this.element.onchange) { this.element.onchange(new Event("change")); }
+		if (this.root.onchange) { this.root.onchange(new Event("change")); }
 	}
 
 	getValue()
 	{
 		// return this.element;
-        return this.element.dataset["value"];
+        return this.root.dataset["value"];
 	}
 
 	setEmpty(isEmpty: boolean)
 	{
 		if (isEmpty)
 		{
-			this.element = null;
+			this.root = null;
 		}
 	}
 }
@@ -614,7 +624,7 @@ export class LiteBox
 		const items = this.root.querySelectorAll(".list-item");
 		for (let i = 0; i < items.length; i++) {
 			const item: HTMLLIElementPlus = items[i] as HTMLLIElementPlus;
-			if (item.data == name) {
+			if (item.data.id == name) {
 				LiteGUI.trigger(item, "click");
 				break;
 			}
@@ -652,8 +662,8 @@ export class Slider
 			else if (e.layerX) { mouseX = e.layerX; mouseY = e.layerY; }
 			this.setFromX(mouseX);
 			this.doc_binded = root.ownerDocument;
-			this.doc_binded.addEventListener("mousemove", this.onMouseMove);
-			this.doc_binded.addEventListener("mouseup", this.onMouseUp);
+			this.doc_binded.addEventListener("mousemove", this.onMouseMove.bind(this));
+			this.doc_binded.addEventListener("mouseup", this.onMouseUp.bind(this));
 			e.preventDefault();
 			e.stopPropagation();
 		});
@@ -673,6 +683,7 @@ export class Slider
 	}
 
 	onMouseMove(e: any) {
+		console.log(this.root.getBoundingClientRect());
 		const rect = this.root.getBoundingClientRect();
 		if (!rect) { return; }
 		const x = e.x === undefined ? e.pageX : e.x;
@@ -760,14 +771,14 @@ export class LineEditor
 		element.appendChild(canvas);
 		element.canvas = canvas;
 
-		element.addEventListener("mousedown", this.onmousedown);
+		element.addEventListener("mousedown", this.onmousedown.bind(this));
 
 		this.selected = -1;
 
 		this.last_mouse = [0, 0];
 
 		this.redraw();
-		return element;
+		//return element;
 	}
 
 	getValueAt(x: number)
@@ -885,8 +896,8 @@ export class LineEditor
 	}
 
 	onmousedown(evt: MouseEvent) {
-		document.addEventListener("mousemove", this.onmousemove);
-		document.addEventListener("mouseup", this.onmouseup);
+		document.addEventListener("mousemove", this.onmousemove.bind(this));
+		document.addEventListener("mouseup", this.onmouseup.bind(this));
 
 		const rect = this.canvas.getBoundingClientRect();
 		const mousex = evt.clientX - rect.left;
@@ -908,6 +919,7 @@ export class LineEditor
 	}
 
 	onmousemove(evt: MouseEvent) {
+		console.log("mouse move");
 		const rect = this.canvas.getBoundingClientRect();
 		let mousex = evt.clientX - rect.left;
 		let mousey = evt.clientY - rect.top;

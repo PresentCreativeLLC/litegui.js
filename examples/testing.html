@@ -11,50 +11,10 @@
 </head>
 
 <body>
-    <section id="consoleSection"></section>
     <script type="text/javascript">
 		//call the init to setup 
 		LiteGUI.init();
-
-		const widget = new LiteGUI.widget();
 		
-		/*const button = widget.createButton("Button01", {callback: () => {console.log("button clicked");}});
-		button.click();
-		const searchbox = widget.createSearchBox("Searchbox01", {callback: () => {console.log("searchbox clicked");}, placeholder: "type to search"});
-		searchbox.setValue("busqueda genérica");
-		console.log("The search box: " + searchbox.getValue());
-		const context = widget.createContextMenu(["Valor1", "Valor2", "Valor3"], {title: "Titulo genérico"});
-		context.close(undefined, false);
-		const check = widget.createCheckbox(false, () => {console.log("checkbox changed")});
-		check.setValue(true);
-		const litebox = widget.createLitebox(true, () => {console.log("litebox changed")});
-		litebox.setValue(true);
-		const items = [
-			{name: "Pos0", title: "Title0", id: "Pos0"},
-			{name: "Pos1", title: "Title1", id: "Pos1"},
-			{name: "Pos2", title: "Title2", id: "Pos2"},
-			{name: "Pos3", title: "Title3", id: "Pos3"},
-		];
-    	const list = widget.createList("List01", items, {callback: () => {console.log("litebox changed")}});
-		list.setSelectedItem("Pos1");
-
-		const slider = widget.createSlider(0.3, {min: 0, max: 1});
-		slider.setFromX(1);
-		const lineEditor = widget.createLineEditor([[0,0], [50,50], [100,100], [200,200]],{});
-		console.log("lineEditor at 0.5: " + lineEditor.getValueAt(0.5));
-		lineEditor.addValue([300,300]);
-		lineEditor.redraw();
-
-		const complexList = widget.createComplexList({height: 50});
-		complexList.addTitle("Titulo de complexList");
-		complexList.addHTML("aditional list", () => {console.log("aditional list clicked")});
-
-		for(let i=0; i<3; i++)
-		{
-			document.createElement("div");
-			complexList.addItem(item, "item generico " + i, true, true);
-		}*/
-		LiteGUI.add(widget);
 	</script>
 </body>
 
