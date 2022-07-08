@@ -31,7 +31,7 @@ module.exports =
 		new MiniCssExtractPlugin({filename: "litegui.css"}),
 		new CopyPlugin({
 			patterns: [
-				{ from: './external/jscolor/', to: './external/jscolor/' }]
+				{ from: './external/jscolor/', to: './jscolor/' }]
 		})
 	],
 	module: {
