@@ -26,7 +26,7 @@ interface ContextMenuOptions
 
 interface ListOptions
 {
-	parent?: LiteguiObject | HTMLDivElementPlus;
+	parent?: LiteguiObject;
 	callback?: Function;
 }
 
@@ -62,62 +62,6 @@ interface ComplexListOptions
 	item_code?: string;
 }
 
-// Enclose in a scope
-export class widget {
-
-	constructor()
-	{
-		/*
-		 *LiteGUI.Button = this.Button;
-		 *LiteGUI.SearchBox = this.SearchBox;
-		 *LiteGUI.ContextMenu = this.ContextMenu;
-		 *LiteGUI.ContextualMenu = this.ContextMenu; // LEGACY: REMOVE
-		 *LiteGUI.Checkbox = this.Checkbox;
-		 *LiteGUI.createLiteBox = this.createLiteBox;
-		 *LiteGUI.List = this.List;
-		 *LiteGUI.Slider = this.Slider;
-		 *LiteGUI.LineEditor = this.LineEditor;
-		 *LiteGUI.ComplexList = this.ComplexList;
-		 */
-	}
-
-	createButton(value: string, options: ButtonOptions)
-	{
-		return new Button(value, options);
-	}
-	createSearchBox(value: string, options: SearchBoxOptions)
-	{
-		return new SearchBox(value, options);
-	}
-	createContextMenu(valuesArray: /* ContextMenuItem[] | ContextMenuItem */any, options: ContextMenuOptions)
-	{
-		return new ContextMenu(valuesArray, options);
-	}
-	createCheckbox(value: boolean, on_change: CallableFunction)
-	{
-		return new Checkbox(value, on_change);
-	}
-	static createLiteBox(state: boolean, on_change: CallableFunction)
-	{
-		return new LiteBox(state, on_change);
-	}
-	createList(id: string, items: Array<ListItem | string>, options: ListOptions)
-	{
-		return new List(id, items, options);
-	}
-	createSlider(value: number, options: SliderOptions)
-	{
-		return new Slider(value, options);
-	}
-	createLineEditor(valuesArray: number[][], options: LineEditorOptions)
-	{
-		return new LineEditor(valuesArray, options);
-	}
-	createComplexList(options: ComplexListOptions)
-	{
-		return new ComplexList(options);
-	}
-}
 
 export class Button
 {
@@ -633,7 +577,7 @@ export class LiteBox
  * @param {Array} values
  * @param {Object} options
  */
- export class List
+export class List
 {
 	root: HTMLUListElement;
 	callback: Function;

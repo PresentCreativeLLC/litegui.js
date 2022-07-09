@@ -4,7 +4,8 @@ import { Menubar } from "../../menubar";
 import { Panel } from "../../panel";
 import { Table } from "../../table";
 import { Tree } from "../../tree";
-import { widget, LiteBox } from "../../widgets";
+import { Console } from "../../console";
+import { Button, SearchBox, ContextMenu, Checkbox, LiteBox, List, Slider, LineEditor, ComplexList } from "../../widgets";
 import { Area } from "../../area";
 import { jscolor } from "../../jscolor";
 import { Tabs } from "../../tabs"
@@ -126,7 +127,8 @@ export interface MouseEventPlus extends MouseEvent
 	layerX: any;
 }
 
-export type LiteguiObject = Area | Console | Dialog | Dragger | Inspector | Menubar | Panel | Tabs | Table | Tree | widget;
+export type LiteguiObject = Area | Console | Dialog | Dragger | Inspector | Menubar | Panel | Tabs | Table | Tree | Button |
+    SearchBox | ContextMenu |Checkbox | LiteBox | List | Slider | LineEditor | ComplexList;
 
 export interface AreaOptions
 {

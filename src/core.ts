@@ -4,7 +4,7 @@ import { Dialog } from "./dialog";
 import { Menubar} from "./menubar";
 import { Panel } from "./panel";
 import { Tabs } from "./tabs";
-import { widget, ContextMenu, LineEditor, Slider } from "./widgets"
+import { Button, SearchBox, ContextMenu, Checkbox, LiteBox, List, Slider, LineEditor, ComplexList } from "./widgets"
 import { Console } from "./console";
 import { Tree } from "./tree";
 import { Inspector } from "./inspector"
@@ -57,14 +57,20 @@ let escapeHtmlEntities: any;
         Menubar: typeof Menubar = Menubar;
 		Dialog: typeof Dialog = Dialog;
 		Panel: typeof Panel = Panel;
-		widget: typeof widget = widget;
+		Button: typeof Button = Button;
+		SearchBox: typeof SearchBox = SearchBox;
+		ContextMenu: typeof ContextMenu = ContextMenu;
+		Checkbox: typeof Checkbox = Checkbox;
+		LiteBox: typeof LiteBox = LiteBox;
+		List: typeof List = List;
+		Slider: typeof Slider = Slider;
+		LineEditor: typeof LineEditor = LineEditor;
+		ComplexList: typeof ComplexList = ComplexList;
 		Tabs: typeof Tabs = Tabs;
 		Tree: typeof Tree = Tree;
 		Console: typeof Console = Console;
         Inspector: typeof Inspector = Inspector;
         Dragger: typeof Dragger = Dragger;
-        LineEditor: typeof LineEditor = LineEditor;
-        Slider: typeof Slider = Slider;
 		Table: typeof Table = Table;
         special_codes: typeof special_codes = special_codes;
 
@@ -346,10 +352,10 @@ let escapeHtmlEntities: any;
 			this.add(this.menubar);
 		}
 
-		ContextMenu(options: any, values: any): ContextMenu
+		/*ContextMenu(options: any, values: any): ContextMenu
 		{
 			return new ContextMenu(values, options);
-		}
+		}*/
 
 		setWindowSize(w: number | undefined, h: number | undefined) : void
 		{

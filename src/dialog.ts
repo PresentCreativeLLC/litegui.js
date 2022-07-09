@@ -217,7 +217,11 @@ export class Dialog
 	 */
 	add(litegui_item : LiteguiObject | object)
 	{
-		(this.content as HTMLDivElementPlus).appendChild(litegui_item.root || litegui_item);
+		//(this.content as HTMLDivElementPlus).appendChild((litegui_item as LiteguiObject).root ? (litegui_item as LiteguiObject).root! : (litegui_item as object).root);
+		if((litegui_item as LiteguiObject).root)
+		{
+			(this.content as HTMLDivElementPlus).appendChild((litegui_item as LiteguiObject).root!);
+		}
 	}
 
 	// Takes the info from the parent to
@@ -342,7 +346,7 @@ export class Dialog
 		const panel = this.root as HTMLDivElementPlus;
 
 		dock_type = dock_type || "full";
-		parent = parent.content || parent;
+		//parent = parent.content || parent;
 
 		panel.style.top = "0";
 		panel.style.left = "0";
@@ -392,7 +396,7 @@ export class Dialog
 		}
 
 
-		if (parent.content)
+		/*if (parent.content)
 		{parent.content.appendChild(panel);}
 		else if (typeof(parent) == "string")
 		{
@@ -401,7 +405,7 @@ export class Dialog
 			{parent.appendChild(panel);}
 		}
 		else
-		{parent.appendChild(panel);}
+		{*/parent.root?.appendChild(panel);//}
 	}
 
 	addButton(name : string, options? : object | Function)

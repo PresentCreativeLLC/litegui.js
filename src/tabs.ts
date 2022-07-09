@@ -683,7 +683,7 @@ class tab_info
 
 	add(v: LiteguiObject | HTMLDivElementPlus)
 	{
-		this.content.appendChild(v.root || v);
+		this.content.appendChild((v as LiteguiObject).root ? (v as LiteguiObject).root! : (v as HTMLDivElementPlus));
 	}
 	setTitle(title: string)
 	{
