@@ -1,65 +1,9 @@
 import { LiteGUI, special_codes } from "./core";
-import { HTMLDivElementPlus, HTMLSpanElementPlus, EventTargetPlus, HTMLLIElementPlus, MouseEventPlus, LiteguiObject } from "./@types/globals/index"
-
-interface ButtonOptions
-{
-	callback? : Function;
-}
-
-interface SearchBoxOptions
-{
-	placeholder?: string;
-	callback?: Function
-}
-
-interface ContextMenuOptions
-{
-	autoopen?: boolean;
-	ignore_item_callbacks?: boolean;
-	callback?: Function;
-	top?: number;
-	left?: number;
-	title?: string;
-	event?: MouseEvent | PointerEvent | CustomEvent;
-	parentMenu?: ContextMenu;
-}
-
-interface ListOptions
-{
-	parent?: LiteguiObject | HTMLDivElementPlus;
-	callback?: Function;
-}
+import { HTMLDivElementPlus, HTMLSpanElementPlus, EventTargetPlus, HTMLLIElementPlus, MouseEventPlus, LiteguiObject, ButtonOptions, SearchBoxOptions, ContextMenuOptions, ListOptions, SliderOptions, LineEditorOptions, ComplexListOptions } from "./@types/globals/index"
 
 interface ListItem
 {
 	name: string, title: string, id: string
-}
-
-interface SliderOptions
-{
-	min?: number;
-	max?: number;
-}
-
-interface LineEditorOptions
-{
-	callback?: Function;
-	height?: number;
-	width?: number;
-	show_samples?: number;
-	no_trespassing?: boolean;
-	defaulty?: number;
-	xrange?: number[];
-	linecolor?: string;
-	pointscolor?: string;
-	bgcolor?: string;
-	extraclass?: string;
-}
-
-interface ComplexListOptions
-{
-	height?: string | number;
-	item_code?: string;
 }
 
 // Enclose in a scope
@@ -1118,10 +1062,10 @@ export class ComplexList
 		return elem;
 	};
 
-	addHTML(html: string, on_click: CallableFunction)
+	addHTML(html: string, on_click: Function)
 	{
 		const elem = LiteGUI.createElement("div", ".listtext", html);
-		if (on_click) { elem.addEventListener("mousedown", on_click); }
+		if (on_click) { elem.addEventListener("mousedown", on_click as EventListenerOrEventListenerObject); }
 		this.root.appendChild(elem);
 		return elem;
 	};
@@ -1131,7 +1075,7 @@ export class ComplexList
 		this.root.innerHTML = "";
 	};
 
-	addItem(item: any, text: string, is_enabled: boolean, can_be_removed: boolean)
+	addItem(item: HTMLDivElementPlus, text: string, is_enabled: boolean, can_be_removed: boolean)
 	{
 		const title = text || item.content || item.name;
 		const elem = LiteGUI.createListItem(this.item_code, { ".title": title }) as HTMLSpanElementPlus;

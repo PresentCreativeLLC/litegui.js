@@ -324,7 +324,7 @@ export class Tabs
 				const el = e.target;
 				if (that._timeout_mouseover) { clearTimeout(that._timeout_mouseover); }
 				that._timeout_mouseover = setTimeout((() => {
-					LiteGUI.trigger(el, "click");
+					LiteGUI.trigger(el as EventTarget, "click");
 					that._timeout_mouseover = null;
 				}), 500);
 			};
