@@ -394,7 +394,7 @@ export class ContextMenu
 					if (!value.submenu.options) {
 						throw ("ContextMenu submenu needs options");
 					}
-					const submenu = LiteGUI.ContextMenu(value.submenu.options, {
+					const submenu = new LiteGUI.ContextMenu(value.submenu.options, {
 						callback: value.submenu.callback,
 						event: e,
 						parentMenu: that,
@@ -626,7 +626,11 @@ export class List
 
 		if (options.parent) {
 			if (options.parent.root) { options.parent.root.appendChild(root); }
-			else { options.parent.appendChild(root); }
+			else
+			{
+				//options.parent.appendChild(root);
+				console.log("trying to add a widget with out a parent with root");
+			}
 		}
 	}
 

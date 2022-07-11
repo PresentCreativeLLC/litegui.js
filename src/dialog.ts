@@ -222,6 +222,10 @@ export class Dialog
 		{
 			(this.content as HTMLDivElementPlus).appendChild((litegui_item as LiteguiObject).root!);
 		}
+		else if ((litegui_item as object as any).root)
+		{
+			(this.content as HTMLDivElementPlus).appendChild((litegui_item as object as any).root);
+		}
 	}
 
 	// Takes the info from the parent to
