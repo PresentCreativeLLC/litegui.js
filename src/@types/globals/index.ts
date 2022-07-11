@@ -65,7 +65,7 @@ export interface HTMLSpanElementPlus extends HTMLSpanElement
 export interface EventTargetPlus extends EventTarget
 {
 	value: any;
-	data(data: any);
+	data(data: any): any;
 	classList: any;
     setValue: Function;
 }
