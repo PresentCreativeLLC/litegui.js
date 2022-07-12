@@ -194,6 +194,17 @@ export interface InspectorOptions
     
 }
 
+export interface PanelOptions
+{
+	scroll: boolean;
+	position: Array<number | string>;
+	height: number | string;
+	width: number | string;
+	title: string;
+	className: string;
+	content: string;
+}
+
 export interface ButtonOptions
 {
 	callback? : Function;
