@@ -1,6 +1,7 @@
 import { LiteGUI, special_codes } from "./core";
 import { HTMLDivElementPlus, HTMLSpanElementPlus, EventTargetPlus, HTMLLIElementPlus, MouseEventPlus, LiteguiObject } from "./@types/globals/index"
 
+
 interface ButtonOptions
 {
 	callback? : Function;
@@ -1071,10 +1072,10 @@ export class ComplexList
 		return elem;
 	};
 
-	addHTML(html: string, on_click: CallableFunction)
+	addHTML(html: string, on_click: Function)
 	{
 		const elem = LiteGUI.createElement("div", ".listtext", html);
-		if (on_click) { elem.addEventListener("mousedown", on_click); }
+		if (on_click) { elem.addEventListener("mousedown", on_click as EventListenerOrEventListenerObject); }
 		this.root.appendChild(elem);
 		return elem;
 	};
@@ -1084,7 +1085,7 @@ export class ComplexList
 		this.root.innerHTML = "";
 	};
 
-	addItem(item: any, text: string, is_enabled: boolean, can_be_removed: boolean)
+	addItem(item: HTMLDivElementPlus, text: string, is_enabled: boolean, can_be_removed: boolean)
 	{
 		const title = text || item.content || item.name;
 		const elem = LiteGUI.createListItem(this.item_code, { ".title": title }) as HTMLSpanElementPlus;

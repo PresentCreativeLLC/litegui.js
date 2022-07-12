@@ -49,6 +49,7 @@ export interface HTMLDivElementPlus extends HTMLDivElement
 
 export interface HTMLSpanElementPlus extends HTMLSpanElement
 {
+	widget?: any;
 	hide: () => void;
 	show: () => void;
 	setSelected: (v: boolean) => void;
@@ -62,8 +63,15 @@ export interface HTMLSpanElementPlus extends HTMLSpanElement
     item?: any;
 }
 
+export interface HTMLScriptElementPlus extends HTMLScriptElement
+{
+	original_src: string;
+	num: string;
+}
+
 export interface EventTargetPlus extends EventTarget
 {
+	dataset: any;
 	value: any;
 	data(data: any): any;
 	classList: any;
@@ -82,8 +90,16 @@ export interface HTMLLIElementPlus extends HTMLLIElement
 
 export interface HTMLElementPlus extends HTMLElement
 {
+	__events?: any;
+	add?: Function;
+	root?: HTMLElement;
     update?: Function;
     dialog? : any;
+}
+
+export interface HTMLButtonElementPlus extends HTMLButtonElement
+{
+    root: any;
 }
 
 export interface ParentNodePlus extends ParentNode
@@ -176,6 +192,108 @@ export interface InspectorOptions
     instance?: any,
     widgets_per_row?: number,
     
+}
+
+interface ButtonOptions
+{
+	callback? : Function;
+}
+
+interface SearchBoxOptions
+{
+	placeholder?: string;
+	callback?: Function
+}
+
+export interface ContextMenuOptions
+{
+	autoopen?: boolean;
+	ignore_item_callbacks?: boolean;
+	callback?: Function;
+	top?: number;
+	left?: number;
+	title?: string;
+	event?: MouseEvent | PointerEvent | CustomEvent;
+	parentMenu?: ContextMenu;
+}
+
+interface ListOptions
+{
+	parent?: LiteguiObject | HTMLDivElementPlus;
+	callback?: Function;
+}
+
+interface SliderOptions
+{
+	min?: number;
+	max?: number;
+}
+
+interface LineEditorOptions
+{
+	callback?: Function;
+	height?: number;
+	width?: number;
+	show_samples?: number;
+	no_trespassing?: boolean;
+	defaulty?: number;
+	xrange?: number[];
+	linecolor?: string;
+	pointscolor?: string;
+	bgcolor?: string;
+	extraclass?: string;
+}
+
+interface ComplexListOptions
+{
+	height?: string | number;
+	item_code?: string;
+}
+
+export interface DialogOptions
+{
+	min_height?: number;
+	noclose?: boolean;
+	parent?: string | HTMLElementPlus;
+	attach?: boolean;
+	scroll?: boolean;
+	buttons?: Array<DialogButtonOptions>;
+	fullcontent?: boolean;
+	closable?: boolean;
+	close?: string;
+	detachable?: boolean;
+	hide?: boolean;
+	minimize?: boolean;
+	title?: string;
+	className?: string;
+	content?: string;
+	minHeight?: number | number;
+	minWidth?: number | number;
+	height?: string | number;
+	width?: string | number;
+	id?: string;
+	resizable?: boolean;
+	draggable?: boolean;
+}
+
+interface DialogButtonOptions
+{
+	name: string;
+	className?: string;
+	callback?: Function;
+	close?: boolean;
+}
+
+export interface MessageOptions
+{
+	textarea?: boolean;
+	value?: string;
+	className?: string; 
+    title? : string;
+    width? : number; 
+    height? : number; 
+    content? : string; 
+    noclose? : boolean; 
 }
 
 export interface InstanceObject extends Object

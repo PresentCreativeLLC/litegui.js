@@ -10,6 +10,7 @@ import { Tree } from "./tree";
 import { Inspector } from "./inspector"
 import { Dragger } from "./dragger";
 import { Table } from "./table";
+import { ContextMenuOptions, DialogOptions, DocumentPlus, EventTargetPlus, HTMLButtonElementPlus, HTMLDivElementPlus, HTMLElementPlus, HTMLLIElementPlus, HTMLScriptElementPlus, HTMLSpanElementPlus, LiteguiObject, MessageOptions } from "./@types/globals";
 
 let escapeHtmlEntities: any;
 	// Those useful HTML unicode codes that I never remeber but I always need
@@ -36,8 +37,8 @@ let escapeHtmlEntities: any;
 		content: HTMLElement | null = null;
 		container: HTMLElement | null = null;
 
-		panels: any = {};
-		windows: Array<any> = []; // Windows opened by the GUI (we need to know about them to close them once the app closes)
+		panels: object = {};
+		windows: Array<Window> = []; // Windows opened by the GUI (we need to know about them to close them once the app closes)
 
 		// Undo
 		undo_steps: Array<any> = [];
@@ -46,9 +47,9 @@ let escapeHtmlEntities: any;
 		modalbg_div: HTMLElement | null = null;
 
 		// The top menu
-		mainmenu: any = null;
+		mainmenu?: HTMLElement;
 
-		_safe_cliboard : any;
+		_safe_cliboard? : string;
 		menubar : Menubar | undefined;
 		tabs: Tabs | undefined;
         
@@ -170,7 +171,7 @@ let escapeHtmlEntities: any;
 		 * @param {*} params it will be stored in e.detail
 		 * @param {*} origin it will be stored in e.srcElement
 		 */
-		trigger(element: any, event_name: string, params?: any, /*origin? : any*/): CustomEvent<any>
+		trigger(element: HTMLElementPlus | any, event_name: string, params?: any, /*origin? : any*/): CustomEvent<any>
 		{
 			// TODO: fix the deprecated elements
 			const evt = new CustomEvent(event_name, { detail: params });
@@ -197,7 +198,7 @@ let escapeHtmlEntities: any;
 		 * @param {String} event the string defining the event
 		 * @param {Function} callback where to call
 		 */
-		bind(element : any, event : string, callback : Function): void
+		bind(element : HTMLElement | object | string | Array<HTMLElement>, event : string, callback : Function): void
 		{
 			if (!element) {
 				throw ("Cannot bind to null");
@@ -211,7 +212,7 @@ let escapeHtmlEntities: any;
 
 			if (element.constructor === String)
 			{
-				element = document.querySelectorAll(element as any);
+				element = document.querySelectorAll(element as string);
 			}
 
 			if (element.constructor === NodeList || element.constructor === Array)
@@ -223,14 +224,14 @@ let escapeHtmlEntities: any;
 			}
 			else
 			{
-				inner(element);
+				inner(element as HTMLElement);
 			}
 
-			function inner(element : any)
+			function inner(element : HTMLElementPlus)
 			{
 				if (element.addEventListener)
 				{
-					element.addEventListener(event, callback);
+					element.addEventListener(event, callback as EventListenerOrEventListenerObject);
 				}
 				else if (element.__events)
 				{
@@ -239,7 +240,7 @@ let escapeHtmlEntities: any;
 				else
 				{
 					// Create a dummy HTMLentity so we can use it to bind HTML events
-					const dummy = document.createElement("span") as any;
+					const dummy = document.createElement("span") as HTMLSpanElementPlus;
 					dummy.widget = element; // Double link
 					Object.defineProperty(element, "__events", {
 						enumerable: false,
@@ -259,9 +260,9 @@ let escapeHtmlEntities: any;
 		 * @param {String} event the string defining the event
 		 * @param {Function} callback where to call
 		 */
-		unbind(element : any, event : string, callback : Function): void
+		unbind(element : HTMLElement | object | any, event : string, callback : Function): void
 		{
-			if (element.removeEventListener)
+			if ((element as HTMLElement).removeEventListener)
 			{element.removeEventListener(event, callback);}
 			else if (element.__events && element.__events.removeEventListener)
 			{element.__events.removeEventListener(event, callback);}
@@ -274,7 +275,7 @@ let escapeHtmlEntities: any;
 		 * @param {String} selector
 		 * @param {String} class_name
 		 */
-		removeClass(elem : any, selector : string, class_name?: string): void
+		removeClass(elem : HTMLElement, selector : string, class_name?: string): void
 		{
 			if (!class_name)
 			{
@@ -291,7 +292,7 @@ let escapeHtmlEntities: any;
 		 * @method add
 		 * @param {Object} litegui_element
 		 */
-		add(litegui_element : any): void
+		add(litegui_element : LiteguiObject): void
 		{
 			this.content?.appendChild(litegui_element.root || litegui_element);
 		}
@@ -301,13 +302,13 @@ let escapeHtmlEntities: any;
 		 * @method remove
 		 * @param {Object} litegui_element it also supports HTMLentity, selector string or Array of elements
 		 */
-		remove(litegui_element : any): void
+		remove(litegui_element : LiteguiObject | HTMLElement | string | Array<HTMLLIElement>): void
 		{
 			if (!litegui_element) {return;}
 
 			if (litegui_element.constructor === String) // Selector
 			{
-				const elements = document.querySelectorAll(litegui_element as any);
+				const elements = document.querySelectorAll(litegui_element as LiteguiObject | HTMLElement | string | Array<HTMLLIElement>);
 				for (let i = 0; i < elements.length; ++i)
 				{
 					const element = elements[i];
@@ -352,7 +353,7 @@ let escapeHtmlEntities: any;
 			this.add(this.menubar);
 		}
 
-		/*ContextMenu(options: any, values: any): ContextMenu
+		/*ContextMenu(options: ContextMenuOptions, values: any): ContextMenu
 		{
 			return new ContextMenu(values, options);
 		}*/
@@ -402,7 +403,7 @@ let escapeHtmlEntities: any;
 		 * @param {String} cursor
 		 *
 		 */
-		isCursorOverElement(event : any, element : any): boolean
+		isCursorOverElement(event : MouseEvent, element : HTMLElement): boolean
 		{
 			const left = event.pageX;
 			const top = event.pageY;
@@ -427,7 +428,7 @@ let escapeHtmlEntities: any;
 		 * @param {Boolean} force_local force to store the data in the browser clipboard (this one can be read back)
 		 *
 		 */
-		toClipboard(object : any, force_local : boolean): void
+		toClipboard(object : string | object, force_local : boolean): void
 		{
 			if (object && object.constructor !== String)
 			{object = JSON.stringify(object);}
@@ -460,7 +461,7 @@ let escapeHtmlEntities: any;
 			// Old system
 			try
 			{
-				this._safe_cliboard = null;
+				this._safe_cliboard = undefined;
 				localStorage.setItem("litegui_clipboard", object);
 			}
 			catch (err)
@@ -494,22 +495,22 @@ let escapeHtmlEntities: any;
 		 * @param {String|Object} code it could be a string with CSS rules, or an object with the style syntax.
 		 *
 		 */
-		addCSS(code : string | any)
+		addCSS(code : string | object)
 		{
 			if (!code)
 			{return;}
 
 			if (code.constructor === String)
 			{
-				const style = document.createElement('style') as any;
+				const style = document.createElement('style') as HTMLStyleElement;
 				style.type = 'text/css';
 				style.innerHTML = code;
 				document.getElementsByTagName('head')[0].appendChild(style);
 				return;
 			}
 
-			for (const i in code)
-			{document.body.style[parseInt(i)] = code[i];}
+			for (const i in (code as object))
+			{document.body.style[parseInt(i)] = code[i as keyof object];}
 
 		}
 
@@ -520,23 +521,23 @@ let escapeHtmlEntities: any;
 		 * @param {Function} on_complete
 		 *
 		 */
-		requireCSS(url : any, on_complete : Function)
+		requireCSS(url : string | Array<string>, on_complete : Function)
 		{
 			if (typeof(url)=="string")
 			{url = [url];}
 
 			while (url.length)
 			{
-				const link  = document.createElement('link') as any;
+				const link  = document.createElement('link') as HTMLLinkElement;
 				// Link.id   = cssId;
 				link.rel  = 'stylesheet';
 				link.type = 'text/css';
-				link.href = url.shift(1);
+				link.href = url.shift(/* 1 */) as string;
 				link.media = 'all';
 				const head = document.getElementsByTagName('head')[0];
 				head.appendChild(link);
 				if (url.length == 0)
-				{link.onload = on_complete;}
+				{link.onload = on_complete as (this:GlobalEventHandlers, ev: Event) => any;}
 			}
 		}
 
@@ -547,7 +548,7 @@ let escapeHtmlEntities: any;
 		 * @param {Function} on_complete
 		 *
 		 */
-		request(request : any)
+		request(request : {url: string, dataType: string, mimeType?: string, data?: Array<string>, nocache?: boolean, error?: Function, success?: Function})
 		{
 			let dataType = request.dataType || "text";
 			if (dataType == "json") // Parse it locally
@@ -565,7 +566,7 @@ let escapeHtmlEntities: any;
 			const xhr = new XMLHttpRequest();
 			xhr.open(request.data ? 'POST' : 'GET', request.url, true);
 			if (dataType)
-			{xhr.responseType = dataType;}
+			{xhr.responseType = dataType as XMLHttpRequestResponseType;}
 			if (request.mimeType)
 			{xhr.overrideMimeType(request.mimeType);}
 			if (request.nocache)
@@ -653,7 +654,7 @@ let escapeHtmlEntities: any;
 		 * @param {Function} on_error
 		 *
 		 */
-		requestJSON(url : String, on_complete : Function, on_error : Function)
+		requestJSON(url : string, on_complete : Function, on_error : Function)
 		{
 			return this.request({ url: url, dataType: "json", success: on_complete, error: on_error });
 		}
@@ -689,8 +690,8 @@ let escapeHtmlEntities: any;
 
 			let total = url.length;
 			const size = total;
-			const loaded_scripts : Array<any> = [];
-			const onload = function(script : any, e : any)
+			const loaded_scripts : Array<HTMLScriptElementPlus> = [];
+			const onload = function(script : HTMLScriptElementPlus, e : Event)
 			{
 				total--;
 				loaded_scripts.push(script);
@@ -704,9 +705,9 @@ let escapeHtmlEntities: any;
 				}
 			};
 
-			for (const i in url as any)
+			for (const i in url as Array<string>)
 			{
-				const script = document.createElement('script') as any;
+				const script = document.createElement('script') as HTMLScriptElementPlus;
 				script.num = i;
 				script.type = 'text/javascript';
 				script.src = url[parseInt(i)] + (version ? "?version=" + version : "");
@@ -715,7 +716,7 @@ let escapeHtmlEntities: any;
 				script.onload = onload.bind(undefined, script);
 				if (on_error)
 				{
-					script.onerror = function(err : any)
+					script.onerror = function(err : string | Event)
 					{
 						on_error(err, this.original_src, this.num);
 					};
@@ -726,17 +727,17 @@ let escapeHtmlEntities: any;
 
 
 		// Old version, it loads one by one, so it is slower
-		requireScriptSerial(url : any, on_complete : Function, on_progress : Function)
+		requireScriptSerial(url : string | Array<string>, on_complete : Function, on_progress : Function)
 		{
 			if (typeof(url)=="string")
 			{url = [url];}
 
-			const loaded_scripts : Array<any> = [];
+			const loaded_scripts : Array<GlobalEventHandlers> = [];
 			function addScript()
 			{
 				const script = document.createElement('script');
 				script.type = 'text/javascript';
-				script.src = url.shift(1);
+				script.src = (url as Array<string>).shift(/* 1 */) as string;
 				script.onload = function(e)
 				{
 					if (url.length)
@@ -759,7 +760,7 @@ let escapeHtmlEntities: any;
 			addScript();
 		}
 
-		newDiv(id : any, code : any)
+		newDiv(id : string, code : string)
 		{
 			return this.createElement("div",id,code, undefined, undefined);
 		}
@@ -773,9 +774,9 @@ let escapeHtmlEntities: any;
 		 * @param {Object} style
 		 *
 		 */
-		createElement(tag : string, id_class : string, content : string, style?: any, events?: any)
+		createElement(tag : string, id_class : string, content : string, style?: string | object, events?: object) : HTMLElement
 		{
-			const elem = document.createElement(tag) as any;
+			const elem = document.createElement(tag) as HTMLElementPlus;
 			if (id_class)
 			{
 				const t = id_class.split(" ");
@@ -798,7 +799,7 @@ let escapeHtmlEntities: any;
 			elem.root = elem;
 			if (content)
 			{elem.innerHTML = content;}
-			elem.add = function(v : any) { this.appendChild(v.root || v); };
+			elem.add = function(v : HTMLDivElementPlus | LiteguiObject) { this.appendChild(v.root || v); };
 
 			if (style)
 			{
@@ -806,9 +807,9 @@ let escapeHtmlEntities: any;
 				{elem.setAttribute("style",style);}
 				else
 				{
-					for (const i in style)
+					for (const i in style as object)
 					{
-						elem.style[i] = style[parseInt(i)];
+						elem.style[i as keyof object] = style[i as keyof object];
 					}
 				}
 			}
@@ -817,7 +818,7 @@ let escapeHtmlEntities: any;
 			{
 				for (const i in events)
 				{
-					elem.addEventListener(i, events[i]);
+					elem.addEventListener(i, events[i as keyof object]);
 				}
 			}
 			return elem;
@@ -832,24 +833,24 @@ let escapeHtmlEntities: any;
 		 * @return {HTMLElement}
 		 *
 		 */
-		createListItem(code : string, values : any, style?: any)
+		createListItem(code : string, values : object, style?: object)
 		{
-			let elem = document.createElement("span") as any;
-			elem.innerHTML = code;
+			let elem : HTMLSpanElement | ChildNode = document.createElement("span");
+			(elem as HTMLSpanElement).innerHTML = code;
 			elem = elem.childNodes[0]; // To get the node
 			if (values)
 			{
 				for (const i in values)
 				{
-					const subelem = elem.querySelector(i);
-					if (subelem) {subelem.innerText = values[i];}
+					const subelem = (elem as HTMLSpanElement).querySelector(i) as HTMLElement;
+					if (subelem) {subelem.innerText = values[i as keyof object];}
 				}
 			}
 			if (style)
 			{
 				for (const i in style)
 				{
-					elem.style[i] = style[i];
+					(elem as HTMLSpanElement).style[i as keyof object] = style[i as keyof object];
 				}
 			}
 			return elem;
@@ -864,9 +865,9 @@ let escapeHtmlEntities: any;
 		 * @param {Object|String} style
 		 *
 		 */
-		createButton(id_class : string, content : string, callback : Function, style : any)
+		createButton(id_class : string, content : string, callback : Function, style : object | string) : HTMLButtonElement
 		{
-			const elem = document.createElement("button") as any;
+			const elem = document.createElement("button") as HTMLButtonElementPlus;
 			elem.className = "litegui litebutton button";
 			if (id_class)
 			{
@@ -885,23 +886,23 @@ let escapeHtmlEntities: any;
 			if (content !== undefined)
 			{elem.innerHTML = content;}
 			if (callback)
-			{elem.addEventListener("click", callback);}
+			{elem.addEventListener("click", callback as (this: HTMLButtonElement, ev: MouseEvent) => any);}
 			if (style)
 			{
 				if (style.constructor === String)
 				{elem.setAttribute("style",style);}
 				else
 				{
-					for (const i in style)
+					for (const i in style as object)
 					{
-						elem.style[i] = style[i];
+						elem.style[i as keyof object] = style[i as keyof object];
 					}
 				}
 			}
 			return elem;
 		}
 
-		getParents(element : any)
+		getParents(element : HTMLElement) : Array<HTMLElement>
 		{
 			const elements = [];
 			let curElement = element.parentElement;
@@ -918,10 +919,10 @@ let escapeHtmlEntities: any;
 		}
 
 		// Used to create a window that retains all the CSS info or the scripts.
-		newWindow(title : string, width : number, height : number, options : any)
+		newWindow(title : string, width : number, height : number, options? : {scripts?: boolean, content?: string}) : Window
 		{
 			options = options || {};
-			const new_window = window.open("","","width="+width+", height="+height+", location=no, status=no, menubar=no, titlebar=no, fullscreen=yes") as any;
+			const new_window = window.open("","","width="+width+", height="+height+", location=no, status=no, menubar=no, titlebar=no, fullscreen=yes") as Window;
 			new_window.document.write("<html><head><title>"+title+"</title>");
 
 			// Transfer style
@@ -951,13 +952,13 @@ let escapeHtmlEntities: any;
 		}
 
 		//* DIALOGS *******************
-		showModalBackground(v : any)
+		showModalBackground(v : boolean)
 		{
 			if (this.modalbg_div)
 			{this.modalbg_div.style.display = v ? "block" : "none";}
 		}
 
-		showMessage(content : any, options : any)
+		showMessage(content : string, options? : DialogOptions)
 		{
 			options = options || {};
 
@@ -978,7 +979,7 @@ let escapeHtmlEntities: any;
 		 * @param {Object} options ( min_height, content, noclose )
 		 *
 		 */
-		popup(content : string, options : any)
+		popup(content : string, options? : DialogOptions) : Dialog
 		{
 			options = options || {};
 
@@ -1004,7 +1005,7 @@ let escapeHtmlEntities: any;
 		 * @param {Object} options ( title, width, height, content, noclose )
 		 *
 		 */
-		alert(content : string, options : any)
+		alert(content : string, options? : MessageOptions) : Dialog
 		{
 			options = options || {};
 
@@ -1027,7 +1028,7 @@ let escapeHtmlEntities: any;
 		 * @param {Object} options ( title, width, height, content, noclose )
 		 *
 		 */
-		confirm(content : string, callback : Function, options : any)
+		confirm(content : string, callback : Function, options? : MessageOptions) : Dialog
 		{
 			options = options || {};
 			options.className = "alert";
@@ -1044,9 +1045,9 @@ let escapeHtmlEntities: any;
 			(dialog.content as HTMLDivElement).style.paddingBottom = "10px";
 			const buttons = (dialog.content as HTMLDivElement).querySelectorAll("button");
 
-			const inner = (v : any) =>
+			const inner = (v : MouseEvent) =>
 			{
-				const button = v.target;
+				const button = v.target as EventTargetPlus;
 				const value = button.dataset["value"] == "yes";
 				dialog.close(); // Close before callback
 				if (callback)
@@ -1072,7 +1073,7 @@ let escapeHtmlEntities: any;
 		 * @param {Object} options ( title, width, height, content, noclose )
 		 *
 		 */
-		prompt(content : string, callback : Function, options : any)
+		prompt(content : string, callback : Function, options? : MessageOptions) : Dialog
 		{
 			options = options || {};
 			options.className = "alert";
@@ -1092,28 +1093,28 @@ let escapeHtmlEntities: any;
 			options.noclose = true;
 			const dialog = this.showMessage(content, options);
 
-			const inner = function(e : any)
+			const inner = function(e : Event)
 			{
-				const button = e.target;
-				let value = (input as any).value;
-				if (button.dataset && button.dataset["value"] == "cancel")
+				const button = e.target as EventTargetPlus;
+				let value = (input as HTMLDivElementPlus).value;
+				if (button!.dataset && button!.dataset["value"] == "cancel")
 				{
-					value = null;
+					value = undefined;
 				}
 				dialog.close(); // Close before callback
 				if (callback) {callback(value);}
 			};
 
-			const inner_key = function(e : any)
+			const inner_key = function(e : Event)
 			{
-				if (!e) {e = window.event;}
-				const keyCode = e.keyCode || e.which;
-				if (keyCode == '13')
+				if (!e) {e = window.event!;}
+				const keyCode = (e as KeyboardEvent).keyCode || (e as KeyboardEvent).which;
+				if (keyCode == 13)
 				{
 					inner(e);
 					return false;
 				}
-				if (keyCode == '29') {dialog.close();}
+				if (keyCode == 29) {dialog.close();}
 				return;
 			};
 
@@ -1126,9 +1127,10 @@ let escapeHtmlEntities: any;
 			const input = (dialog.content as HTMLDivElement).querySelector("input,textarea");
 			input!.addEventListener("keydown", inner_key, true);
 
-			(input as any).focus();
+			(input as HTMLElement).focus();
 			return dialog;
 		}
+		
 
 		/**
 		 * Shows a choice dialog with a message
@@ -1138,7 +1140,7 @@ let escapeHtmlEntities: any;
 		 * @param {Object} options ( title, width, height, content, noclose )
 		 *
 		 */
-		choice(content : string, choices : any, callback : Function, options : any)
+		choice(content : string, choices : object, callback : Function, options? : MessageOptions) : Dialog
 		{
 			options = options || {};
 			options.className = "alert";
@@ -1152,7 +1154,7 @@ let escapeHtmlEntities: any;
 
 			for (const i in choices)
 			{
-				content +="<button class='litebutton' data-value='"+i+"' style='width:45%; margin-left: 10px'>"+(choices[i].content || choices[i])+"</button>";
+				content +="<button class='litebutton' data-value='"+i+"' style='width:45%; margin-left: 10px'>"+((choices as any)[i].content || choices[i as keyof object])+"</button>";
 			}
 			options.noclose = true;
 
@@ -1160,10 +1162,10 @@ let escapeHtmlEntities: any;
 			(dialog.content as HTMLDivElement).style.paddingBottom = "10px";
 			const buttons = (dialog.content as HTMLDivElement).querySelectorAll("button");
 
-			const inner = (v : any) =>
+			const inner = (v : MouseEvent) =>
 			{
-				const button = v.target;
-				const value = choices[ button.dataset["value"] ];
+				const button = v.target as EventTargetPlus;
+				const value = choices[ button.dataset["value"] as keyof object];
 				dialog.close(); // Close before callback
 				if (callback) {callback(value);}
 			};
@@ -1185,7 +1187,7 @@ let escapeHtmlEntities: any;
 			document.body.removeChild(link);
 		}
 
-		downloadFile(filename : string, data : any, dataType : any)
+		downloadFile(filename : string, data : File | Blob, dataType : string)
 		{
 			if (!data)
 			{
@@ -1223,31 +1225,31 @@ let escapeHtmlEntities: any;
 		 * @method getUrlVars
 		 *
 		 */
-		getUrlVars()
+		getUrlVars() : Array<string>
 		{
 			const vars = [];
 			let hash;
-			const hashes : string | Array<any> = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+			const hashes : string | Array<string> = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
 			for (let i = 0; i < hashes.length; i++)
 			{
 			hash = hashes[i].split('=');
 			vars.push(hash[0]);
-			vars[hash[0]] = hash[1];
+			vars[hash[0] as keyof object] = hash[1];
 			}
 			return vars;
 		}
 
-		getUrlVar(name : any)
+		getUrlVar(name : string) : string
 		{
-			return LiteGUI.getUrlVars()[name];
+			return LiteGUI.getUrlVars()[name as keyof object];
 		}
 
-		focus(element : any)
+		focus(element : HTMLElement | Window)
 		{
 			element.focus();
 		}
 
-		blur(element : any)
+		blur(element : HTMLElement | Window)
 		{
 			element.blur();
 		}
@@ -1259,8 +1261,8 @@ let escapeHtmlEntities: any;
 		 * @param {HTMLEntity} dragger the area to start the dragging
 		 *
 		 */
-		draggable(container : any, dragger : any = undefined, on_start : Function | undefined = undefined, 
-			on_finish : Function | undefined = undefined, on_is_draggable : any = undefined)
+		draggable(container : HTMLElement, dragger? : HTMLElement, on_start? : Function, 
+			on_finish? : Function, on_is_draggable? : Function)
 		{
 			dragger = dragger || container;
 			dragger.addEventListener("mousedown", inner_mouse);
@@ -1276,7 +1278,7 @@ let escapeHtmlEntities: any;
 			container.style.left = x + "px";
 			container.style.top = y + "px";
 
-			function inner_mouse(e : any)
+			function inner_mouse(e : MouseEvent)
 			{
 				if (e.type == "mousedown")
 				{
@@ -1337,7 +1339,7 @@ let escapeHtmlEntities: any;
 		 * @param {Object} target
 		 *
 		 */
-		cloneObject(object : any, target : object)
+		cloneObject(object : object, target : object)
 		{
 			const o : any = target || {};
 			for (const i in object)
@@ -1345,7 +1347,7 @@ let escapeHtmlEntities: any;
 				if (i[0] == "_" || i.substring(0, 5) == "jQuery") // Skip vars with _ (they are private)
 				{continue;}
 
-				const v = object[i];
+				const v = object[i as keyof object] as any;
 				if (v == null)
 				{
 					o[i] = null;
@@ -1360,7 +1362,7 @@ let escapeHtmlEntities: any;
 				}
 				else if (v.constructor == Float32Array) // Typed arrays are ugly when serialized
 				{
-					o[i] = Array.apply([], v as any); // Clone
+					o[i] = Array.apply([], v as never); // Clone
 				}
 				else if (Array.isArray(v))
 				{
@@ -1389,13 +1391,13 @@ let escapeHtmlEntities: any;
 			return o;
 		}
 
-		safeName(str : string)
+		safeName(str : string) : string
 		{
 			return String(str).replace(/[\s.]/g, '');
 		}
 
 		// Given a html entity string it returns the equivalent unicode character
-		htmlEncode(html_code : any)
+		htmlEncode(html_code : string) : string
 		{
 			const e = document.createElement("div");
 			e.innerHTML = html_code;
@@ -1403,7 +1405,7 @@ let escapeHtmlEntities: any;
 		}
 
 		// Given a unicode character it returns the equivalent html encoded string
-		htmlDecode(unicode_character : string)
+		htmlDecode(unicode_character : string) : string
 		{
 			const e = document.createElement("div");
 			e.innerText = unicode_character;
@@ -1417,13 +1419,13 @@ let escapeHtmlEntities: any;
 		 * @return {String} valid css size string
 		 *
 		 */
-		sizeToCSS(v?: any)
+		sizeToCSS(v?: number | string) : string | null
 		{
 			const value = v;
 			if (value ===  undefined || value === null) {return null;}
 			if (value.constructor === String) {return value;}
-			if (value >= 0) {return (value|0) + "px";}
-			return "calc( 100% - " + Math.abs(value|0) + "px )";
+			if (value >= 0) {return (value as number|0) + "px";}
+			return "calc( 100% - " + Math.abs(value as number|0) + "px )";
 		}
 
 		/**
@@ -1433,9 +1435,9 @@ let escapeHtmlEntities: any;
 		 * @return {Window} the window element
 		 *
 		 */
-		getElementWindow(v : any)
+		getElementWindow(v : HTMLElement) : Window
 		{
-			const doc = v.ownerDocument;
+			const doc = v.ownerDocument as DocumentPlus;
 			return doc.defaultView || doc.parentWindow;
 		}
 
@@ -1447,13 +1449,13 @@ let escapeHtmlEntities: any;
 		 * @param {Function} callback_enter [optional] function to call when the user drags something inside
 		 *
 		 */
-		createDropArea(element : any, callback_drop : Function, callback_enter : Function, callback_exit : Function)
+		createDropArea(element : HTMLElement, callback_drop : Function, callback_enter : Function, callback_exit : Function)
 		{
 			element.addEventListener("dragenter", onDragEvent);
 
-			function onDragEvent(evt : any)
+			function onDragEvent(evt : DragEvent)
 			{
-				element.addEventListener("dragexit", onDragEvent);
+				element.addEventListener("dragexit", onDragEvent as EventListenerOrEventListenerObject);
 				element.addEventListener("dragover", onDragEvent);
 				element.addEventListener("drop", onDrop);
 				evt.stopPropagation();
@@ -1468,12 +1470,12 @@ let escapeHtmlEntities: any;
 				}
 			}
 
-			function onDrop(evt : any)
+			function onDrop(evt : DragEvent)
 			{
 				evt.stopPropagation();
 				evt.preventDefault();
 
-				element.removeEventListener("dragexit", onDragEvent);
+				element.removeEventListener("dragexit", onDragEvent as EventListenerOrEventListenerObject);
 				element.removeEventListener("dragover", onDragEvent);
 				element.removeEventListener("drop", onDrop);
 
@@ -1497,14 +1499,14 @@ let escapeHtmlEntities: any;
 
 // Low quality templating system
 Object.defineProperty(String.prototype, "template", {
-	value: function(data : any, eval_code : string)
+	value: function(data : object, eval_code : string)
 	{
 		let tpl = this;
 		const re = /{{([^}}]+)?}}/g;
 		let match;
 	    while (match)
 		{
-			const str = eval_code ? (new Function("with(this) { try { return " + match[1] +"} catch(e) { return 'error';} }")).call(data) : data[match[1]];
+			const str = eval_code ? (new Function("with(this) { try { return " + match[1] +"} catch(e) { return 'error';} }")).call(data) : data[match[1] as keyof object];
 		    tpl = tpl.replace(match[0], str);
 			match = re.exec(tpl);
 	    }
@@ -1817,7 +1819,7 @@ if (typeof escapeHtmlEntities == 'undefined')
 	};
 }
 
-function beautifyCode(code : string, reserved : any, skip_css : boolean)
+function beautifyCode(code : string, reserved : Array<String>, skip_css : boolean)
 {
 	reserved = reserved || ["abstract", "else", "instanceof", "super", "boolean", "enum", "int", "switch", "break", "export", "interface", "synchronized", "byte", "extends", "let", "this", "case", "false", "long", "throw", "catch", "final", "native", "throws", "char", "finally", "new", "transient", "class", "float", "null", "true", "const", "for", "package", "try", "continue", "function", "private", "typeof", "debugger", "goto", "protected", "var", "default", "if", "public", "void", "delete", "implements", "return", "volatile", "do", "import", "short", "while", "double", "in", "static", "with"];
 

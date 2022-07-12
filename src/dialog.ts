@@ -1,37 +1,5 @@
-import { ChildNodePlus, DocumentPlus, HTMLDivElementPlus, HTMLElementPlus, LiteguiObject, ParentNodePlus } from "./@types/globals";
+import { ChildNodePlus, DialogButtonOptions, DialogOptions, DocumentPlus, HTMLDivElementPlus, HTMLElementPlus, LiteguiObject, ParentNodePlus } from "./@types/globals";
 import { LiteGUI } from "./core";
-
-interface DialogOptions
-{
-	parent?: string | HTMLElementPlus;
-	attach?: boolean;
-	scroll?: boolean;
-	buttons?: Array<DialogButtonOptions>;
-	fullcontent?: boolean;
-	closable?: boolean;
-	close?: boolean;
-	detachable?: boolean;
-	hide?: boolean;
-	minimize?: boolean;
-	title?: string;
-	className?: string;
-	content?: string;
-	minHeight?: number | number;
-	minWidth?: number | number;
-	height?: string | number;
-	width?: string | number;
-	id?: string;
-	resizable?: boolean;
-	draggable?: boolean;
-}
-
-interface DialogButtonOptions
-{
-	name: string;
-	className?: string;
-	callback?: Function;
-	close?: boolean;
-}
 
 /** **************** DIALOG **********************/
 export class Dialog
@@ -264,7 +232,7 @@ export class Dialog
 		if (options.draggable)
 		{
 			this.draggable = true;
-			LiteGUI.draggable(panel, panel.querySelector(".panel-header"), ()=>
+			LiteGUI.draggable(panel, panel.querySelector(".panel-header") as HTMLElement, ()=>
 			{
 				that.bringToFront();
 			},()=>{}, ()=>
@@ -531,7 +499,7 @@ export class Dialog
 		this.minimized = [];
 
 		(this.root!.querySelector(".content") as HTMLElement).style.display = "";
-		LiteGUI.draggable(this.root);
+		LiteGUI.draggable(this.root as HTMLDivElementPlus);
 		this.root!.style.left = this.old_box!.left+"px";
 		this.root!.style.top = this.old_box!.top + "px";
 		this.root!.style.width = this.old_box!.width + "px";
