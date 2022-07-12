@@ -194,12 +194,12 @@ export interface InspectorOptions
     
 }
 
-interface ButtonOptions
+export interface ButtonOptions
 {
 	callback? : Function;
 }
 
-interface SearchBoxOptions
+export interface SearchBoxOptions
 {
 	placeholder?: string;
 	callback?: Function
@@ -217,19 +217,19 @@ export interface ContextMenuOptions
 	parentMenu?: ContextMenu;
 }
 
-interface ListOptions
+export interface ListOptions
 {
 	parent?: LiteguiObject | HTMLDivElementPlus;
 	callback?: Function;
 }
 
-interface SliderOptions
+export interface SliderOptions
 {
 	min?: number;
 	max?: number;
 }
 
-interface LineEditorOptions
+export interface LineEditorOptions
 {
 	callback?: Function;
 	height?: number;
@@ -244,7 +244,7 @@ interface LineEditorOptions
 	extraclass?: string;
 }
 
-interface ComplexListOptions
+export interface ComplexListOptions
 {
 	height?: string | number;
 	item_code?: string;
@@ -276,7 +276,7 @@ export interface DialogOptions
 	draggable?: boolean;
 }
 
-interface DialogButtonOptions
+export interface DialogButtonOptions
 {
 	name: string;
 	className?: string;

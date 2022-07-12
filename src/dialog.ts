@@ -419,7 +419,7 @@ export class Dialog
 	 */
 	close()
 	{
-		LiteGUI.remove(this.root);
+		LiteGUI.remove(this.root!);
 		LiteGUI.trigger(this, "closed", this);
 		if (this.on_close)
 		{this.on_close();}

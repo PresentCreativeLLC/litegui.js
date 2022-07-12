@@ -294,7 +294,7 @@ let escapeHtmlEntities: any;
 		 */
 		add(litegui_element : LiteguiObject): void
 		{
-			this.content?.appendChild(litegui_element.root || litegui_element);
+			this.content?.appendChild((litegui_element as any).root || litegui_element);
 		}
 
 		/**
@@ -308,7 +308,7 @@ let escapeHtmlEntities: any;
 
 			if (litegui_element.constructor === String) // Selector
 			{
-				const elements = document.querySelectorAll(litegui_element as LiteguiObject | HTMLElement | string | Array<HTMLLIElement>);
+				const elements = document.querySelectorAll(litegui_element);
 				for (let i = 0; i < elements.length; ++i)
 				{
 					const element = elements[i];
@@ -325,13 +325,13 @@ let escapeHtmlEntities: any;
 					this.remove(litegui_element[i]);
 				}
 			}
-			else if (litegui_element.root && litegui_element.root.parentNode) // Ltiegui widget
+			else if ((litegui_element as LiteguiObject).root && (litegui_element as LiteguiObject).root!.parentNode) // Ltiegui widget
 			{
-				litegui_element.root.parentNode.removeChild(litegui_element.root);
+				(litegui_element as LiteguiObject).root!.parentNode!.removeChild((litegui_element as LiteguiObject).root!);
 			}
-			else if (litegui_element.parentNode) // Regular HTML entity
+			else if ((litegui_element as HTMLElement).parentNode) // Regular HTML entity
 			{
-				litegui_element.parentNode.removeChild(litegui_element);
+				(litegui_element as HTMLElement).parentNode!.removeChild((litegui_element as HTMLElement));
 			}
 		}
 
@@ -799,7 +799,7 @@ let escapeHtmlEntities: any;
 			elem.root = elem;
 			if (content)
 			{elem.innerHTML = content;}
-			elem.add = function(v : HTMLDivElementPlus | LiteguiObject) { this.appendChild(v.root || v); };
+			elem.add = function(v : HTMLDivElementPlus | LiteguiObject) { this.appendChild((v as LiteguiObject).root! || v); };
 
 			if (style)
 			{
