@@ -294,7 +294,7 @@ let escapeHtmlEntities: any;
 		 */
 		add(litegui_element : LiteguiObject): void
 		{
-			this.content?.appendChild((litegui_element as any).root || litegui_element);
+			this.content?.appendChild((litegui_element.root as HTMLElement) || litegui_element);
 		}
 
 		/**

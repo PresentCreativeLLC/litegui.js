@@ -1,4 +1,3 @@
-import { widget } from "../src/widgets";
 
 /* function Construct ()
 {

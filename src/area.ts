@@ -1,7 +1,7 @@
 // Enclose in a scope
 /** **************** AREA **************/
 
-import { AreaOptions, HTMLDivElementPlus, ParentNodePlus } from "./@types/globals";
+import { AreaOptions, HTMLDivElementPlus, LiteguiObject, ParentNodePlus } from "./@types/globals";
 import { LiteGUI } from "./core";
 
 
@@ -36,7 +36,7 @@ export class Area
         let optionsTemp: AreaOptions | undefined = options;
 
         /* The root element containing all sections */
-        const root: HTMLDivElementPlus = document.createElement("div");
+        const root = document.createElement("div") as HTMLDivElementPlus;
         root.className = "litearea";
         if (optionsTemp?.id)
         {root.id = optionsTemp.id;}
@@ -532,7 +532,7 @@ export class Area
         this.onResize();
     };
 
-    add(v: any)
+    add(v: LiteguiObject | HTMLElement)
     {
         let value = v;
         if (typeof(value) == "string")
@@ -542,7 +542,7 @@ export class Area
             value = element;
         }
 
-        this.content.appendChild(value.root || value);
+        this.content.appendChild(((value as LiteguiObject).root as HTMLElement) || value);
     };
 
     query(v: any)
@@ -577,7 +577,7 @@ export class Split
             console.warn("LiteGUI.Split legacy parameter, use sections as first parameter instead of id.");
         }
 
-        const root = document.createElement("div");
+        const root = document.createElement("div") as HTMLDivElementPlus;
         this.root = root;
         if (options.id) { root.id = options.id; }
         root.className = "litesplit " + (options.vertical ? "vsplit" : "hsplit");

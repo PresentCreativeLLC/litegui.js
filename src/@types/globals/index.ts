@@ -13,6 +13,7 @@ import { Dragger } from "../../dragger";
 
 export interface HTMLDivElementPlus extends HTMLDivElement
 {
+	_editing: any;
     disabled?: boolean;
     content?: HTMLElementPlus;
     name?: string | null;
@@ -49,6 +50,7 @@ export interface HTMLDivElementPlus extends HTMLDivElement
 
 export interface HTMLSpanElementPlus extends HTMLSpanElement
 {
+	stopPropagation?: boolean;
 	widget?: any;
 	hide: () => void;
 	show: () => void;
@@ -71,6 +73,7 @@ export interface HTMLScriptElementPlus extends HTMLScriptElement
 
 export interface EventTargetPlus extends EventTarget
 {
+	parentNode: any;
 	dataset: any;
 	value: any;
 	data(data: any): any;
@@ -80,12 +83,18 @@ export interface EventTargetPlus extends EventTarget
 
 export interface HTMLLIElementPlus extends HTMLLIElement
 {
+	listbox: any;
     data: any;
     options: any;
     tabs: Tabs;
     selected: boolean;
     title_element : HTMLDivElementPlus;
     parent_id : string;
+}
+
+export interface HTMLInputElementPlus extends HTMLInputElement
+{
+	getValue() : any;
 }
 
 export interface HTMLElementPlus extends HTMLElement
@@ -104,13 +113,24 @@ export interface HTMLButtonElementPlus extends HTMLButtonElement
 
 export interface ParentNodePlus extends ParentNode
 {
+	dataset: any;
+	getBoundingClientRect: any;
+	scrollLeft: number;
     offsetHeight: number;
     scrollTop: number;
 }
 
+export interface ElementPlus extends Element
+{
+	_old_name?: string;
+	_editing?: any;
+
+}
+
 export interface ChildNodePlus extends ChildNode
 {
-    listbox : LiteBox;
+	querySelector(arg0: string): any;
+    listbox : LiteBox | HTMLSpanElementPlus;
     offsetTop : number;
     classList : DOMTokenList;
     parent_id : string;
@@ -171,6 +191,35 @@ export interface AreaRoot
 
 }
 
+export interface TreeOptions
+{
+	allow_drag?: boolean;
+	allow_rename?: boolean;
+	allow_multiselection?: boolean;
+	selected?: boolean;
+	collapsed?: boolean;
+	collapsed_depth?: number;
+	indent_offset?: number;
+	id?: string;
+	height?: string | number;
+}
+
+export interface TreeNode
+{
+	skipdrag?: boolean;
+	onDragData?: Function;
+	callback?: Function;
+	visible?: boolean;
+	postcontent?: string;
+	precontent?: string;
+	className?: string;
+	DOM?: any;
+	dataset?: any;
+	content?: any;
+	id?: string;
+	children?: Array<TreeNode>
+}
+
 export interface InspectorOptions
 {
     type?: string;
@@ -196,13 +245,13 @@ export interface InspectorOptions
 
 export interface PanelOptions
 {
-	scroll: boolean;
-	position: Array<number | string>;
-	height: number | string;
-	width: number | string;
-	title: string;
-	className: string;
-	content: string;
+	scroll?: boolean;
+	position?: Array<number | string>;
+	height?: number | string;
+	width?: number | string;
+	title?: string;
+	className?: string;
+	content?: string;
 }
 
 export interface ButtonOptions
