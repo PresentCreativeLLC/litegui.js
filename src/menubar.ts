@@ -1,23 +1,25 @@
 import { LiteGUI } from "./core";
-import { HTMLDivElementPlus, HTMLLIElementPlus, HTMLParagraphElementPlus } from "./@types/globals/index"
+import { HTMLDivElementPlus, HTMLElementPlus, HTMLLIElementPlus, HTMLParagraphElementPlus, MenubarOptions } from "./@types/globals/index"
+import { Panel } from "./panel";
+
 /** ************ MENUBAR ************************/
 export class Menubar
 {
 	closing_time: number;
-	options: any;
+	options: MenubarOptions;
 	root: HTMLDivElementPlus;
 	menu: SubMenu[];
-	panels: any[];
+	panels: Array<HTMLDivElement>;
 	content: HTMLUListElement;
 	is_open: boolean;
 	auto_open: boolean;
 	sort_entries: boolean;
-	data: any;
+	data?: object;
 	closing_by_leave?: NodeJS.Timeout | null;
 
-	constructor(id: string, options?: any)
+	constructor(id: string, options?: MenubarOptions)
 	{
-		this.options = options || {};
+		this.options = options! || {};
 
 		this.menu = [];
 		this.panels = [];
@@ -30,8 +32,8 @@ export class Menubar
 		this.root.appendChild(this.content);
 
 		this.is_open = false;
-		this.auto_open = options.auto_open || false;
-		this.sort_entries = options.sort_entries || false;
+		this.auto_open = options?.auto_open || false;
+		this.sort_entries = options?.sort_entries || false;
 		this.closing_time = 500;
 	}
 
@@ -42,12 +44,12 @@ export class Menubar
 		this.panels = [];
 	}
 
-	attachToPanel(panel: any)
+	attachToPanel(panel: Panel)
 	{
-		panel.content.insertBefore(this.root, panel.content.firstChild);
+		(panel.content as Element).insertBefore(this.root, (panel.content as Element).firstChild);
 	}
 
-	add(path: string, data: any)
+	add(path: string, data: Function | object)
 	{
 		this.data = data || {};
 
@@ -244,7 +246,7 @@ export class Menubar
 	}
 
 	// Create the panel with the drop menu
-	showMenu(menu: any, e: MouseEvent, root: HTMLLIElementPlus | HTMLParagraphElementPlus, is_submenu: boolean = false)
+	showMenu(menu: HTMLDivElement, e: MouseEvent, root: HTMLLIElementPlus | HTMLParagraphElementPlus, is_submenu: boolean = false)
 	{
 
 		if (!is_submenu) {this.hidePanels();}
@@ -265,14 +267,16 @@ export class Menubar
 
 		if (this.sort_entries)
 		{
-			sorted_entries.sort((a,b) =>
+			sorted_entries.sort((a,b ) =>
 			{
 				let a_order = 10;
 				let b_order = 10;
-				if (a && a.data && a.data.order != null) {a_order = a.data.order;}
-				if (a && a.separator && a.order != null) {a_order = a.order;}
-				if (b && b.data && b.data.order != null) {b_order = b.data.order;}
-				if (b && b.separator && b.order != null) {b_order = b.order;}
+				const aa = a as HTMLElementPlus;
+				const bb = b as HTMLElementPlus;
+				if (aa && aa.data && aa.data.order != null) {a_order = aa.data.order;}
+				if (aa && aa.separator && aa.order != null) {a_order = aa.order;}
+				if (bb && bb.data && bb.data.order != null) {b_order = bb.data.order;}
+				if (bb && bb.separator && bb.order != null) {b_order = bb.order;}
 				return a_order - b_order;
 			});
 		}
@@ -349,7 +353,7 @@ export class Menubar
 		for (const i in sorted_entries)
 		{
 			const item = document.createElement("p") as HTMLParagraphElementPlus;
-			const menu_item = sorted_entries[i];
+			const menu_item = sorted_entries[i] as HTMLElementPlus;
 
 			item.className = 'litemenu-entry ' + (item.children ? " submenu" : "");
 			const has_submenu = menu_item.children && menu_item.children.length;
@@ -446,7 +450,7 @@ export interface SubMenu
 	name: string;
 	parent?: SubMenu;
 	children: SubMenu[] | undefined;
-	data: any;
+	data?: any;
 	disable?: Function;
 	enable?: Function;
 	separator?: boolean;
