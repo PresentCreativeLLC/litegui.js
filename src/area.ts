@@ -50,12 +50,12 @@ export class Area
         let height = optionsTemp?.height || "100%";
 
         if (width < 0)
-        {width = 'calc( 100% - '+Math.abs(width)+'px)';}
+        {width = 'calc( 100% - '+Math.abs(width as number)+'px)';}
         if (height < 0)
-        {height = 'calc( 100% - '+ Math.abs(height)+'px)';}
+        {height = 'calc( 100% - '+ Math.abs(height as number)+'px)';}
 
-        root.style.width = width;
-        root.style.height = height;
+        root.style.width = width as string;
+        root.style.height = height as string;
 
         this.options = optionsTemp!;
 

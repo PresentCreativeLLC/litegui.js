@@ -1,4 +1,4 @@
-import { ChildNodePlus, ElementPlus, EventTargetPlus, HTMLDivElementPlus, HTMLElementPlus, HTMLInputElementPlus, HTMLLIElementPlus, HTMLSpanElementPlus, ParentNodePlus, TreeNode, TreeOptions } from "./@types/globals";
+import { ChildNodePlus, ElementPlus, EventTargetPlus, HTMLDivElementPlus, HTMLInputElementPlus, HTMLLIElementPlus, HTMLSpanElementPlus, ParentNodePlus, TreeNode, TreeOptions } from "./@types/globals";
 import { LiteGUI }  from "./core";
 import { LiteBox } from "./widgets";
 
@@ -1341,7 +1341,7 @@ private _updateListBox(node : ChildNodePlus , options? : TreeOptions, current_le
 	}
 };
 
-private onClickBox(e : any, node : string | ChildNodePlus)
+private onClickBox(e : Event, node : string | ChildNodePlus)
 {
 	const children = this.getChildren(node);
 

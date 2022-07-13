@@ -1,68 +1,10 @@
 import { LiteGUI, special_codes } from "./core";
-import { HTMLDivElementPlus, HTMLSpanElementPlus, EventTargetPlus, HTMLLIElementPlus, MouseEventPlus, LiteguiObject } from "./@types/globals/index"
-
-
-interface ButtonOptions
-{
-	callback? : Function;
-}
-
-interface SearchBoxOptions
-{
-	placeholder?: string;
-	callback?: Function
-}
-
-interface ContextMenuOptions
-{
-	autoopen?: boolean;
-	ignore_item_callbacks?: boolean;
-	callback?: Function;
-	top?: number;
-	left?: number;
-	title?: string;
-	event?: MouseEvent | PointerEvent | CustomEvent;
-	parentMenu?: ContextMenu;
-}
-
-interface ListOptions
-{
-	parent?: LiteguiObject;
-	callback?: Function;
-}
+import { HTMLDivElementPlus, HTMLSpanElementPlus, EventTargetPlus, HTMLLIElementPlus, MouseEventPlus, LiteguiObject, ButtonOptions, SearchBoxOptions, ContextMenuOptions, ListOptions, SliderOptions, LineEditorOptions, ComplexListOptions } from "./@types/globals/index"
 
 interface ListItem
 {
 	name: string, title: string, id: string
 }
-
-interface SliderOptions
-{
-	min?: number;
-	max?: number;
-}
-
-interface LineEditorOptions
-{
-	callback?: Function;
-	height?: number;
-	width?: number;
-	show_samples?: number;
-	no_trespassing?: boolean;
-	defaulty?: number;
-	xrange?: number[];
-	linecolor?: string;
-	pointscolor?: string;
-	bgcolor?: string;
-	extraclass?: string;
-}
-
-interface ComplexListOptions
-{
-	height?: string | number;
-	item_code?: string;
-}
-
 
 export class Button
 {
@@ -626,7 +568,7 @@ export class List
 
 
 		if (options.parent) {
-			if (options.parent.root) { options.parent.root.appendChild(root); }
+			if ((options.parent as LiteguiObject).root) { (options.parent as LiteguiObject).root?.appendChild(root); }
 			else
 			{
 				//options.parent.appendChild(root);
@@ -682,7 +624,7 @@ export class Slider
 			let mouseX, mouseY;
 			if (event.offsetX) { mouseX = event.offsetX; mouseY = event.offsetY; }
 			else if (event.layerX) { mouseX = event.layerX; mouseY = event.layerY; }
-			this.setFromX(mouseX);
+			this.setFromX(mouseX as number);
 			this.doc_binded = root.ownerDocument;
 			this.doc_binded.addEventListener("mousemove", this.onMouseMove.bind(this));
 			this.doc_binded.addEventListener("mouseup", this.onMouseUp.bind(this));

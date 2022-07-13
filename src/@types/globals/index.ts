@@ -13,7 +13,7 @@ import { Dragger } from "../../dragger";
 
 export interface HTMLDivElementPlus extends HTMLDivElement
 {
-	_editing: any;
+	_editing: boolean;
     disabled?: boolean;
     content?: HTMLElementPlus;
     name?: string | null;
@@ -51,7 +51,7 @@ export interface HTMLDivElementPlus extends HTMLDivElement
 export interface HTMLSpanElementPlus extends HTMLSpanElement
 {
 	stopPropagation?: boolean;
-	widget?: any;
+	widget?: HTMLElementPlus;
 	hide: () => void;
 	show: () => void;
 	setSelected: (v: boolean) => void;
@@ -62,7 +62,7 @@ export interface HTMLSpanElementPlus extends HTMLSpanElement
     setEmpty: Function;
     expand: Function;
     collapse: Function;
-    item?: any;
+    item?: HTMLDivElementPlus;
 }
 
 export interface HTMLScriptElementPlus extends HTMLScriptElement
@@ -73,11 +73,11 @@ export interface HTMLScriptElementPlus extends HTMLScriptElement
 
 export interface EventTargetPlus extends EventTarget
 {
-	parentNode: any;
-	dataset: any;
+	parentNode: ParentNodePlus;
+	dataset: DOMStringMap;
 	value: any;
-	data(data: any): any;
-	classList: any;
+	data: any;
+	classList: DOMTokenList;
     setValue: Function;
 }
 
@@ -99,20 +99,25 @@ export interface HTMLInputElementPlus extends HTMLInputElement
 
 export interface HTMLElementPlus extends HTMLElement
 {
+	name?: string;
+	order?: number;
+	separator?: boolean;
+	data?: any;
 	__events?: any;
 	add?: Function;
 	root?: HTMLElement;
     update?: Function;
-    dialog? : any;
+    dialog? : HTMLElementPlus;
 }
 
 export interface HTMLButtonElementPlus extends HTMLButtonElement
 {
-    root: any;
+    root?: HTMLButtonElement;
 }
 
 export interface ParentNodePlus extends ParentNode
 {
+	data?: any;
 	dataset: any;
 	getBoundingClientRect: any;
 	scrollLeft: number;
@@ -123,7 +128,7 @@ export interface ParentNodePlus extends ParentNode
 export interface ElementPlus extends Element
 {
 	_old_name?: string;
-	_editing?: any;
+	_editing?: boolean;
 
 }
 
@@ -138,7 +143,7 @@ export interface ChildNodePlus extends ChildNode
     data : any;
     title_element: HTMLDivElementPlus;
     id: string
-    innerHTML : any;
+    innerHTML : string;
 }
 
 export interface ParentNodePlus extends ParentNode
@@ -159,8 +164,8 @@ export interface HTMLParagraphElementPlus extends HTMLParagraphElement
 
 export interface MouseEventPlus extends MouseEvent
 {
-	layerY: any;
-	layerX: any;
+	layerY: number;
+	layerX: number;
 }
 
 export type LiteguiObject = Area | Console | Dialog | Dragger | Inspector | Menubar | Panel | Tabs | Table | Tree | Button |
@@ -172,8 +177,8 @@ export interface AreaOptions
     immediateResize?: boolean;
     id?: string,
     className?: string,
-    width?: any,
-    height?: any,
+    width?: number | string,
+    height?: number | string,
     content_id?: string,
     autoresize?: boolean,
     main?: boolean,
@@ -189,6 +194,12 @@ export interface AreaRoot
     litearea?: Area,
     style?: any,
 
+}
+
+export interface MenubarOptions
+{
+	auto_open: boolean;
+	sort_entries: boolean;
 }
 
 export interface TreeOptions
@@ -252,6 +263,33 @@ export interface PanelOptions
 	title?: string;
 	className?: string;
 	content?: string;
+}
+
+export interface TabsOptions
+{
+	selected?: boolean;
+	onclose?: Function;
+	className?: string;
+	parent?: string | HTMLDivElement;
+	height?: string | number;
+	width?: string | number;
+	index?: number;
+	bigicon?: string;
+	title?: string;
+	callback?: Function;
+	callback_leave?: Function;
+	callback_context?: Function;
+	callback_canopen?: Function;
+	skip_callbacks?: boolean;
+	content?: HTMLDivElementPlus | string;
+	closable?: boolean;
+	tab_width?: number | string;
+	tab_className?: string;
+	id?: string;
+	size?: string | number;
+	mode?: string;
+	button?: boolean;
+	autoswitch? : boolean;
 }
 
 export interface ButtonOptions

@@ -1,32 +1,5 @@
 import { LiteGUI, special_codes } from "./core";
-import { HTMLDivElementPlus, HTMLLIElementPlus, HTMLParagraphElementPlus, LiteguiObject } from "./@types/globals/index";
-
-export interface TabsOptions
-{
-	selected?: boolean;
-	onclose?: Function;
-	className?: string;
-	parent?: string | HTMLDivElement;
-	height?: string | number;
-	width?: string | number;
-	index?: number;
-	bigicon?: string;
-	title?: string;
-	callback?: Function;
-	callback_leave?: Function;
-	callback_context?: Function;
-	callback_canopen?: Function;
-	skip_callbacks?: boolean;
-	content?: HTMLDivElementPlus | string;
-	closable?: boolean;
-	tab_width?: number | string;
-	tab_className?: string;
-	id?: string;
-	size?: string | number;
-	mode?: string;
-	button?: boolean;
-	autoswitch? : boolean;
-}
+import { HTMLDivElementPlus, HTMLLIElementPlus, HTMLParagraphElementPlus, LiteguiObject, TabsOptions } from "./@types/globals/index";
 
 /**
  * Widget that contains several tabs and their content
