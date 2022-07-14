@@ -536,8 +536,11 @@ export class Dialog
 	bringToFront()
 	{
 		const parent = this.root?.parentNode;
-		parent!.removeChild(this.root as HTMLDivElementPlus);
-		parent!.appendChild(this.root as HTMLDivElementPlus);
+		if(parent)
+		{
+			parent.removeChild(this.root as HTMLDivElementPlus);
+			parent.appendChild(this.root as HTMLDivElementPlus);
+		}	
 	}
 
 	/**

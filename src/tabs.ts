@@ -310,7 +310,7 @@ export class Tabs
 			if (after) { this.list.insertBefore(element, after); }
 			else { this.list.appendChild(element); }
 		}
-		else if (this.plus_tab) { this.list.insertBefore(element, this.plus_tab as Node); }
+		else if (this.plus_tab) { this.list.insertBefore(element, (this.plus_tab as tab_info).tab); }
 		else { this.list.appendChild(element); }
 
 		if (op.tab_width) {
@@ -409,7 +409,8 @@ export class Tabs
 		const tabInfo: tab_info = new tab_info(id, element, content, title!);
 
 		if (op.onclose) { tabInfo.onClose = op.onclose; }
-		let tempo = this.getTabIndexInTab(id);
+		//let tempo = this.getTabIndexInTab(id);
+		const tempo = this.tabs.length;
 		this.tabs[tempo] = tabInfo;
 
 		this.recomputeTabsByIndex();
@@ -550,7 +551,8 @@ export class Tabs
 		if (tab.tab.parentNode) { tab.tab.parentNode.removeChild(tab.tab); }
 		if (tab.content.parentNode) { tab.content.parentNode.removeChild(tab.content); }
 		const index = this.getTabIndexInTab(id);
-		delete this.tabs[index];
+		this.tabs.splice(index, 1);
+		//delete this.tabs[index];
 
 		this.recomputeTabsByIndex();
 	}
@@ -567,7 +569,8 @@ export class Tabs
 			if (tab.tab.parentNode) { tab.tab.parentNode.removeChild(tab.tab); }
 			if (tab.content.parentNode) { tab.content.parentNode.removeChild(tab.content); }
 			const index = this.getTabIndexInTab(tab.id);
-			delete this.tabs[index];
+			//delete this.tabs[index];
+			this.tabs.splice(index, 1);
 		}
 
 		this.recomputeTabsByIndex();
@@ -599,7 +602,8 @@ export class Tabs
 		}
 		target_tabs.root.appendChild(tab.content);
 		//this.tabs[id] = undefined;
-		delete this.tabs[this.getTabIndexInTab(id)];
+		//delete this.tabs[this.getTabIndexInTab(id)];
+		//!IMPORTANT this.tabs.splice(this.getTabIndexInTab(id), 1);
 		let newtab = null;
 		for (const i in this.tabs) {
 			newtab = i;
