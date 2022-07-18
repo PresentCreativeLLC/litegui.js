@@ -53,7 +53,7 @@ export class Dialog
 		const element = document.getElementById(id) as HTMLElementPlus;
 		if (!element)
 		{return null;}
-		return element.dialog;
+		return element.dialog!;
 	}
 
 	_ctor(options? : DialogOptions)
