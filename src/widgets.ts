@@ -6,36 +6,6 @@ interface ListItem
 	name: string, title: string, id: string
 }
 
-interface SliderOptions
-{
-	min?: number;
-	max?: number;
-}
-
-interface LineEditorOptions
-{
-	callback?: Function;
-	height?: number;
-	width?: number;
-	show_samples?: number;
-	no_trespassing?: boolean;
-	defaulty?: number;
-	xrange?: number[];
-	linecolor?: string;
-	pointscolor?: string;
-	bgcolor?: string;
-	extraclass?: string;
-}
-
-interface ComplexListOptions
-{
-	height?: string | number;
-	item_code?: string;
-	onItemSelected: Function | null;
-	onItemToggled: Function | null;
-	onItemRemoved: Function | null;
-}
-
 
 export class Button
 {
