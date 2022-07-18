@@ -13,98 +13,9 @@
 <body>
     <script type="text/javascript">
 		//call the init to setup 
-		//LiteGUI.init();
-        
-        LiteGUI.init({wrapped: true, width: 800, height: 800});
+		LiteGUI.init();
 
-		const dialog = new LiteGUI.Dialog({ id: "testDialog", title:"testDialog", close: true, minimize: true, 
-        	width: 300, scroll: true, resizable:true, draggable: true, detachable: true });
-		console.log("Dialog get dialog test: " + dialog.getDialog("testDialog"));
-        LiteGUI.add(dialog);
-		dialog._ctor({ id: "testDialog", title:"testDialog", close: true, minimize: true, 
-        	width: 300, scroll: true, resizable:true, draggable: true, detachable: true });
-		console.log("Dialog ctor test: " + dialog.root);
-
-		const dragger = new LiteGUI.Dragger(0.3, { disabled : false });
-        
-		//dialog.add(dragger);
-        //const dragger2 = new LiteGUI.Dragger(0.3, { disabled : true });
-		//dialog.add(dragger2);
-		console.log("Dialog add test: " + dialog.content?.childNodes[0]);
-
-		dialog.enableProperties({resizable: true, draggable: true});
-		dialog.setResizable();
-		console.log("Dialog enable properties test: " + dialog.draggable);
 		
-		dialog.dockTo(LiteGUI);
-		console.log("Dialog dock to test | width: " + dialog.root.style.width + " | height: " + dialog.root.style.height);
-		dialog.highlight(200);
-
-		dialog.setSize(1000, 1200);
-    	dialog.minimize();
-		console.log("Dialog minimize test: " + dialog.root.style.width);
-		
-		dialog.arrangeMinimized();
-		console.log("Dialog arrange minimized test: " + dialog.root.style.top);
-
-		dialog.maximize();
-		console.log("Dialog maximize test: " + dialog.root.style.top);
-		dialog.makeModal();
-		console.log("Dialog make modal test: " + LiteGUI.modalbg_div?.childNodes.length);
-		//dialog.bringToFront();
-		console.log("Dialog bring to front test: " + dialog.root?.parentNode?.childNodes[dialog.root?.parentNode?.childNodes.length - 1]);
-		dialog.hide();
-		console.log("Dialog hide test: " + dialog.root.style.display);
-		dialog.show();
-        console.log("Dialog show test: " + dialog.root.style.display);
-		dialog.fadeIn(300);
-		const x = 450;
-		const y = 550;
-		dialog.setPosition(x, y);
-		console.log("Dialog set position test | left: " + dialog.root.style.left + " | top: " + dialog.root.style.top);
-		const w = 400;
-		const h = 400;
-		dialog.setSize(w, h);
-		console.log("Dialog set size test | width: " + dialog.root.style.width + " | height: " + dialog.root.style.height);
-		const title = "myNewTitle";
-		dialog.setTitle(title);
-		console.log("Dialog set title test: " + dialog.header.innerHTML);
-		dialog.setPosition(0,0);
-		dialog.center();
-		console.log("Dialog center test | left: " + dialog.root.style.left + " | top: " + dialog.root.style.top);
-		dialog.adjustSize(0, true);
-		console.log("dialog: " + dialog);
-
-		dialog.clear();
-		console.log("Dialog clear test: " + dialog.content.innerHTML);
-
-		dialog.setSize(1000, 1200);
-		const clientRects = dialog.root.getClientRects;
-		//dialog.detachWindow();
-		dialog.root.getClientRects = clientRects;
-
-		//dialog.reattachWindow();
-		console.log("Dialog reattach window test: " + dialog.dialog_window);
-		dialog.root.getClientRects = clientRects;
-
-		//dialog.close();
-		console.log("Dialog close test: " + dialog.dialog_window);
-		dialog.root.getClientRects = clientRects;
-
-		dialog.showAll();
-		dialog.show();
-
-        dragger.setRange(0.1, 0.9);
-        dragger.setValue(0.7, true);
-        //LiteGUI.add(dragger);
-        dialog.add(dragger);
-
-
-		/*dialog.hideAll();
-		dialog.hide();
-
-		dialog.closeAll();
-		dialog.close();*/
 	</script>
 </body>
 

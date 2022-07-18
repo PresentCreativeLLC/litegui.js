@@ -1292,7 +1292,7 @@ let escapeHtmlEntities: any;
 					if (on_is_draggable && on_is_draggable(container,e) == false)
 					{
 						e.stopPropagation();
-						e.preventDefault();
+						//e.preventDefault();
 						return false;
 					}
 
@@ -1303,7 +1303,7 @@ let escapeHtmlEntities: any;
 					if (on_start)
 					{on_start(container, e);}
 					e.stopPropagation();
-					e.preventDefault();
+					//e.preventDefault();
 					return false;
 				}
 

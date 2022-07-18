@@ -61,6 +61,9 @@ interface ComplexListOptions
 {
 	height?: string | number;
 	item_code?: string;
+	onItemSelected: Function | null;
+	onItemToggled: Function | null;
+	onItemRemoved: Function | null;
 }
 
 
@@ -496,12 +499,7 @@ export class LiteBox
 		element.innerHTML = state ? "&#9660;" : "&#9658;";
 		element.dataset["value"] = state ? "open" : "closed";
 
-		element.onclick = function (e: MouseEvent) {
-			const box = e.target as EventTargetPlus;
-			box?.setValue(element.dataset["value"] == "open" ? false : true);
-			// if (this.stopPropagation) {e.stopPropagation();}
-			if (e.stopPropagation) { e.stopPropagation(); }
-		};
+		element.onclick = this.onMouseClic.bind(this);
 		//element.addEventListener("click", onclick!.bind(element));
 		element.onchange = on_change as ((this: GlobalEventHandlers, ev: Event) => any);
 
@@ -523,6 +521,14 @@ export class LiteBox
 		// 	return this.dataset["value"];
 		// };
         // return element;
+	}
+
+	onMouseClic(e: MouseEvent)
+	{
+		const box = e.target as EventTargetPlus;
+		this.setValue(this.root?.dataset["value"] == "open" ? false : true);
+		// if (this.stopPropagation) {e.stopPropagation();}
+		if (e.stopPropagation) { e.stopPropagation(); }
 	}
 
 	setValue(v?: boolean)
@@ -669,6 +675,9 @@ export class Slider
 	options: SliderOptions;
 	doc_binded?: Document;
 	onChange?: Function;
+
+	mouseMoveBind = this.onMouseMove.bind(this);
+	mouseUpBind = this.onMouseUp.bind(this);
 	constructor(value: number, options?: SliderOptions)
 	{
 		this.options = options! || {};
@@ -676,20 +685,9 @@ export class Slider
 		const root = this.root = document.createElement("div") as HTMLDivElementPlus;
 		this.value = value;
 		root.className = "liteslider";
-
-		root.addEventListener("mousedown", (e: MouseEvent) => {
-			const event = e as MouseEventPlus;
-			let mouseX, mouseY;
-			if (event.offsetX) { mouseX = event.offsetX; mouseY = event.offsetY; }
-			else if (event.layerX) { mouseX = event.layerX; mouseY = event.layerY; }
-			this.setFromX(mouseX);
-			this.doc_binded = root.ownerDocument;
-			this.doc_binded.addEventListener("mousemove", this.onMouseMove.bind(this));
-			this.doc_binded.addEventListener("mouseup", this.onMouseUp.bind(this));
-			e.preventDefault();
-			e.stopPropagation();
-		});
-
+		this.doc_binded = root.ownerDocument;
+		this.root.addEventListener("mousedown", this.onMouseDown.bind(this));
+		//root.addEventListener("mousedown", (e: MouseEvent) => {});
 		this.setValue(value);
 	}
 
@@ -704,6 +702,20 @@ export class Slider
 		this.setValue(range * norm + min);
 	}
 
+	onMouseDown(e: MouseEvent)
+	{
+		const event = e as MouseEventPlus;
+		let mouseX, mouseY;
+		if (event.offsetX) { mouseX = event.offsetX; mouseY = event.offsetY; }
+		else if (event.layerX) { mouseX = event.layerX; mouseY = event.layerY; }
+		this.setFromX(mouseX);
+		if(!this.doc_binded) { return; }
+		this.root.addEventListener("mousemove", this.mouseMoveBind, false);
+		this.root.addEventListener("mouseup", this.mouseUpBind, false);
+		e.preventDefault();
+		e.stopPropagation();
+	}
+
 	onMouseMove(e: MouseEvent) {
 		const rect = this.root.getBoundingClientRect();
 		if (!rect) { return; }
@@ -715,11 +727,11 @@ export class Slider
 		return false;
 	}
 
-	onMouseUp(e: MouseEvent) {
-		const doc = this.doc_binded || document;
-		this.doc_binded = undefined;
-		doc.removeEventListener("mousemove", this.onMouseMove);
-		doc.removeEventListener("mouseup", this.onMouseUp);
+	onMouseUp(e: MouseEvent) {		
+		if(!this.doc_binded) { return false; }
+		//this.doc_binded = undefined;
+		this.root.removeEventListener("mousemove", this.mouseMoveBind, false);
+		this.root.removeEventListener("mouseup", this.mouseUpBind, false);
 		if(typeof e.preventDefault == 'function')
 			e.preventDefault();
 		return false;
@@ -764,6 +776,9 @@ export class LineEditor
 	canvas: HTMLCanvasElement;
 	selected: number;
 	last_mouse: number[];
+
+	mouseMoveBind = this.onmousemove.bind(this);
+	mouseUpBind = this.onmouseup.bind(this);
 	constructor(value: number[][], options?: LineEditorOptions)
 	{
 		this.options = options! || {};
@@ -862,7 +877,7 @@ export class LineEditor
 	redraw()
 	{
 		if(!this.canvas || !this.canvas.parentNode) { return; }
-		const rect = (this.canvas.parentNode as HTMLCanvasElement).getBoundingClientRect();
+		const rect = this.canvas.getBoundingClientRect();
 		if (rect && this.canvas.width != rect.width && rect.width && rect.width < 1000) { this.canvas.width = rect.width; }
 		if (rect && this.canvas.height != rect.height && rect.height && rect.height < 1000) { this.canvas.height = rect.height; }
 
@@ -917,8 +932,8 @@ export class LineEditor
 	}
 
 	onmousedown(evt: MouseEvent) {
-		document.addEventListener("mousemove", this.onmousemove.bind(this));
-		document.addEventListener("mouseup", this.onmouseup.bind(this));
+		document.addEventListener("mousemove", this.mouseMoveBind);
+		document.addEventListener("mouseup", this.mouseUpBind);
 
 		const rect = this.canvas.getBoundingClientRect();
 		const mousex = evt.clientX - rect.left;
@@ -940,6 +955,7 @@ export class LineEditor
 	}
 
 	onmousemove(evt: MouseEvent) {
+		console.log("onmousemove");
 		const rect = this.canvas.getBoundingClientRect();
 		let mousex = evt.clientX - rect.left;
 		let mousey = evt.clientY - rect.top;
@@ -991,8 +1007,8 @@ export class LineEditor
 	{
 		this.selected = -1;
 		this.redraw();
-		document.removeEventListener("mousemove", this.onmousemove);
-		document.removeEventListener("mouseup", this.onmouseup);
+		document.removeEventListener("mousemove", this.mouseMoveBind);
+		document.removeEventListener("mouseup", this.mouseUpBind);
 		this.onchange();
 		evt.preventDefault();
 		evt.stopPropagation();
@@ -1046,7 +1062,7 @@ export class ComplexList
 	onItemToggled: Function | null;
 	onItemRemoved: Function | null;
 
-	constructor(options?: ComplexListOptions)
+	constructor(options: ComplexListOptions)
 	{
 		this.options = options! || {};
 
@@ -1062,7 +1078,9 @@ export class ComplexList
 		this.selected = null;
 		this.onItemSelected = null;
 		this.onItemToggled = null;
-		this.onItemRemoved = null;
+		this.onItemSelected = options.onItemSelected;
+		this.onItemToggled = options.onItemToggled;
+		this.onItemRemoved = options.onItemRemoved;
 	}
 
 	addTitle(text: string)
@@ -1115,6 +1133,7 @@ export class ComplexList
 			e.preventDefault();
 			e.stopPropagation();
 			e.stopImmediatePropagation();
+			elem.remove();
 			if (that.onItemRemoved) {
 				that.onItemRemoved(item, elem);
 			}
