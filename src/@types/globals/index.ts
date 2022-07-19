@@ -45,7 +45,7 @@ export interface HTMLDivElementPlus extends HTMLDivElement
     _last_container_stack?: any[];
     sectiontitle?: Element;
     input?: HTMLInputElement;
-    // parentNode?: ParentNode;
+    parentNode?: ParentNode;
 }
 
 export interface HTMLSpanElementPlus extends HTMLSpanElement
@@ -73,6 +73,7 @@ export interface HTMLScriptElementPlus extends HTMLScriptElement
 
 export interface EventTargetPlus extends EventTarget
 {
+    dragger: any;
 	parentNode: ParentNodePlus;
 	dataset: DOMStringMap;
 	value: any;
@@ -94,11 +95,13 @@ export interface HTMLLIElementPlus extends HTMLLIElement
 
 export interface HTMLInputElementPlus extends HTMLInputElement
 {
+	color: any;
 	getValue() : any;
 }
 
 export interface HTMLElementPlus extends HTMLElement
 {
+    group?: boolean;
 	name?: string;
 	order?: number;
 	separator?: boolean;
@@ -121,8 +124,9 @@ export interface ParentNodePlus extends ParentNode
 	dataset: any;
 	getBoundingClientRect: any;
 	scrollLeft: number;
-    offsetHeight: number;
     scrollTop: number;
+	offsetWidth : number;
+    offsetHeight : number;
 }
 
 export interface ElementPlus extends Element
@@ -144,12 +148,6 @@ export interface ChildNodePlus extends ChildNode
     title_element: HTMLDivElementPlus;
     id: string
     innerHTML : string;
-}
-
-export interface ParentNodePlus extends ParentNode
-{
-    offsetWidth : number;
-    offsetHeight : number;
 }
 
 export interface DocumentPlus extends Document

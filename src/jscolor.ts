@@ -1,3 +1,5 @@
+import { HTMLInputElementPlus } from "./@types/globals";
+
 type Position =
 {
     x: number,
@@ -74,7 +76,7 @@ export abstract class jscolor
     static bind()
     {
         var matchClass = new RegExp('(^|\\s)('+jscolor.bindClass+')\\s*(\\{[^}]*\\})?', 'i');
-		var e: any = document.getElementsByTagName('input');
+		var e = document.getElementsByTagName('input') as HTMLCollectionOf<HTMLInputElementPlus>;
 		for(var i=0; i<e.length; i+=1) {
 			var m;
 			if(!e[i].color && e[i].className && (m = e[i].className.match(matchClass))) {
@@ -212,11 +214,11 @@ export abstract class jscolor
 
     static URI = class URI
     {
-        scheme: any;
-        authority: any;
-        path: any;
-        query: any;
-        fragment: any;
+        scheme: string | null;
+        authority: string | null;
+        path: string | null;
+        query: string | null;
+        fragment: string | null;
 
         constructor(uri?: string)
         {
@@ -233,12 +235,13 @@ export abstract class jscolor
 
         parse(uri: string)
         {
-            var m: any = uri.match(/^(([A-Za-z][0-9A-Za-z+.-]*)(:))?((\/\/)([^\/?#]*))?([^?#]*)((\?)([^#]*))?((#)(.*))?/);
-			this.scheme = m[3] ? m[2] : null;
-			this.authority = m[5] ? m[6] : null;
-			this.path = m[7];
-			this.query = m[9] ? m[10] : null;
-			this.fragment = m[12] ? m[13] : null;
+            var m: RegExpMatchArray | null = uri.match(/^(([A-Za-z][0-9A-Za-z+.-]*)(:))?((\/\/)([^\/?#]*))?([^?#]*)((\?)([^#]*))?((#)(.*))?/);
+			const a : string  = m![0];
+			this.scheme = m![3] ? m![2] : null;
+			this.authority = m![5] ? m![6] : null;
+			this.path = m![7];
+			this.query = m![9] ? m![10] : null;
+			this.fragment = m![12] ? m![13] : null;
 			return this;
         }
 
@@ -268,12 +271,12 @@ export abstract class jscolor
 			if(r.scheme !== null) {
 				t.scheme = r.scheme;
 				t.authority = r.authority;
-				t.path = this.removeDotSegments(r.path);
+				t.path = this.removeDotSegments(r.path!);
 				t.query = r.query;
 			} else {
 				if(r.authority !== null) {
 					t.authority = r.authority;
-					t.path = this.removeDotSegments(r.path);
+					t.path = this.removeDotSegments(r.path!);
 					t.query = r.query;
 				} else {
 					if(r.path === '') { // TODO: == or === ?
@@ -284,15 +287,15 @@ export abstract class jscolor
 							t.query = base.query;
 						}
 					} else {
-						if(r.path.substring(0,1) === '/') {
-							t.path = this.removeDotSegments(r.path);
+						if(r.path!.substring(0,1) === '/') {
+							t.path = this.removeDotSegments(r.path!);
 						} else {
 							if(base.authority !== null && base.path === '') { // TODO: == or === ?
 								t.path = '/'+r.path;
 							} else {
 								t.path = base.path.replace(/[^\/]+$/,'')+r.path;
 							}
-							t.path = this.removeDotSegments(t.path);
+							t.path = this.removeDotSegments(t.path!);
 						}
 						t.query = r.query;
 					}
@@ -335,7 +338,7 @@ export abstract class jscolor
         hash: boolean;
         caps: boolean;
         slider: boolean;
-        onImmediateChange: any;//string | Function;
+        onImmediateChange?: string | Function;
         pickerOnfocus: boolean;
         pickerMode: PickerMode;
         pickerPosition: PickerPosition;
@@ -343,7 +346,7 @@ export abstract class jscolor
         pickerButtonHeight: number;
         pickerClosable: boolean;
         pickerCloseText: string;
-        pickerButtonColor: any;
+        pickerButtonColor: string;
         pickerFace: number;
         pickerFaceColor: string;
         pickerBorder: number;
@@ -381,7 +384,7 @@ export abstract class jscolor
             this.slider = true; // show the value/saturation slider?
             this.valueElement = target; // value holder
             this.styleElement = target; // where to reflect current color
-            this.onImmediateChange = null; // onchange callback (can be either string or function)
+            this.onImmediateChange = undefined; // onchange callback (can be either string or function)
             this.hsv = [0, 0, 1]; // read-only  0-6, 0-1, 0-1
             this.rgb = [1, 1, 1]; // read-only  0-1, 0-1, 0-1
     
@@ -607,7 +610,7 @@ export abstract class jscolor
 				r===null ? this.rgb[0] : (this.rgb[0]=r),
 				g===null ? this.rgb[1] : (this.rgb[1]=g),
 				b===null ? this.rgb[2] : (this.rgb[2]=b)
-			);
+			) as Array<number>;
 			if(hsv[0] !== null) {
 				this.hsv[0] = hsv[0];
 			}
@@ -655,7 +658,7 @@ export abstract class jscolor
 			);
         }
         
-        RGB_HSV(r: number, g: number, b: number): Array<any>
+        RGB_HSV(r: number, g: number, b: number): Array<number | null>
         {
 			var n = Math.min(Math.min(r,g),b);
 			var v = Math.max(Math.max(r,g),b);
@@ -733,12 +736,12 @@ export abstract class jscolor
 			// controls interaction
 			p.box.onmouseup =
 			p.box.onmouseout = ()=> { this.target.focus(); };
-			p.box.onmousedown = (e: any)=> 
+			p.box.onmousedown = (e: MouseEvent)=> 
             { 
                 this.abortBlur = true; e.preventDefault(); 
                 return false; 
             };
-			p.box.onmousemove = (e: any)=> 
+			p.box.onmousemove = (e: MouseEvent)=> 
             {
 				if (this.holdPad || this.holdSld) 
                 {
@@ -764,7 +767,7 @@ export abstract class jscolor
                     jscolor.fireEvent(this.valueElement,'change'); 
                 } 
             };
-			p.padM.onmousedown = (e: any)=> 
+			p.padM.onmousedown = (e: MouseEvent)=> 
             {
 				this.holdPad=true;
 				this.setPad(e);
@@ -779,7 +782,7 @@ export abstract class jscolor
                     jscolor.fireEvent(this.valueElement,'change'); 
                 } 
             };
-			p.sldM.onmousedown = (e: any)=> 
+			p.sldM.onmousedown = (e: MouseEvent)=> 
             {
 				this.holdSld=true;
 				this.setSld(e);
@@ -901,7 +904,7 @@ export abstract class jscolor
 			doc.getElementsByTagName('body')[0].appendChild(p.boxB);
         }
 
-        getPickerDims(o: any): Array<any>
+        getPickerDims(o: color): Array<number>
         {
             var dims = [
 				2*o.pickerInset + 2*o.pickerFace + jscolor.images.pad[0] +
@@ -916,7 +919,7 @@ export abstract class jscolor
 
         redrawPad()
         {
-            var yComponent: any;
+            var yComponent: number = 0;
             // redraw the pad pointer
 			switch(this.modeID) {
 				case 0: yComponent = 1; break;
@@ -974,7 +977,7 @@ export abstract class jscolor
 
         redrawSld()
         {
-            var yComponent: any;
+            var yComponent: number = 0;
 			// redraw the slider pointer
 			switch(this.modeID) 
             {
