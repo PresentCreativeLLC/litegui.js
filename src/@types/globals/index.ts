@@ -63,6 +63,7 @@ export interface HTMLSpanElementPlus extends HTMLSpanElement
     expand: Function;
     collapse: Function;
     item?: HTMLDivElementPlus;
+	liteBox: LiteBox;
 }
 
 export interface HTMLScriptElementPlus extends HTMLScriptElement
@@ -344,6 +345,9 @@ export interface ComplexListOptions
 {
 	height?: string | number;
 	item_code?: string;
+	onItemSelected: Function | null;
+	onItemToggled: Function | null;
+	onItemRemoved: Function | null;
 }
 
 export interface DialogOptions

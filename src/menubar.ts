@@ -129,7 +129,21 @@ export class Menubar
 
 		const index = menu.parent.children.indexOf(menu);
 		if (index != -1)
-		{menu.parent.children.splice(index, 1);}
+		{
+			menu.parent.children.splice(index, 1);
+			if (this.is_open) {
+				this.hidePanels();
+				const evt = new MouseEvent("click", {
+					view: window,
+					bubbles: true,
+					cancelable: true,
+					clientX: 0,
+					clientY: 0
+				});
+				this.showMenu(menu.parent.element!.data, evt, menu.parent.element!);
+			};
+						
+		}
 	}
 
 	separator(path: string, order: number)
@@ -239,7 +253,7 @@ export class Menubar
 	{
 		if (!this.panels.length)
 		{return;}
-
+		this.is_open = false;
 		for (const i in this.panels)
 		{LiteGUI.remove(this.panels[i]);}
 		this.panels = [];
@@ -248,7 +262,7 @@ export class Menubar
 	// Create the panel with the drop menu
 	showMenu(menu: HTMLDivElement, e: MouseEvent, root: HTMLLIElementPlus | HTMLParagraphElementPlus, is_submenu: boolean = false)
 	{
-
+		this.is_open = true;
 		if (!is_submenu) {this.hidePanels();}
 
 		if (!menu.children || !menu.children.length) {return;}
@@ -337,7 +351,7 @@ export class Menubar
 			{
 				that.showMenu(item, e, el, true);
 			}
-			else if (!item.data.keep_open)
+			else if (!item.data?.keep_open)
 			{
 				that.is_open = false;
 				that.hidePanels();

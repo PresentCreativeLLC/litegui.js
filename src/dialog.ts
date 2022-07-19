@@ -453,7 +453,8 @@ export class Dialog
 		/* this.minimized = true; */
 		this.old_box = this.root?.getBoundingClientRect();
 
-		(this.root!.querySelector(".content") as HTMLElement)!.style.display = "none";
+		if(!(this.root!.querySelector(".content") as HTMLElement)) { return; }
+		(this.root!.querySelector(".content") as HTMLElement).style.display = "none";
 
 		const minimize_button = this.root?.querySelector(".minimize-button") as HTMLElement;
 		if (minimize_button)
@@ -494,7 +495,7 @@ export class Dialog
 
 	maximize()
 	{
-		if (!this.minimized)
+		if (this.minimized.length == 0)
 		{return;}
 		this.minimized = [];
 
@@ -536,8 +537,11 @@ export class Dialog
 	bringToFront()
 	{
 		const parent = this.root?.parentNode;
-		parent!.removeChild(this.root as HTMLDivElementPlus);
-		parent!.appendChild(this.root as HTMLDivElementPlus);
+		if(parent)
+		{
+			parent.removeChild(this.root as HTMLDivElementPlus);
+			parent.appendChild(this.root as HTMLDivElementPlus);
+		}	
 	}
 
 	/**
@@ -662,6 +666,10 @@ export class Dialog
 
 	detachWindow(on_complete? : Function, on_close? : Function) : Window | undefined
 	{
+		if(this.minimized.length > 0)
+		{
+			this.maximize();
+		}
 		if (this.dialog_window)
 		{return;}
 

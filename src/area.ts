@@ -342,7 +342,7 @@ export class Area
             last_pos[1] = e.pageY;
             e.stopPropagation();
             e.preventDefault();
-            if (that.options.immediateResize) // Immediate is for legacy...
+            if (that.options?.immediateResize) // Immediate is for legacy...
             {that.onResize();}
         }
 
@@ -442,7 +442,7 @@ export class Area
         const area2 = this.sections[1];
         const splitinfo = " - "+ Area.splitbar_size +"px";
 
-        const min_size = this.options.minSplitSize || 10;
+        const min_size = this.options?.minSplitSize || 10;
 
         if (this.direction == "horizontal")
         {
@@ -505,14 +505,12 @@ export class Area
         // return this.root.addEventListener(a, b, c, d);
     };
 
-    setAreaSize(area: any, size: number | string)
-    {
-        const element = this.sections[1];
-        
-        const splitinfo = " - "+Area.splitbar_size+"px";
-        element.root.style.width = "-moz-calc( 100% - " + size + splitinfo + " )";
-        element.root.style.width = "-webkit-calc( 100% - " + size + splitinfo + " )";
-        element.root.style.width = "calc( 100% - " + size + splitinfo + " )";
+    setAreaSize(area: Area, size: number)
+    {        
+        const splitinfo = (size + Area.splitbar_size) + "px";
+        area.root.style.width = "-moz-calc( 100% - " + splitinfo + " )";
+        area.root.style.width = "-webkit-calc( 100% - " + splitinfo + " )";
+        area.root.style.width = "calc( 100% - " + splitinfo + " )";
     };
 
     merge(main_section?: number)
