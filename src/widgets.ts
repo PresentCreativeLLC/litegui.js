@@ -428,13 +428,14 @@ export class Checkbox
 // The tiny box to expand the children of a node
 export class LiteBox
 {
-	root?: HTMLSpanElement;
+	root?: HTMLSpanElementPlus;
 	stopPropagation : boolean = false;
 
 	constructor(state: boolean, on_change: Function)
 	{
 		const element = document.createElement("span") as HTMLSpanElementPlus;
 		this.root = element;
+		element.liteBox = this;
 		element.className = "listbox " + (state ? "listopen" : "listclosed");
 		element.innerHTML = state ? "&#9660;" : "&#9658;";
 		element.dataset["value"] = state ? "open" : "closed";

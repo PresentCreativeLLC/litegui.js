@@ -63,6 +63,7 @@ export interface HTMLSpanElementPlus extends HTMLSpanElement
     expand: Function;
     collapse: Function;
     item?: HTMLDivElementPlus;
+	liteBox: LiteBox;
 }
 
 export interface HTMLScriptElementPlus extends HTMLScriptElement

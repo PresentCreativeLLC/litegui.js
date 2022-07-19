@@ -282,9 +282,9 @@ export class Tree
 		if (node.classList.contains("hidden")) {return false;}
 
 		// Check listboxes
-		const listbox = node.querySelector(".listbox") as HTMLInputElementPlus;
+		const listbox = node.querySelector(".listbox") as HTMLSpanElementPlus;
 		if (!listbox) {return true;}
-		if (listbox?.getValue() == "closed") {return false;}
+		if (listbox.liteBox?.getValue() == "closed") {return false;}
 		return true;
 	};
 
