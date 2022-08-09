@@ -113,6 +113,9 @@ export interface HTMLElementPlus extends HTMLElement
     update?: Function;
     dialog? : HTMLElementPlus;
 	setValue?: Function;
+	fireEvent?: Function;
+	value?: any;
+	jscStyle?: any;
 }
 
 export interface HTMLButtonElementPlus extends HTMLButtonElement
@@ -154,7 +157,8 @@ export interface ChildNodePlus extends ChildNode
 
 export interface DocumentPlus extends Document
 {
-    parentWindow : Window;
+	createEventObject?: Function;
+    parentWindow? : Window;
 }
 
 export interface HTMLParagraphElementPlus extends HTMLParagraphElement

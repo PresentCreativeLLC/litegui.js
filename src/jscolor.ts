@@ -1,4 +1,4 @@
-import { HTMLInputElementPlus } from "./@types/globals";
+import { DocumentPlus, HTMLElementPlus, HTMLInputElementPlus, MouseEventPlus } from "./@types/globals";
 
 type Position =
 {
@@ -8,6 +8,21 @@ type Position =
 type PickerMode = 'HSV' | 'HVS';
 type PickerPosition = 'left' | 'right' | 'top' | 'bottom';
 
+interface Picker
+{
+	box : HTMLDivElement;
+	boxB : HTMLDivElement;
+	pad : HTMLDivElement;
+	padB : HTMLDivElement;
+	padM : HTMLDivElement;
+	sld : HTMLDivElement;
+	sldB : HTMLDivElement;
+	sldM : HTMLDivElement;
+	btn : HTMLDivElement;
+	btnS : HTMLSpanElement;
+	btnT : any;
+	owner? : any;
+}
 export abstract class jscolor
 {
     static dir: string | boolean = '';
@@ -24,11 +39,11 @@ export abstract class jscolor
 	}
     static imgRequire: any = {}
 	static imgLoaded: any = {}
-    static picker: any;
+    static picker: Picker;
 
     static install()
     {
-        jscolor.addEvent(window, 'load', jscolor.init());
+        jscolor.addEvent(window, 'load', jscolor.init);
     }
 
     static init()
@@ -62,8 +77,8 @@ export abstract class jscolor
 		let e = document.getElementsByTagName('script');
 		for(var i=0; i<e.length; i+=1) {
 			if(e[i].src && /(^|\/)jscolor(.*).js([?#].*)?$/i.test(e[i].src)) {
-				var src: any = new jscolor.URI(e[i].src);
-				var srcAbs = src.toAbsolute(base);
+				var src = new jscolor.URI(e[i].src);
+				var srcAbs = src.toAbsolute(base) as any;
 				srcAbs.path = srcAbs.path.replace(/[^\/]+$/, ''); // remove filename
 				srcAbs.query = null;
 				srcAbs.fragment = null;
@@ -114,68 +129,68 @@ export abstract class jscolor
 		}
     }
 
-    static fetchElement(mixed: any): any
+    static fetchElement(mixed: string | HTMLElement): HTMLElement | null
     {
         return typeof mixed === 'string' ? document.getElementById(mixed) : mixed;
     }
 
-    static addEvent(el: any, evnt: string, func: any)
+    static addEvent(el: HTMLElement | Window, evnt: string, func: Function)
     {
         if(el.addEventListener) {
-			el.addEventListener(evnt, func, false);
+			el.addEventListener(evnt, func as EventListenerOrEventListenerObject, false);
 		} else if(el.attachEvent) {
 			el.attachEvent('on'+evnt, func);
 		}
     }
 
-    static fireEvent(el: any, evnt: string)
+    static fireEvent(el: HTMLElementPlus, evnt: string)
     {
         if(!el) {
 			return;
 		}
-        var ev: any;
+        var ev;
 		if(document.createEvent) 
         {
 			ev = document.createEvent('HTMLEvents');
 			ev.initEvent(evnt, true, true);
 			el.dispatchEvent(ev);
 		} 
-        else if((document as any).createEventObject) 
+        else if((document as DocumentPlus).createEventObject) 
         {
-			ev = (document as any).createEventObject();
-			el.fireEvent('on'+evnt, ev);
+			ev = (document as DocumentPlus).createEventObject!();
+			el.fireEvent!('on'+evnt, ev);
 		} 
-        else if(el['on'+evnt]) { // alternatively use the traditional event model (IE5)
-			el['on'+evnt]();
+        else if(el['on'+evnt as keyof object]) { // alternatively use the traditional event model (IE5)
+			(el['on'+evnt as keyof object] as Function)();
 		}
     }
 
-    static getElementPos(e: any): Array<number>
+    static getElementPos(e: HTMLElement): Array<number>
     {
-        var e1=e, e2=e;
+        var e1 : HTMLElement=e, e2=e;
 		var x=0, y=0;
 		if(e1.offsetParent) {
 			do {
 				x += e1.offsetLeft;
 				y += e1.offsetTop;
-			} while(e1 = e1.offsetParent);
+			} while(e1 = (e1.offsetParent as HTMLElement));
 		}
-		while((e2 = e2.parentNode) && e2.nodeName.toUpperCase() !== 'BODY') {
+		while((e2 = (e2.parentNode as HTMLElement)) && e2.nodeName.toUpperCase() !== 'BODY') {
 			x -= e2.scrollLeft;
 			y -= e2.scrollTop;
 		}
 		return [x, y];
     }
 
-    static getElementSize(e: any): Array<number>
+    static getElementSize(e: HTMLElement): Array<number>
     {
         return [e.offsetWidth, e.offsetHeight];
     }
 
-    static getRelMousePos(e: any): Position
+    static getRelMousePos(e: MouseEventPlus): Position
     {
         var x = 0, y = 0;
-		if (!e) { e = window.event; }
+		if (!e) { e = window.event as MouseEventPlus; }
 		if (typeof e.offsetX === 'number') {
 			x = e.offsetX;
 			y = e.offsetY;
@@ -258,7 +273,7 @@ export abstract class jscolor
         
         toAbsolute(_base: string)
         {
-            var base: any = new jscolor.URI(_base);
+            var base = new jscolor.URI(_base);
 			var r = this;
 			var t = new jscolor.URI();
 
@@ -293,7 +308,7 @@ export abstract class jscolor
 							if(base.authority !== null && base.path === '') { // TODO: == or === ?
 								t.path = '/'+r.path;
 							} else {
-								t.path = base.path.replace(/[^\/]+$/,'')+r.path;
+								t.path = base.path!.replace(/[^\/]+$/,'')+r.path;
 							}
 							t.path = this.removeDotSegments(t.path!);
 						}
@@ -330,7 +345,7 @@ export abstract class jscolor
 			return out;
         }
     }
-    // function color(target: any, prop?: any): jscolor.color;
+    // function color(target: an.y, prop?: an.y): jscolor.color;
     static color = class color
     {
         required: boolean;
@@ -362,9 +377,9 @@ export abstract class jscolor
         leaveSld: number;
         modeID: number;
         abortBlur: boolean;
-        target: any;
-        valueElement: any;
-        styleElement: any;
+        target: HTMLElement;
+        valueElement: HTMLElementPlus;
+        styleElement: HTMLElementPlus;
         holdPad: boolean;
         holdSld: boolean;
         get Hsv(): Array<number>
@@ -375,7 +390,7 @@ export abstract class jscolor
         {
             return this.rgb;
         }
-        constructor(target: any, prop?: any)
+        constructor(target: HTMLElement, prop?: object)
         {
             this.required = true; // refuse empty values?
             this.adjust = true; // adjust value to uniform notation?
@@ -409,8 +424,8 @@ export abstract class jscolor
             this.leaveSld = 1<<3;
             this.modeID = this.pickerMode.toLowerCase()==='hvs' ? 1 : 0;
             this.abortBlur = false;
-            this.valueElement = jscolor.fetchElement(this.valueElement),
-            this.styleElement = jscolor.fetchElement(this.styleElement);
+            this.valueElement = jscolor.fetchElement(this.valueElement) as HTMLElementPlus,
+            this.styleElement = jscolor.fetchElement(this.styleElement) as HTMLElementPlus;
             this.holdPad = false,
             this.holdSld = false;
             this.target = target;
@@ -418,7 +433,7 @@ export abstract class jscolor
             {
                 if(prop.hasOwnProperty(p)) 
                 {
-                    (this as any)[p] = prop[p];
+                    (this as any)[p] = prop[p as keyof object];
                 }
             }
             // target
@@ -799,7 +814,7 @@ export abstract class jscolor
 			p.boxB.style.clear = 'both';
 			p.boxB.style.left = x+'px';
 			p.boxB.style.top = y+'px';
-			p.boxB.style.zIndex = this.pickerZIndex;
+			p.boxB.style.zIndex = this.pickerZIndex.toString();
 			p.boxB.style.border = this.pickerBorder+'px solid';
 			p.boxB.style.borderColor = this.pickerBorderColor;
 			p.boxB.style.background = this.pickerFaceColor;
@@ -1015,9 +1030,9 @@ export abstract class jscolor
 			}
         }
 
-        setPad(e: Position)
+        setPad(e: MouseEvent)
         {
-			var mpos = jscolor.getRelMousePos(e);
+			var mpos = jscolor.getRelMousePos(e as MouseEventPlus);
 			var x = mpos.x - this.pickerFace - this.pickerInset;
 			var y = mpos.y - this.pickerFace - this.pickerInset;
 			switch(this.modeID) {
@@ -1028,9 +1043,9 @@ export abstract class jscolor
 			}
         }
 
-        setSld(e: Position)
+        setSld(e: MouseEvent)
         {
-			var mpos = jscolor.getRelMousePos(e);
+			var mpos = jscolor.getRelMousePos(e as MouseEventPlus);
 			var y = mpos.y - this.pickerFace - this.pickerInset;
 			switch(this.modeID) 
             {
