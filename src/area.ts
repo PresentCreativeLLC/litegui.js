@@ -49,9 +49,9 @@ export class Area
         let width = optionsTemp?.width || "100%";
         let height = optionsTemp?.height || "100%";
 
-        if (width < 0)
+        if (typeof (width) == 'number' && width < 0)
         {width = 'calc( 100% - '+Math.abs(width as number)+'px)';}
-        if (height < 0)
+        if (typeof (height) == 'number' && height < 0)
         {height = 'calc( 100% - '+ Math.abs(height as number)+'px)';}
 
         root.style.width = width as string;

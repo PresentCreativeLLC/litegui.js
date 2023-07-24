@@ -1424,7 +1424,7 @@ let escapeHtmlEntities: any;
 			const value = v;
 			if (value ===  undefined || value === null) {return null;}
 			if (value.constructor === String) {return value;}
-			if (value >= 0) {return (value as number|0) + "px";}
+			if (typeof (value) == 'number' && value >= 0) {return (value as number|0) + "px";}
 			return "calc( 100% - " + Math.abs(value as number|0) + "px )";
 		}
 
