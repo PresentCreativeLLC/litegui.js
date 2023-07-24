@@ -11,3 +11,4 @@ export * from './table';
 export * from './tabs';
 export * from './tree';
 export * from './widgets';
+export * from './jscolor'
