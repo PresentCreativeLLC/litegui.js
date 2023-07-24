@@ -19,6 +19,7 @@
 	"pack": "webpack --config webpack.pack.config.js",
 	"build-var": "webpack --config webpack.var.config.js",
     "lint": "eslint . --fix --ext .js",
+	"prepare": "npm run build",
     "test": "jest"
   },
   "license": "MIT",
