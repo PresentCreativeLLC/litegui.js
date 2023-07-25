@@ -1,15 +1,18 @@
-import { HTMLDivElementPlus, HTMLElementPlus, InspectorOptions, InstanceObject, ParentNodePlus } from "./@types/globals";
+import { EventTargetPlus, HTMLDivElementPlus, HTMLElementPlus, InspectorOptions, VectorOptions, addOptions, addStringOptions, addNumberOptions, InstanceObject, addPadOptions, onWidgetChangeOptions, addInfoOptions, addCheckboxOptions, processElementOptions, appendOptions, addTitleOptions, beginGroupOptions, addArrayOptions, containerOptions, addTreeOptions, applyOptions, addFileOptions, LineEditorOptions, addColor, addIconOptions, MouseEventPlus, addButtonOptions, addListOptions, createWidgetOptions,addComboOptions, addSliderOptions, setupOptions, addStringButtonOptions, properties_info, ParentNodePlus, ItemOptions, TreeNode } from "./@types/globals";
 import { LiteGUI } from "./core";
 import { purgeElement } from "./core";
 import { Dragger } from "./dragger";
 import { jscolor } from "./jscolor";
+import { LineEditor } from "./widgets";
+
+
 
 
 declare global
 {
     interface Window
     {
-        jscolor: any;
+        jscolor: jscolor;
     }
 }
 
@@ -31,12 +34,12 @@ export class Inspector
     current_section: any;
     _current_container_stack: any[] = [];
     private _current_container: any;
-    on_refresh: Function | undefined;
-    on_addProperty: Function | undefined;
-    instance: {[key: string]: any} | undefined;
+    on_refresh?: Function;
+    on_addProperty?: Function;
+    instance?: {[key: string]: any};
     name: string = "";
     options: InspectorOptions;
-    height: string | number | undefined | null;
+    height?: string | number;
 
     constructor(options?: InspectorOptions) // TODO: Define the options
     {
@@ -97,7 +100,7 @@ export class Inspector
         return r;
     };
     
-    setValues(v: any)
+    setValues(v: any[])
     {
         for (const i in v)
         {
@@ -121,10 +124,10 @@ export class Inspector
         {return;}
         if (at_front)
         {
-            (parent as HTMLElementPlus).insertBefore(this.root, (parent as HTMLElementPlus).firstChild);
+            (parent as HTMLElementPlus).insertBefore(this.root as Node, (parent as HTMLElementPlus).firstChild);
         }
         else
-        {(parent as HTMLElementPlus).appendChild(this.root);}
+        {(parent as HTMLElementPlus).appendChild(this.root as Node);}
     };
     
     /**
@@ -148,7 +151,7 @@ export class Inspector
         this.current_section = null;
         this._current_container = null;
         this._current_container_stack = [];
-        this.addContainer();
+        this.addContainer("", {});
     };
     
     /**
@@ -168,14 +171,14 @@ export class Inspector
      * + widget_parent
      * + replace
      */
-    append(widget: any, options?: any)
+    append(widget: any, options?: appendOptions)
     {
         options = options || {};
     
         const root = options.widget_parent || this._current_container || this.root;
     
         if (options.replace)
-        {options.replace.parentNode.replaceChild(widget, options.replace);}
+        {options.replace.parentNode!.replaceChild(widget, options.replace as Node);}
         else
         {
             widget.section = this.current_section;
@@ -231,13 +234,9 @@ export class Inspector
         {this._current_container = null;}
     };
     
-    setup(info: any)
+    setup(info: setupOptions)
     {
-        for (const i in info)
-        {
-            const w = info[i];
-            const widget = this.add(w.type, w.name, w.value, w.options);
-        }
+        const widget = this.add(info.type, info.name, info.value, info.options);
     };
     
     /**
@@ -249,11 +248,11 @@ export class Inspector
      */
     getWidget(name: string | number)
     {
-        if (name !== null && name.constructor === Number)
+        if (name.constructor === Number)
         {
             return this.widgets[name];
         }
-        return this.widgets_by_name.get(name.toString());
+        return this.widgets_by_name.get(name as string);
     };
     
     /**
@@ -266,8 +265,8 @@ export class Inspector
      * @param {Object} properties_info_example it overwrites the info about properties found in the object (in case the automaticaly guessed type is wrong)
      * @param {Array} properties_to_skip this properties will be ignored
      */
-    inspectInstance(instance: InstanceObject | {[key: string]: any}, properties?: any,
-        properties_info_example?: any, properties_to_skip?: any)
+    inspectInstance(instance: InstanceObject | {[key: string]: any}, properties?: string[],
+        properties_info_example?: properties_info, properties_to_skip?: string[])
     {
         if (!instance) {return;}
     
@@ -293,7 +292,7 @@ export class Inspector
          * Properties info contains  name:type for every property
          * Must be cloned to ensure there is no overlap between widgets reusing the same container
          */
-        let properties_info: any = {};
+        let properties_info: properties_info = {};
     
         if ((instance as InstanceObject).getInspectorProperties)
         {
@@ -304,44 +303,44 @@ export class Inspector
             // Add to properties_info the ones that are not specified
             for (const i in properties)
             {
-                if (properties_info_example && properties_info_example[i])
+                if (properties_info_example && (properties_info_example as any)[i])
                 {
                     // Clone
-                    properties_info[i] = inner_clone(properties_info_example[i]);
+                    (properties_info as any)[i] = inner_clone((properties_info_example as any)[i]);
                     continue;
                 }
     
-                const v = properties[i];
-    
+                //const v = properties[i];
+                const v = (properties_info_example as any)[i];
                 if (classObject["@" + i]) // Guess from class object info
                 {
                     const shared_options = classObject["@" + i];
                     if (shared_options && shared_options.widget === null)
                     {continue;} // Skip
-                    properties_info[i] = inner_clone(shared_options);
+                    (properties_info as any)[i] = inner_clone(shared_options);
                 }
                 else if ((instance as {[key: string]: any})["@" + i]) // Guess from instance info
-                {properties_info[i] = (instance as {[key: string]: any})["@" + i];}
-                else if (v === null || v === undefined) // Are you sure?
+                {(properties_info as any)[i] = (instance as {[key: string]: any})["@" + i];}
+                else if (i === null || i === undefined) // Are you sure?
                 {continue;}
                 else
                 {
                     switch (v.constructor)
                     {
-                    case Number: properties_info[i] = { type: "number", step: 0.1 }; break;
-                    case String: properties_info[i] = { type: "string" }; break;
-                    case Boolean: properties_info[i] = { type: "boolean" }; break;
+                    case Number: (properties_info as any)[i] = { type: "number", step: 0.1 }; break;
+                    case String: (properties_info as any)[i] = { type: "string" }; break;
+                    case Boolean: (properties_info as any)[i] = { type: "boolean" }; break;
                     default:
                         if (v && (v.constructor === Array || v.constructor.BYTES_PER_ELEMENT)) // Array or typed_array
                         {
                             const is_number = v[0] != null && v[0].constructor === Number;
                             switch (v.length)
                             {
-                            case 2: properties_info[i] = { type: is_number ? "vec2" : "Array", step: 0.1 }; break;
-                            case 3: properties_info[i] = { type: is_number ? "vec3" : "Array", step: 0.1 }; break;
-                            case 4: properties_info[i] = { type: is_number ? "vec4" : "Array", step: 0.1 }; break;
+                            case 2: (properties_info as any)[i] = { type: is_number ? "vec2" : "Array", step: 0.1 }; break;
+                            case 3: (properties_info as any)[i] = { type: is_number ? "vec3" : "Array", step: 0.1 }; break;
+                            case 4: (properties_info as any)[i] = { type: is_number ? "vec4" : "Array", step: 0.1 }; break;
                             default:
-                                properties_info[i] = { type: "Array" };
+                                (properties_info as any)[i] = { type: "Array" };
                                 break;
                             }
                         }
@@ -353,7 +352,7 @@ export class Inspector
         if (properties_to_skip)
         {
             for (const i in properties_to_skip)
-            {delete properties_info[ properties_to_skip[i] ];}
+            {delete (properties_info as any)[properties_to_skip[i]];}
         }
     
         // Allows to establish the order of the properties in the inspector
@@ -363,15 +362,15 @@ export class Inspector
             for (const i in classObject.properties_order)
             {
                 const name = classObject.properties_order[i];
-                if (properties_info[ name ])
-                {sorted_properties[ name ] = properties_info[ name ];}
+                if ((properties_info as any)[ name ])
+                {sorted_properties[ name ] = (properties_info as any)[ name ];}
                 else
                 {console.warn("property not found in instance:", name);}
             }
             for (const i in properties_info) // Add the missing ones at the end (should this be optional?)
             {
                 if (!sorted_properties[i])
-                {sorted_properties[i] = properties_info[i];}
+                {sorted_properties[i] = (properties_info as any)[i];}
             }
             properties_info = sorted_properties;
         }
@@ -404,7 +403,7 @@ export class Inspector
     
         for (const i in instance)
         {
-            if (i[0] == "_" || i[0] == "@" || i.substr(0,6) == "jQuery") // Skip vars with _ (they are private)
+            if (i[0] == "_" || i[0] == "@" || i.substring(0,6) == "jQuery") // Skip vars with _ (they are private)
             {continue;}
     
             const v = instance[i];
@@ -423,19 +422,14 @@ export class Inspector
      * @param {Object} properties_info object containing   "property_name" :{ type: value, widget:..., min:..., max:... }  or just "property":"type"
      * @param {Array} properties_to_skip this properties will be ignored
      */
-    showProperties(instance: any, properties_info: any)
+    showProperties(instance: any, properties_info: properties_info)
     {
         // For every enumerable property create widget
         for (const i in properties_info)
         {
             let varname = i;
-            let options = properties_info[i];
-            if (!options)
-            {continue;}
-            if (options.constructor === String) // It allows to just specify the type
-            {
-                options = { type: options };
-            }
+            let options = (properties_info as any)[i];
+
             if (options.name) { varname = options.name; }
             if (!options.callback) // Generate default callback to modify data
             {
@@ -533,11 +527,14 @@ export class Inspector
      * - pre_title: string to append to the left side of the name, this is helpful if you want to add icons with behaviour when clicked
      * - title: string to replace the name, sometimes you want to supply a different name than the one you want to show (this is helpful to retrieve values from an inspector)
      */
-    createWidget(name: string | null, content: any, options: any)
+    createWidget(
+        name: string | null, 
+        content: string | number | boolean | HTMLElement, 
+        options?: createWidgetOptions) : any
     {
         options = options || {};
         content = (content === undefined || content === null) ? "" : content;
-        const element: any = (document.createElement("DIV"));
+        const element = (document.createElement("DIV")) as HTMLDivElementPlus;
         element.className = "widget " + (options.className || "");
         element.inspector = this;
         element.options = options;
@@ -568,7 +565,7 @@ export class Inspector
         this.widgets.push(element);
         if (options.widget_name || name)
         {
-            this.widgets_by_name.set(options.widget_name || name, element);
+            this.widgets_by_name.set(options.widget_name || name!, element);
         }
     
         if (this.widgets_per_row != 1)
@@ -582,7 +579,7 @@ export class Inspector
         let contentwidth = "";
         if ((name !== undefined && name !== null) && (this.name_width || options.name_width) && !this.one_line)
         {
-            const w = LiteGUI.sizeToCSS(options.name_width || this.name_width);
+            const w = LiteGUI.sizeToCSS(options.name_width || this.name_width!);
             namewidth = "style='width: calc(" + w + " - 0px); width: -webkit-calc(" + w + " - 0px); width: -moz-calc(" + w + " - 0px); '"; // Hack
             contentwidth = "style='width: calc( 100% - " + w + "); width: -webkit-calc(100% - " + w + "); width: -moz-calc( 100% - " + w + "); '";
         }
@@ -602,7 +599,7 @@ export class Inspector
         let content_class = "wcontent ";
         let title = name;
         if (options.title)
-        {title = options.title;}
+        {title = options.title as string;}
         if (name === null || name === undefined)
         {content_class += " full";}
         else if (name === "") // Three equals because 0 == ""
@@ -617,21 +614,21 @@ export class Inspector
             element.innerHTML = code + "<span class='info_content "+content_class+"' "+contentwidth+"></span>";
             const content_element = element.querySelector("span.info_content");
             if (content_element)
-            {content_element.appendChild(content);}
+            {content_element.appendChild(content as Node);}
         }
     
         element.content = (element.querySelector("span.info_content") as HTMLElementPlus);
         element.remove = function()
         {
             if (this.parentNode)
-            {this.parentNode.removeChild(this);}
+            {this.parentNode.removeChild(this as Node);}
         };
     
         return element;
     };
     
     // Calls callback, triggers wchange, calls onchange in Inspector
-    onWidgetChange(element: any, name: string, value: any, options: any, expand_value: any, event: any)
+    onWidgetChange(element: any, name: string, value: any, options: onWidgetChangeOptions, expand_value: any, event: any)
     {
         const section = element.section; // This.current_section
     
@@ -716,20 +713,16 @@ export class Inspector
      * @return {HTMLElement} the widget in the form of the DOM element that contains it
      *
      */
-    add(type: string, name: string | null, value: string, options: any)
+    add(type: string, name: string, value: string, options: addOptions )
     {
-        if (!type)
-        {throw ("Inspector: no type specified");}
-    
-        // Type could be an object with every parameter contained inside
-        if (arguments.length == 1 && typeof(type) == "object")
-        {
-            options = type;
-            type = options.type;
-            name = options.name;
-            value = options.value;
-        }
-        let func = Inspector.widget_constructors[type.toLowerCase()];
+        if(options.type)
+        type = options.type;
+        if(options.name)
+        name = options.name;
+        if(options.value)
+        value = options.value;
+        
+        let func = Inspector.widget_constructors[(type as string).toLowerCase()];
         if (!func)
         {
             console.warn("LiteGUI.Inspector do not have a widget called", type);
@@ -745,9 +738,6 @@ export class Inspector
         if (func.constructor !== Function)
         {return;}
     
-        if (options && options.constructor === Function)
-        {options = { callback: options };}
-    
         return (func as Function).call(this, name, value, options);
     };
     
@@ -757,7 +747,7 @@ export class Inspector
     };
     
     
-    applyOptions(element: any, options: any)
+    applyOptions(element: HTMLDivElementPlus, options?: applyOptions)
     {
         if (!element || !options)
         {return;}
@@ -767,9 +757,9 @@ export class Inspector
         if (options.id)
         {element.id = options.id;}
         if (options.width)
-        {element.style.width = LiteGUI.sizeToCSS(options.width);}
+        {element.style.width = LiteGUI.sizeToCSS(options.width)!;}
         if (options.height)
-        {element.style.height = LiteGUI.sizeToCSS(options.height);}
+        {element.style.height = LiteGUI.sizeToCSS(options.height)!;}
     };
     
     
@@ -807,9 +797,11 @@ export class Inspector
      * @return {HTMLElement} the widget in the form of the DOM element that contains it
      *
      */
-    addString(name: string,value: any, options: any)
+    addString(
+        name: string, 
+        value: string, 
+        options: addStringOptions)
     {
-        options = this.processOptions(options);
     
         value = value || "";
         const that = this;
@@ -834,20 +826,20 @@ export class Inspector
             // Input.style.textAlign = "right";
         }
     
-        input.addEventListener(options.immediate ? "keyup" : "change", (e: any) =>
+        input.addEventListener(options.immediate ? "keyup" : "change", (e: KeyboardEvent | Event) =>
         {
-            const r = this.onWidgetChange.call(that, element, name,e.target.value, options, null, null);
+            const r = this.onWidgetChange.call(that, element, name,(e.target as EventTargetPlus).value, options, null, null);
             if (r !== undefined) {input.value = r;}
         });
     
         if (options.callback_enter)
         {
-            input.addEventListener("keydown" , (e: any) =>
+            input.addEventListener("keydown" , (e: KeyboardEvent) =>
             {
                 if (e.keyCode == 13)
                 {
-                    const r = this.onWidgetChange.call(that, element, name, e.target.value, options, null, null);
-                    options.callback_enter();
+                    const r = this.onWidgetChange.call(that, element, name, (e.target as EventTargetPlus).value, options, null, null);
+                    if(options.callback_enter)options.callback_enter();
                     e.preventDefault();
                 }
             });
@@ -855,7 +847,7 @@ export class Inspector
     
         this.tab_index += 1;
     
-        element.setIcon = function(img: any)
+        element.setIcon = function(img: string)
         {
             if (!img)
             {
@@ -871,7 +863,7 @@ export class Inspector
         if (options.icon)
         {element.setIcon(options.icon);}
     
-        element.setValue = function(v: any, skip_event: any)
+        element.setValue = function(v: number, skip_event: boolean)
         {
             if (v === undefined)
             {return;}
@@ -885,7 +877,7 @@ export class Inspector
         element.focus = function() { this.querySelector("input").focus(); };
         element.disable = function() { input.disabled = true; };
         element.enable = function() { input.disabled = false; };
-        this.append(element,options);
+        this.append(element, options);
         this.processElement(element, options);
         return element;
     };
@@ -903,12 +895,8 @@ export class Inspector
      * @return {HTMLElement} the widget in the form of the DOM element that contains it
      *
      */
-    addStringButton(name: string, value: any, options: any)
+    addStringButton(name: string, value: string, options: addStringButtonOptions)
     {
-        options = this.processOptions(options);
-    
-        if (value === undefined)
-        {value = "";}
         const that = this;
         this.values.set(name, value);
     
@@ -918,16 +906,16 @@ export class Inspector
             "/></span><button class='micro'>"+(options.button || "...")+"</button>", options);
         const input = element.querySelector(".wcontent input");
         input.value = value;
-        input.addEventListener("change", (e: any) =>
+        input.addEventListener("change", (e: Event) =>
         {
-            const r = this.onWidgetChange.call(that,element,name,e.target.value, options, null, null);
+            const r = this.onWidgetChange.call(that,element,name,(e.target as HTMLInputElement)?.value, options, null, null);
             if (r !== undefined) { input.value = r; }
         });
     
         if (options.disabled)
         {input.setAttribute("disabled","disabled");}
     
-        element.setIcon = function(img: any)
+        element.setIcon = function(img: string)
         {
             if (!img)
             {
@@ -944,7 +932,7 @@ export class Inspector
         {element.setIcon(options.icon);}
     
         const button = element.querySelector(".wcontent button");
-        button.addEventListener("click", (e: any) =>
+        button.addEventListener("click", (e: KeyboardEvent) =>
         {
             if (options.callback_button) {options.callback_button.call(element, input.value, e);}
         });
@@ -959,7 +947,7 @@ export class Inspector
     
         this.tab_index += 1;
         this.append(element,options);
-        element.setValue = function(v: any, skip_event: any)
+        element.setValue = function(v: number, skip_event: boolean)
         {
             input.value = v;
             if (!skip_event)
@@ -987,9 +975,11 @@ export class Inspector
      * @return {HTMLElement} the widget in the form of the DOM element that contains it
      *
      */
-    addTextarea(name: string, value: any, options: any)
+    addTextarea(
+        name: string, 
+        value: string, 
+        options: createWidgetOptions)
     {
-        options = this.processOptions(options);
     
         value = value || "";
         const that = this;
@@ -999,9 +989,9 @@ export class Inspector
         this.tab_index++;
         const textarea = element.querySelector(".wcontent textarea");
         textarea.value = value;
-        textarea.addEventListener(options.immediate ? "keyup" : "change", (e: any) =>
+        textarea.addEventListener(options.immediate ? "keyup" : "change", (e: KeyboardEvent | Event) =>
         {
-            this.onWidgetChange.call(that,element,name,e.target.value, options, false, e);
+            this.onWidgetChange.call(that,element,name,(e.target as HTMLInputElement)?.value, options, false, e);
         });
         if (options.callback_keydown)
         {
@@ -1013,8 +1003,8 @@ export class Inspector
             textarea.style.height = "calc( " + LiteGUI.sizeToCSS(options.height) + " - 5px )";
         }
         // Textarea.style.height = LiteGUI.sizeToCSS( options.height );
-        this.append(element,options);
-        element.setValue = function(v: any, skip_event: any)
+        this.append(element, options);
+        element.setValue = function(v: string, skip_event: boolean)
         {
             if (v === undefined)
             {return;}
@@ -1052,21 +1042,22 @@ export class Inspector
      * @return {HTMLElement} the widget in the form of the DOM element that contains it
      *
      */
-    addNumber(name: string, value: any, options: any)
+    addNumber(
+        name: string, 
+        value: number, 
+        options: addNumberOptions)
     {
-        options = this.processOptions(options);
-    
         value = value || 0;
         const that = this;
         this.values.set(name, value);
     
         const element = this.createWidget(name,"", options);
-        this.append(element,options);
+        this.append(element, options);
     
         options.extraclass = "full";
         options.tab_index = this.tab_index;
         // Options.dragger_class = "full";
-        options.full = true;
+        options.fullNum = true;
         options.precision = options.precision !== undefined ? options.precision : 2;
         options.step = options.step === undefined ? (options.precision == 0 ? 1 : 0.1) : options.step;
     
@@ -1078,7 +1069,7 @@ export class Inspector
         dragger.root.style.width = "calc( 100% - 1px )";
         element.querySelector(".wcontent").appendChild(dragger.root);
     
-        const inner_before_change = function(options: any)
+        const inner_before_change = function(options: {callback_before?: Function})
         {
             if (options.callback_before) {options.callback_before.call(element);}
         };
@@ -1090,16 +1081,16 @@ export class Inspector
     
         const input = element.querySelector("input");
     
-        input.addEventListener("change", (e: any) =>
+        input.addEventListener("change", (e: Event) =>
         {
-            const el = e.target;
-            LiteGUI.trigger(element, "wbeforechange", e.target.value);
+            const el = e.target as EventTargetPlus;
+            LiteGUI.trigger(element, "wbeforechange", el.value);
     
-            this.values.set(name, e.target.value);
-    
+            this.values.set(name, el.value);
+            if(options == undefined || typeof(options) == "function") { return; }
             if (options.callback && dragger.dragging)
             {
-                const ret = options.callback.call(element, parseFloat(e.target.value));
+                const ret = options.callback.call(element, parseFloat(el.value));
                 if (typeof(ret) == "number") { el.value = ret; }
             }
             else if ((options.callback || options.finalCallback) && !dragger.dragging)
@@ -1107,16 +1098,16 @@ export class Inspector
                 let ret = undefined;
                 if (options.finalCallback)
                 {
-                    ret = options.finalCallback.call(element, parseFloat(e.target.value));
+                    ret = options.finalCallback.call(element, parseFloat(el.value));
                 }
                 else if (options.callback)
                 {
-                    ret = options.callback.call(element, parseFloat(e.target.value));
+                    ret = options.callback.call(element, parseFloat(el.value));
                 }
                 if (typeof(ret) == "number") {el.value = ret;}
             }
-            LiteGUI.trigger(element, "wchange", e.target.value);
-            if (that.onchange) {that.onchange(name,e.target.value,element);}
+            LiteGUI.trigger(element, "wchange", el.value);
+            if (that.onchange) {that.onchange(name,el.value,element);}
         });
     
         dragger.root.addEventListener("stop_dragging", (e: any) =>
@@ -1124,11 +1115,12 @@ export class Inspector
             LiteGUI.trigger(input, "change");
         });
     
-        element.setValue = function(v: any, skip_event: any)
+        element.setValue = function(v: number | string, skip_event: boolean)
         {
+            if(options == undefined || typeof(options) == "function") { return; }
             if (v === undefined)
             {return;}
-            v = parseFloat(v);
+            v = parseFloat(v as string);
             if (options.precision)
             {v = v.toFixed(options.precision);}
             v += (options.units || "");
@@ -1165,29 +1157,25 @@ export class Inspector
      * @return {HTMLElement} the widget in the form of the DOM element that contains it
      *
      */
-    addVector2(name: string, value: any, options: any)
+    addVector2(name: string, value: Array<number>, options: VectorOptions)
     {
-        options = this.processOptions(options);
-        if (!options.step)
-        {options.step = 0.1;}
-    
         value = value || [0,0];
         const that = this;
         this.values.set(name, value);
     
         const element = this.createWidget(name,"", options);
     
-        options.step = options.step ||0.1;
+        options.step ? options.step : 0.1;
         // Options.dragger_class = "medium";
         options.tab_index = this.tab_index;
-        options.full = true;
+        options.fullVector = true;
         this.tab_index++;
     
         const draggers: Dragger[] = element.draggers = [];
     
         const inner_before_change = function(e: any)
         {
-            if (options.callback_before) {options.callback_before(e);}
+            if (options.callback_before) {options.callback_before!(e);}
         };
     
         for (let i = 0; i < 2; i++)
@@ -1203,7 +1191,7 @@ export class Inspector
         }
     
         const inputs = element.querySelectorAll("input");
-        const onChangeCallback = (e: any) =>
+        const onChangeCallback = (e: Event) =>
         {
             // Gather all three parameters
             let r = [];
@@ -1217,10 +1205,10 @@ export class Inspector
     
             this.values.set(name, r);
     
-            const dragger = e.target.dragger;
+            const dragger = (e.target as EventTargetPlus).dragger;
             if (options.callback && dragger.dragging)
             {
-                const new_val = options.callback.call(element, r);
+                const new_val = options.callback!.call(element, r);
     
                 if (typeof(new_val) == "object" && new_val.length >= 2)
                 {
@@ -1236,11 +1224,11 @@ export class Inspector
                 let new_val = undefined;
                 if (options.finalCallback)
                 {
-                    new_val = options.finalCallback.call(element, r);
+                    new_val = options.finalCallback!.call(element, r);
                 }
                 else if (options.callback)
                 {
-                    new_val = options.callback.call(element, r);
+                    new_val = options.callback?.call(element, r);
                 }
     
                 if (typeof(new_val) == "object" && new_val.length >= 2)
@@ -1256,7 +1244,7 @@ export class Inspector
             LiteGUI.trigger(element, "wchange", [r]);
             if (that.onchange) {that.onchange(name, r, element);}
         };
-        const onStopDragging = function(input: any, e: any)
+        const onStopDragging = function(input: InputEvent, e: any)
         {
             LiteGUI.trigger(input, "change");
         };
@@ -1271,7 +1259,7 @@ export class Inspector
     
         this.append(element,options);
     
-        element.setValue = function(v: any, skip_event: any)
+        element.setValue = function(v: string, skip_event: boolean)
         {
             if (!v) {return;}
             for (let i = 0; i < draggers.length; i++)
@@ -1302,9 +1290,8 @@ export class Inspector
      * @return {HTMLElement} the widget in the form of the DOM element that contains it
      *
      */
-    addVector3(name: string, value: any, options: any)
+    addVector3(name: string, value: Array<number>, options: VectorOptions)
     {
-        options = this.processOptions(options);
         if (!options.step)
         {options.step = 0.1;}
     
@@ -1317,7 +1304,7 @@ export class Inspector
         options.step = options.step || 0.1;
         // Options.dragger_class = "mini";
         options.tab_index = this.tab_index;
-        options.full = true;
+        options.fullVector = true;
         this.tab_index++;
     
         const draggers: Dragger[] = element.draggers = [];
@@ -1340,7 +1327,7 @@ export class Inspector
         }
     
         const inputs = element.querySelectorAll("input");
-        const onChangeCallback = (e: any) =>
+        const onChangeCallback = (e: Event) =>
         {
             // Gather all three parameters
             let r = [];
@@ -1354,7 +1341,7 @@ export class Inspector
     
             this.values.set(name, r);
     
-            const dragger = e.target.dragger;
+            const dragger = (e.target as EventTargetPlus).dragger;
             if (options.callback && dragger.dragging)
             {
                 const new_val = options.callback.call(element, r);
@@ -1393,7 +1380,7 @@ export class Inspector
             LiteGUI.trigger(element, "wchange", [r]);
             if (that.onchange) {that.onchange(name,r,element);}
         };
-        const onStopDragging = function(input: any, e: any)
+        const onStopDragging = function(input: InputEvent, e: any)
         {
             LiteGUI.trigger(input, "change");
         };
@@ -1408,7 +1395,7 @@ export class Inspector
     
         this.append(element,options);
     
-        element.setValue = function(v: any, skip_event: any)
+        element.setValue = function(v: string, skip_event: boolean)
         {
             if (!v) {return;}
             for (let i = 0; i < draggers.length; i++)
@@ -1439,9 +1426,8 @@ export class Inspector
      * @return {HTMLElement} the widget in the form of the DOM element that contains it
      *
      */
-    addVector4(name: string, value: any, options: any)
+    addVector4(name: string, value: Array<number>, options: VectorOptions)
     {
-        options = this.processOptions(options);
         if (!options.step)
         {options.step = 0.1;}
     
@@ -1454,7 +1440,7 @@ export class Inspector
         options.step = options.step || 0.1;
         // Options.dragger_class = "mini";
         options.tab_index = this.tab_index;
-        options.full = true;
+        options.fullVector = true;
         this.tab_index++;
     
         const draggers: Dragger[] = element.draggers = [];
@@ -1477,10 +1463,10 @@ export class Inspector
         }
     
         const inputs = element.querySelectorAll("input");
-        const onChangeCallback = (e: any) =>
+        const onChangeCallback = (e: Event) =>
         {
             // Gather all parameters
-            let r: any = [];
+            let r = [];
             const elems = inputs;
             for (let j = 0; j < elems.length; j++)
             {
@@ -1491,7 +1477,7 @@ export class Inspector
     
             this.values.set(name, r);
     
-            const dragger = e.target.dragger;
+            const dragger = (e.target as EventTargetPlus).dragger;
             if (options.callback && dragger.dragging)
             {
                 const new_val = options.callback.call(element, r);
@@ -1544,7 +1530,7 @@ export class Inspector
     
         this.append(element,options);
     
-        element.setValue = function(v: any, skip_event: any)
+        element.setValue = function(v: string, skip_event: boolean)
         {
             if (!v) {return;}
             for (let i = 0; i < draggers.length; i++)
@@ -1580,9 +1566,8 @@ export class Inspector
      * @return {HTMLElement} the widget in the form of the DOM element that contains it
      *
      */
-    addPad(name: string, value: any, options: any)
+    addPad(name: string, value: Array<number>, options: addPadOptions)
     {
-        options = this.processOptions(options);
         if (!options.step)
         {options.step = 0.1;}
     
@@ -1605,7 +1590,7 @@ export class Inspector
     
         const wcontent = element.querySelector(".wcontent");
     
-        const pad: any = document.createElement("div");
+        const pad = document.createElement("div") as HTMLDivElementPlus;
         pad.className = "litepad";
         wcontent.appendChild(pad);
         pad.style.width = "100%";
@@ -1625,25 +1610,28 @@ export class Inspector
         this.tab_index++;
     
         let dragging = false;
-    
-        pad._onMouseEvent = function(e: any)
+
+        function mouseDown(e: MouseEvent)
         {
-            const b = pad.getBoundingClientRect();
-            e.mousex = e.pageX - b.left;
-            e.mousey = e.pageY - b.top;
             e.preventDefault();
             e.stopPropagation();
-    
-            if (e.type == "mousedown")
-            {
-                document.body.addEventListener("mousemove", pad._onMouseEvent);
-                document.body.addEventListener("mouseup", pad._onMouseEvent);
-                dragging = true;
-            }
-            else if (e.type == "mousemove")
-            {
-                let x = e.mousex / (b.width);
-                let y = e.mousey / (b.height);
+
+            document.body.addEventListener("mousemove", mouseMove);
+            document.body.addEventListener("mouseup", mouseUp);
+            dragging = true;
+        }
+
+        function mouseMove(e: MouseEvent)
+        {
+            const b = pad.getBoundingClientRect();
+            
+            const mousex = e.pageX - b.left;
+            const mousey = e.pageY - b.top;
+            e.preventDefault();
+            e.stopPropagation();
+
+            let x = mousex / (b.width);
+                let y = mousey / (b.height);
     
                 x = x * (maxx - minx) + minx;
                 y = y * (maxy - miny) + minx;
@@ -1667,20 +1655,22 @@ export class Inspector
                 LiteGUI.trigger(element, "wchange",[r]);
                 if (that.onchange)
                 {that.onchange(name,r,element);}
-            }
-            else if (e.type == "mouseup")
-            {
-                dragging = false;
-                document.body.removeEventListener("mousemove", pad._onMouseEvent);
-                document.body.removeEventListener("mouseup", pad._onMouseEvent);
-            }
+        }
+
+        function mouseUp(e: MouseEvent)
+        {
+            e.preventDefault();
+            e.stopPropagation();
+
+            dragging = false;
+            document.body.removeEventListener("mousemove", mouseMove);
+            document.body.removeEventListener("mouseup", mouseUp);
+        }
+        
     
-            return true;
-        };
+        pad.addEventListener("mousedown", mouseDown);
     
-        pad.addEventListener("mousedown", pad._onMouseEvent);
-    
-        element.setValue = function(v: any, skip_event: any)
+        element.setValue = function(v: any, skip_event: boolean)
         {
             if (v === undefined)
             {return;}
@@ -1725,33 +1715,26 @@ export class Inspector
      * @return {HTMLElement} the widget in the form of the DOM element that contains it
      *
      */
-    addInfo(name: string, value: any, options?: any)
+    addInfo(name: string, value?: string, options?: addInfoOptions)
     {
-        options = this.processOptions(options);
-    
-        value = (value === undefined || value === null) ? "" : value;
+        value = value === undefined ? "" : value;
         let element = null;
         if (name != null)
         {element = this.createWidget(name, value, options);}
         else
         {
             element = document.createElement("div");
-            if (options.className)
+            if (options?.className)
             {element.className = options.className;}
-            if (value.nodeName !== undefined)
-            {
-                element.innerHTML = "<span class='winfo'></span>";
-                element.childNodes[0].appendChild(value);
-            }
-            else
-            {element.innerHTML = "<span class='winfo'>"+value+"</span>";}
+
+            element.innerHTML = "<span class='winfo'>"+value+"</span>";
         }
     
         const info = element.querySelector(".winfo") || element.querySelector(".wcontent");
     
-        if (options.callback) {element.addEventListener("click",options.callback.bind(element));}
+        if (options?.callback) {element.addEventListener("click",options.callback.bind(element));}
     
-        element.setValue = function(v: any)
+        element.setValue = function(v: string)
         {
             if (v === undefined) {return;}
             if (info) {info.innerHTML = v;}
@@ -1761,14 +1744,14 @@ export class Inspector
         if (!content)
         {content = element.querySelector(".winfo");}
     
-        if (options.width)
+        if (options?.width)
         {
             element.style.width = LiteGUI.sizeToCSS(options.width);
             element.style.display = "inline-block";
             if (!name)
             {info.style.margin = "2px";}
         }
-        if (options.height)
+        if (options?.height)
         {
             content.style.height = LiteGUI.sizeToCSS(options.height);
             content.style.overflow = "auto";
@@ -1779,13 +1762,17 @@ export class Inspector
             content.scrollTop = content.offsetTop;
         };
     
-        element.add = function(e: any)
+        element.add = function(e: Node)
         {
             content.appendChild(e);
         };
     
+
         this.append(element,options);
-        this.processElement(element, options);
+        if(options)
+        {
+            this.processElement(element, options);
+        }
         return element;
     };
     
@@ -1802,9 +1789,8 @@ export class Inspector
      * @return {HTMLElement} the widget in the form of the DOM element that contains it
      *
      */
-    addSlider(name: string, value: any, options: any)
+    addSlider(name: string, value: number, options: addSliderOptions)
     {
-        options = this.processOptions(options);
     
         if (options.min === undefined)
         {options.min = 0;}
@@ -1834,7 +1820,7 @@ export class Inspector
         const skip_change = false; // Used to avoid recursive loops
         const text_input = element.querySelector(".slider-text");
         text_input.value = value;
-        text_input.addEventListener('change', (e: any) =>
+        text_input.addEventListener('change', (e: Event) =>
         {
             if (skip_change) {return;}
             const v = parseFloat(text_input.value);
@@ -1850,9 +1836,9 @@ export class Inspector
             this.onWidgetChange.call(that, element, name, value, options, null, null);
         };
     
-        this.append(element,options);
+        this.append(element, options);
     
-        element.setValue = function(v: any, skip_event: any)
+        element.setValue = function(v: number, skip_event: boolean)
         {
             if (v === undefined)
             {return;}
@@ -1881,15 +1867,13 @@ export class Inspector
      * @return {HTMLElement} the widget in the form of the DOM element that contains it
      *
      */
-    addCheckbox(name: string, value: any, options?: any)
+    addCheckbox(name: string, value: boolean, options: addCheckboxOptions)
     {
-        options = this.processOptions(options);
-        value = Boolean(value);
         const that = this;
         this.values.set(name, value);
     
-        const label_on = options.label_on || options.label || "on";
-        const label_off = options.label_off || options.label || "off";
+        const label_on = options.label_on || "on";
+        const label_off = options.label_off || "off";
         const label = (value ? label_on : label_off);
     
         // Var element = this.createWidget(name,"<span class='inputfield'><span class='fixed flag'>"+(value ? "on" : "off")+"</span><span tabIndex='"+this.tab_index+"'class='checkbox "+(value?"on":"")+"'></span></span>", options );
@@ -1922,7 +1906,7 @@ export class Inspector
             return value;
         };
     
-        element.setValue = function(v: any, skip_event: any)
+        element.setValue = function(v: any, skip_event: boolean)
         {
             if (v === undefined)
             {return;}
@@ -1932,7 +1916,7 @@ export class Inspector
         };
     
         this.append(element,options);
-        this.processElement(element, options);
+        if(options) this.processElement(element, options);
         return element;
     };
     
@@ -1944,7 +1928,7 @@ export class Inspector
      * @return {HTMLElement} the widget in the form of the DOM element that contains it
      *
      */
-    addFlags(flags: any, force_flags?: any, options?: any)
+    addFlags(flags: any, force_flags?: object, options?: any)
     {
         const f: any = {};
         for (const i in flags)
@@ -1957,7 +1941,7 @@ export class Inspector
             {
                 if (typeof(f[i]) == "undefined")
                 {
-                    f[i] = (force_flags[i] ? true : false);
+                    f[i] = (force_flags[i as keyof object] ? true : false);
                 }
             }
         }
@@ -1993,22 +1977,18 @@ export class Inspector
      * @return {HTMLElement} the widget in the form of the DOM element that contains it
      *
      */
-    addCombo(name: string, value: any, options: any)
-    {
-        options = this.processOptions(options);
-    
+    addCombo(name: string, value: string, options?: addComboOptions)
+    {    
         // Value = value || "";
         const that = this;
         this.values.set(name, value);
     
         this.tab_index++;
     
-        const element = this.createWidget(name,"<span class='inputfield full inputcombo "+(options.disabled?"disabled":"")+"'></span>", options);
+        const element = this.createWidget(name,"<span class='inputfield full inputcombo "+(options?.disabled?"disabled":"")+"'></span>", options);
         element.options = options;
     
-        let values = options.values || [];
-        if (values.constructor === Function)
-        {values = options.values();}
+        let values: string[] = options?.values || [];
     
         /*
          *If(!values)
@@ -2027,7 +2007,7 @@ export class Inspector
          *}
          */
     
-        const code = "<select tabIndex='"+this.tab_index+"' "+(options.disabled?"disabled":"")+" class='"+(options.disabled?"disabled":"")+"'></select>";
+        const code = "<select tabIndex='"+this.tab_index+"' "+(options?.disabled?"disabled":"")+" class='"+(options?.disabled?"disabled":"")+"'></select>";
         element.querySelector("span.inputcombo").innerHTML = code;
         setValues(values);
     
@@ -2039,7 +2019,7 @@ export class Inspector
             const index = e.target.value;
             value = values[index];
             if (stop_event) {return;}
-            this.onWidgetChange.call(that,element,name,value, options, null, null);
+            this.onWidgetChange.call(that,element,name,value, options!, null, null);
         });
     
         element.getValue = function()
@@ -2047,10 +2027,8 @@ export class Inspector
             return value;
         };
     
-        element.setValue = function(v: any, skip_event: any)
+        element.setValue = function(v: string, skip_event: boolean)
         {
-            if (v === undefined)
-            {return;}
             value = v;
             const select = element.querySelector("select");
             const items = select.querySelectorAll("option");
@@ -2095,24 +2073,15 @@ export class Inspector
             stop_event = false;
         };
     
-        function setValues(v: any, selected?: any)
+        function setValues(v: string[], selected?: string)
         {
-            if (!v)
-            {v = [];}
             values = v;
             if (selected)
             {value = selected;}
             let code = "";
-            let index = 0;
             for (const i in values)
             {
-                const item_value = values[i];
-                const item_index = values.constructor === Array ? index : i;
-                let item_title = values.constructor === Array ? item_value : i;
-                if (item_value && item_value.title)
-                {item_title = item_value.title;}
-                code += "<option value='"+item_index+"' "+(item_value == value ? " selected":"")+" data-index='"+item_index+"'>" + item_title + "</option>";
-                index++;
+                code += "<option value='"+i+"' "+(values[i] == value ? " selected":"")+" data-index='"+i+"'>" + values[i] + "</option>";
             }
             element.querySelector("select").innerHTML = code;
         }
@@ -2120,14 +2089,12 @@ export class Inspector
         element.setOptionValues = setValues;
     
         this.append(element,options);
-        this.processElement(element, options);
+        if(options) this.processElement(element, options);
         return element;
     };
     
-    addComboButtons(name: string, value: any, options: any)
-    {
-        options = this.processOptions(options);
-    
+    addComboButtons(name: string, value: string, options: addComboOptions)
+    {    
         value = value || "";
         const that = this;
         this.values.set(name, value);
@@ -2164,11 +2131,8 @@ export class Inspector
         return element;
     };
     
-    addTags(name: string, value: any, options: any)
+    addTags(name: string, value: string[], options: addComboOptions)
     {
-        options = this.processOptions(options);
-    
-        value = value || [];
         const that = this;
         this.values.set(name, value);
     
@@ -2185,8 +2149,10 @@ export class Inspector
         element.tags = {};
     
         // Add default tags
-        for (const i in options.value)
-        {inner_addtag(options.value[i]);}
+        if(options.value){
+            for (const i in options.value)
+            {inner_addtag(options.value[i]);}
+        }
     
         // Combo change
         const select_element = element.querySelector(".wcontent select");
@@ -2204,12 +2170,12 @@ export class Inspector
     
             element.tags[tagname] = true;
     
-            const tag: any = document.createElement("div");
+            const tag = document.createElement("div") as HTMLDivElementPlus;
             tag.data = tagname;
             tag.className = "wtag";
             tag.innerHTML = tagname+"<span class='close'>X</span>";
     
-            tag.querySelector(".close").addEventListener("click", (e: any) =>
+            tag.querySelector(".close")!.addEventListener("click", (e: any) =>
             {
                 const tagname = tag.data;
                 delete element.tags[tagname];
@@ -2246,10 +2212,8 @@ export class Inspector
      * @return {HTMLElement} the widget in the form of the DOM element that contains it
      *
      */
-    addList(name: string, values: any, options: any)
-    {
-        options = this.processOptions(options);
-    
+    addList(name: string, values: string[], options: addListOptions)
+    {    
         const that = this;
     
         let list_height = "";
@@ -2272,7 +2236,7 @@ export class Inspector
     
         const ul_elements = element.querySelectorAll("ul");
     
-        const inner_key = function(e: any)
+        const inner_key = function(e: KeyboardEvent)
         {
             const selected = element.querySelector("li.selected");
             if (!selected)
@@ -2355,9 +2319,9 @@ export class Inspector
         }
     
     
-        element.updateItems = function(new_values: any, item_selected: any)
+        element.updateItems = function(new_values: string[], item_selected: string)
         {
-            item_selected = item_selected || options.selected;
+            item_selected = item_selected || options.selected || "";
             values = new_values;
             const ul = this.querySelector("ul");
             ul.innerHTML = "";
@@ -2366,8 +2330,7 @@ export class Inspector
             {
                 for (const i in values)
                 {
-                    const	value = values[i];
-                    const li_element = insert_item(value, item_selected, i);
+                    const li_element = insert_item(values[i], item_selected==values[i] ? true: false, i);
                     ul.appendChild(li_element);
                 }
             }
@@ -2376,41 +2339,39 @@ export class Inspector
             LiteGUI.bind(li, "click", inner_item_click);
         };
     
-        function insert_item(value: any, selected: any, index?: any)
+        function insert_item(value: string | number | ItemOptions, selected: boolean, index?: string)
         {
             const item_index = index; // To reference it
-            let item_title: any = index; // To show in the list
-            selected = Boolean(selected);
+            let item_title = ""; // To show in the list
     
             let item_style = null;
             let icon = "";
-            if (value != null)
+
+            if (value.constructor === String || value.constructor === Number)
             {
-                if (value.constructor === String || value.constructor === Number || value.constructor === Boolean)
-                {
-                    item_title = String(value);
-                }
-                else if (value)
-                {
-                    item_title = value.content || value.title || value.name || index;
-                    item_style = value.style;
-                    if (value.icon)
-                    {icon = "<img src='"+value.icon+"' class='icon' /> ";}
-                    if (value.selected)
-                    {selected = true;}
-                }
+                item_title = String(value);
             }
+            else
+            {
+                item_title = (value as ItemOptions).content || (value as ItemOptions).title || (value as ItemOptions).name || index;
+                item_style = (value as ItemOptions).style;
+                if ((value as ItemOptions).icon)
+                {icon = "<img src='"+(value as ItemOptions).icon+"' class='icon' /> ";}
+                if ((value as ItemOptions).selected)
+                {selected = true;}
+            }
+            
     
             let item_name = item_title;
             item_name = item_name.replace(/<(?:.|\n)*?>/gm, ''); // Remove html tags that could break the html
     
             const li_element = document.createElement("li");
-            li_element.classList.add('item-' + LiteGUI.safeName(item_index));
+            li_element.classList.add('item-' + LiteGUI.safeName(item_index || ""));
             if (selected)
             {li_element.classList.add('selected');}
             li_element.dataset["name"] = item_name;
             li_element.dataset["pos"] = item_index;
-            li_element.value = value;
+            li_element.value = (value as number);
             if (item_style)
             {li_element.setAttribute("style", item_style);}
             li_element.innerHTML = icon + item_title;
@@ -2422,13 +2383,8 @@ export class Inspector
             return li_element;
         }
     
-        element.addItem = function(value: any, selected: any, name: any)
+        element.addItem = function(value: string, selected: boolean)
         {
-            if (values.constructor !== Array)
-            {
-                console.error("cannot add item to list of object, only array");
-                return;
-            }
             values.push(value);
             const ul = this.querySelector("ul");
             const li_element = insert_item(value, selected);
@@ -2464,7 +2420,7 @@ export class Inspector
         };
         element.getIndex = element.getByIndex; // Legacy
     
-        element.selectIndex = function(num: number, add_to_selection: any)
+        element.selectIndex = function(num: number, add_to_selection: boolean)
         {
             const items = this.querySelectorAll("ul li");
             for (let i = 0; i < items.length; ++i)
@@ -2521,10 +2477,8 @@ export class Inspector
             }
         };
     
-        element.setValue = function(v: any)
+        element.setValue = function(v: string)
         {
-            if (v === undefined)
-            {return;}
             this.updateItems(v);
         };
     
@@ -2534,7 +2488,7 @@ export class Inspector
             return items.length;
         };
     
-        element.filter = function(callback: any, case_sensitive: boolean)
+        element.filter = function(callback: string | Function, case_sensitive: boolean)
         {
             const items = this.querySelectorAll("ul li");
             let use_string = false;
@@ -2545,7 +2499,7 @@ export class Inspector
                 if (case_sensitive)
                 {needle.toLowerCase();}
                 use_string = true;
-                callback = function(v: any){ return ((case_sensitive ? v : v.toLowerCase()).indexOf(needle) != -1); };
+                callback = function(v: string){ return ((case_sensitive ? v : v.toLowerCase()).indexOf(needle) != -1); };
             }
     
             for (let i = 0; i < items.length; ++i)
@@ -2561,14 +2515,14 @@ export class Inspector
                 if (use_string && value != null && value.constructor !== String)
                 {value = item.innerHTML;}
     
-                if (!callback(value, item, item.classList.contains("selected")))
+                if (!(callback as Function)(value, item, item.classList.contains("selected")))
                 {item.style.display = "none";}
                 else
                 {item.style.display = "";}
             }
         };
     
-        element.selectByFilter = function(callback: any)
+        element.selectByFilter = function(callback: Function)
         {
             const items = this.querySelectorAll("ul li");
             for (let i = 0; i < items.length; ++i)
@@ -2587,10 +2541,8 @@ export class Inspector
         return element;
     };
     
-    addButton(name: string, value: any, options: any)
-    {
-        options = this.processOptions(options);
-    
+    addButton(name: string, value: string, options: addButtonOptions)
+    {    
         value = options.button_text || value || "";
         const that = this;
     
@@ -2619,16 +2571,14 @@ export class Inspector
         });
         this.append(element,options);
     
-        element.wclick = function(callback: any)
+        element.wclick = function(callback: Function)
         {
             if (!options.disabled)
             {LiteGUI.bind(this, "wclick", callback);}
         };
     
-        element.setValue = function(v: any)
+        element.setValue = function(v: string)
         {
-            if (v === undefined)
-            {return;}
             button.innerHTML = v;
         };
     
@@ -2639,28 +2589,22 @@ export class Inspector
         return element;
     };
     
-    addButtons(name: string | null, value: any, options: any)
+    addButtons(name: string | null, value: string[], options: addButtonOptions)
     {
-        options = this.processOptions(options);
-    
-        value = value || "";
         const that = this;
     
         let code = "";
         // Var w = "calc("+(100/value.length).toFixed(3)+"% - "+Math.floor(16/value.length)+"px);";
         const w = "calc( " + (100/value.length).toFixed(3) + "% - 4px )";
         const style = "width:"+w+"; width: -moz-"+w+"; width: -webkit-"+w+"; margin: 2px;";
-        if (value && typeof(value) == "object")
+        for (const i in value)
         {
-            for (const i in value)
-            {
-                let title = "";
-                if (options.title && options.title.constructor === Array)
-                {title = options.title[i] || "";}
-                code += "<button class='litebutton' title='"+title+"' tabIndex='"+this.tab_index+"' style='"+style+"'>"+value[i]+"</button>";
-                this.tab_index++;
-            }
+            let title = "";
+            if (options.title) {options.title.constructor === Array ? title = options.title[i] : title = options.title as string}
+            code += "<button class='litebutton' title='"+title+"' tabIndex='"+this.tab_index+"' style='"+style+"'>"+value[i]+"</button>";
+            this.tab_index++;
         }
+        
         const element = this.createWidget(name, code, options);
         const buttons = element.querySelectorAll("button");
         const buttonCallback = (button: any, evt: any) =>
@@ -2679,16 +2623,13 @@ export class Inspector
         return element;
     };
     
-    addIcon(name: string, value: any, options: any)
+    addIcon(name: string, value: boolean, options: addIconOptions)
     {
-        options = this.processOptions(options);
-    
-        value = value || "";
         const that = this;
     
         const img_url = options.image;
-        const width = options.width || options.size || 20;
-        const height = options.height || options.size || 20;
+        const width = options.width as number || options.size || 20;
+        const height = options.height as number || options.size || 20;
     
         const element = this.createWidget(name,"<span class='icon' " +
             (options.title ? "title='"+options.title+"'" : "") +
@@ -2713,7 +2654,7 @@ export class Inspector
         icon.style.backgroundImage = "url('"+img_url+"')";
         icon.style.backgroundPosition = x + "px " + y + "px";
     
-        icon.addEventListener("mousedown", (e: any) =>
+        icon.addEventListener("mousedown", (e: MouseEvent) =>
         {
             e.preventDefault();
             value = !value;
@@ -2732,10 +2673,8 @@ export class Inspector
         });
         this.append(element,options);
     
-        element.setValue = (v: any, skip_event: any) =>
+        element.setValue = (v: boolean, skip_event: boolean) =>
         {
-            if (v === undefined)
-            {return;}
             value = v;
             const y = value ? height : 0;
             icon.style.backgroundPosition = x + "px " + y + "px";
@@ -2747,10 +2686,8 @@ export class Inspector
         return element;
     };
     
-    addColor(name: string, value: any, options?: any)
+    addColor(name: string, value: number[], options: addColor)
     {
-        options = this.processOptions(options);
-    
         value = value || [0.0,0.0,0.0];
         const that = this;
         this.values.set(name, value);
@@ -2818,7 +2755,7 @@ export class Inspector
             if (options.disabled)
             {myColor.pickerOnfocus = false;} // This doesnt work
     
-            if (value.constructor !== String && value.length && value.length > 2)
+            if (value.length > 2)
             {
                 const intensity = 1.0;
                 myColor.fromRGB(value[0]*intensity, value[1]*intensity, value[2]*intensity);
@@ -2826,17 +2763,17 @@ export class Inspector
             }
     
             // Update values in rgb format
-            input_element.addEventListener("change", (e: any) =>
+            input_element.addEventListener("change", () =>
             {
                 const rgbelement = element.querySelector(".rgb-color");
                 if (rgbelement)
                 {rgbelement.innerHTML = LiteGUI.Inspector.parseColor(myColor.rgb);}
             });
-            input_element.addEventListener("focusin", (e: any) =>
+            input_element.addEventListener("focusin", () =>
             {
                 input_element.focused = true;
             });
-            input_element.addEventListener("focusout", (e: any) =>
+            input_element.addEventListener("focusout", () =>
             {
                 input_element.focused = false;
                 const v = [ myColor.rgb[0] * rgb_intensity, myColor.rgb[1] * rgb_intensity,
@@ -2853,7 +2790,7 @@ export class Inspector
     
             if (options.add_dragger)
             {
-                myColor.onImmediateChange = (dragging: any) =>
+                myColor.onImmediateChange = (dragging: boolean) =>
                 {
                     const v = [ myColor.rgb[0] * rgb_intensity, myColor.rgb[1] * rgb_intensity,
                         myColor.rgb[2] * rgb_intensity ];
@@ -2886,7 +2823,7 @@ export class Inspector
     
                 const dragger = new LiteGUI.Dragger(1, options);
                 element.querySelector('.wcontent').appendChild(dragger.root);
-                const callOnInmediateChange = function(dragging: any)
+                const callOnInmediateChange = function(dragging: boolean)
                 {
                     if (myColor.onImmediateChange)
                     {myColor.onImmediateChange(dragging);}
@@ -2899,14 +2836,14 @@ export class Inspector
                     }
                 };
                 dragger.root.addEventListener("stop_dragging", callOnStopDragging);
-                dragger.input.addEventListener("change", (e: any) =>
+                dragger.input.addEventListener("change", () =>
                 {
                     const v = parseFloat(dragger.input.value);
                     rgb_intensity = v;
                     callOnInmediateChange(dragger.dragging);
                 });
     
-                element.setValue = function(value: any, skip_event: any)
+                element.setValue = function(value: number[], skip_event: boolean)
                 {
                     myColor.fromRGB(value[0],value[1],value[2]);
                     if (!skip_event)
@@ -2930,7 +2867,7 @@ export class Inspector
                     LiteGUI.trigger(element, "wchange", event_data);
                     if (that.onchange) {that.onchange(name, v.concat(), element);}
                 };
-                element.setValue = function(value: any)
+                element.setValue = function(value: number[])
                 {
                     myColor.fromRGB(value[0],value[1],value[2]);
                 };
@@ -2943,7 +2880,7 @@ export class Inspector
         }
         else
         {
-            input_element.addEventListener("change", (e: any) =>
+            input_element.addEventListener("change", () =>
             {
                 const rgbelement = element.querySelector(".rgb-color");
                 if (rgbelement) {rgbelement.innerHTML = LiteGUI.Inspector.parseColor(myColor.rgb);}
@@ -2954,10 +2891,8 @@ export class Inspector
         return element;
     };
     
-    addColorPosition(name: string, value: any, options: any)
-    {
-        options = this.processOptions(options);
-    
+    addColorPosition(name: string, value: number[], options: addColor)
+    {    
         value = value || [0.0,0.0,0.0];
         const that = this;
         this.values.set(name, value);
@@ -3027,23 +2962,23 @@ export class Inspector
             if (options.disabled)
             {myColor.pickerOnfocus = false;} // This doesnt work
     
-            if (value.constructor !== String && value.length && value.length > 2)
+            if (value.length > 2)
             {
                 myColor.fromRGB(value[0],value[1],value[2]);
             }
     
             // Update values in rgb format
-            input_element.addEventListener("change", (e: any) =>
+            input_element.addEventListener("change", () =>
             {
                 const rgbelement = element.querySelector(".rgb-color");
                 if (rgbelement)
                 {rgbelement.innerHTML = LiteGUI.Inspector.parseColor(myColor.rgb);}
             });
-            input_element.addEventListener("focusin", (e: any) =>
+            input_element.addEventListener("focusin", () =>
             {
                 input_element.focused = true;
             });
-            input_element.addEventListener("focusout", (e: any) =>
+            input_element.addEventListener("focusout", () =>
             {
                 input_element.focused = false;
                 if (options.finalCallback)
@@ -3058,9 +2993,9 @@ export class Inspector
     
             if (options.add_dragger)
             {
-                myColor.onImmediateChange = function(dragging: any)
+                myColor.onImmediateChange = function(dragging: boolean)
                 {
-                    const v = [ myColor.rgb[0], myColor.rgb[1], myColor.rgb[2] ];
+                    const v: number[] = [ myColor.rgb[0], myColor.rgb[1], myColor.rgb[2] ];
                     // Inspector.onWidgetChange.call(that,element,name,v, options);
                     const event_data = [v.concat(), myColor.toString()];
                     LiteGUI.trigger(element, "wbeforechange", event_data);
@@ -3090,7 +3025,7 @@ export class Inspector
     
                 const dragger = new LiteGUI.Dragger(myColor.position, options);
                 element.querySelector('.wcontent').appendChild(dragger.root);
-                const callOnInmediateChange = function(dragging: any)
+                const callOnInmediateChange = function(dragging: boolean)
                 {
                     if (myColor.onImmediateChange)
                     {myColor.onImmediateChange(dragging);}
@@ -3103,14 +3038,14 @@ export class Inspector
                     }
                 };
                 dragger.root.addEventListener("stop_dragging", callOnStopDragging);
-                dragger.input.addEventListener("change", (e) =>
+                dragger.input.addEventListener("change", () =>
                 {
                     const v = parseFloat(dragger.input.value);
                     myColor.position = v;
                     callOnInmediateChange(dragger.dragging);
                 });
     
-                element.setValue = function(value: any, skip_event: any)
+                element.setValue = function(value: number[], skip_event: boolean)
                 {
                     myColor.fromRGB(value[0],value[1],value[2]);
                     if (!skip_event)
@@ -3130,7 +3065,7 @@ export class Inspector
                     {options.callback.call(element, v.concat(), "#" + myColor.toString(), myColor);}LiteGUI.trigger(element, "wchange", event_data);
                     if (that.onchange) {that.onchange(name, v.concat(), element);}
                 };
-                element.setValue = function(value: any)
+                element.setValue = function(value: number[])
                 {
                     myColor.fromRGB(value[0],value[1],value[2]);
                 };
@@ -3143,7 +3078,7 @@ export class Inspector
         }
         else
         {
-            input_element.addEventListener("change", (e: any) =>
+            input_element.addEventListener("change", () =>
             {
                 const rgbelement = element.querySelector(".rgb-color");
                 if (rgbelement)
@@ -3155,10 +3090,8 @@ export class Inspector
         return element;
     };
     
-    addFile(name: string, value: any, options: any)
+    addFile(name: string, value: string, options: addFileOptions)
     {
-        options = this.processOptions(options);
-    
         value = value || "";
         const that = this;
         this.values.set(name, value);
@@ -3169,7 +3102,7 @@ export class Inspector
         const input = element.querySelector(".wcontent input");
         if (options.accept) {input.accept = options.accept;}
         const filename_element = element.querySelector(".wcontent .filename");
-        if (value) {filename_element.innerText = value.name;}
+        if (value) {filename_element.innerText = value;}
     
         input.addEventListener("change", (e: any) =>
         {
@@ -3214,18 +3147,15 @@ export class Inspector
         return element;
     };
     
-    addLine(name: string, value: any, options: any)
+    addLine(name: string, value: number[][], options: LineEditorOptions)
     {
-        options = this.processOptions(options);
-    
-        value = value || "";
         const that = this;
         this.values.set(name, value);
     
-        const element: any = this.createWidget(name,"<span class='line-editor'></span>", options);
+        const element = this.createWidget(name,"<span class='line-editor'></span>", options);
         element.style.width = "100%";
     
-        const line_editor: any = new LiteGUI.LineEditor(value, options);
+        const line_editor: LineEditor = new LiteGUI.LineEditor(value, options);
         element.querySelector("span.line-editor").appendChild(line_editor);
     
         LiteGUI.bind(line_editor, "change", (e: any) =>
@@ -3240,11 +3170,8 @@ export class Inspector
         return element;
     };
     
-    addTree(name: string, value: any, options?: any)
+    addTree(name: string, value: TreeNode, options: addTreeOptions)
     {
-        options = this.processOptions(options);
-    
-        value = value || "";
         const element = this.createWidget(name,"<div class='wtree inputfield full'></div>", options);
     
         const tree_root = element.querySelector(".wtree");
@@ -3253,8 +3180,6 @@ export class Inspector
             tree_root.style.height = typeof(options.height) == "number" ? options.height + "px" : options.height;
             tree_root.style.overflow = "auto";
         }
-    
-        const current = value;
     
         const tree = element.tree = new LiteGUI.Tree(value, options.tree_options);
         tree.onItemSelected = function(node: any, data: any)
@@ -3265,7 +3190,7 @@ export class Inspector
     
         tree_root.appendChild(tree.root);
     
-        element.setValue = function(v: any)
+        element.setValue = function(v: TreeNode)
         {
             tree.updateTree(v);
         };
@@ -3275,19 +3200,15 @@ export class Inspector
         return element;
     };
     
-    addDataTree(name: string, value: any, options?: any)
+    addDataTree(name: string, value: string[], options?: createWidgetOptions)
     {
-        options = this.processOptions(options);
-    
-        value = value || "";
         const element = this.createWidget(name,"<div class='wtree'></div>", options);
     
-        const node = element.querySelector(".wtree");
-        const current = value;
+        const node: Element | Node = element.querySelector(".wtree");
     
         inner_recursive(node,value);
     
-        function inner_recursive(root_node: any, value: any)
+        function inner_recursive(root_node: Element | Node, value: string[] | string[][])
         {
             for (const i in value)
             {
@@ -3296,7 +3217,7 @@ export class Inspector
                 if (typeof(value[i]) == "object")
                 {
                     e.innerHTML = "<span class='itemname'>" + i + "</span><span class='itemcontent'></span>";
-                    inner_recursive(e.querySelector(".itemcontent"), value[i]);
+                    inner_recursive(e.querySelector(".itemcontent")!, value[i] as string[]);
                 }
                 else
                 {e.innerHTML = "<span class='itemname'>" + i + "</span><span class='itemvalue'>" + value[i] + "</span>";}
@@ -3321,17 +3242,9 @@ export class Inspector
      * @return {HTMLElement} the widget in the form of the DOM element that contains it
      *
      */
-    addArray(name: string, value: any, options?: any)
+    addArray(name: string, value: Array<number>, options: addArrayOptions)
     {
         const that = this;
-    
-        if (!value || value.constructor !== Array)
-        {
-            console.error("Inspector: Array widget value must be a valid array");
-            return;
-        }
-    
-        options = this.processOptions(options);
     
         const type = options.data_type || "string";
         const max_items = options.max_items || 100;
@@ -3339,11 +3252,11 @@ export class Inspector
     
         // Length widget
         this.widgets_per_row = 3;
-        this.addInfo(name,null,{ name_width: "100%", width: "100% - 160px"});
-        const length_widget = this.addString("length", value.length || "0", { width: 100, callback: (v: any) =>
+        this.addInfo(name, undefined,{ name_width: "100%", width: "100% - 160px"});
+        const length_widget = this.addString("length", value.length.toString() || "0", { width: 100, callback: (v: any) =>
         {
             const rv = parseInt(v);
-            if (value < 0) {value = 0;}
+            //if (value < 0) {value = 0;}
             value.length = rv;
             refresh.call(container, null);
         }});
@@ -3396,7 +3309,7 @@ export class Inspector
                     for (const j in options.data_options)
                     {item_options[j] = options.data_options[j];}
                 }
-                const w = that.add(type, null, v, item_options);
+                const w = that.add(type, "", v, item_options);
     
                 /*
                  *That.addButton(null,"<img src='imgs/mini-icon-trash.png'/>", {  widget_parent: container, index: i, width: 30, callback: function(){
@@ -3414,7 +3327,7 @@ export class Inspector
     
         refresh(container);
     
-        container.setValue = function(v: any)
+        container.setValue = function(v: number)
         {
             this.value = v;
             refresh(container);
@@ -3431,24 +3344,22 @@ export class Inspector
     
     //* **** Containers ********/
     // Creates an empty container but it is not set active
-    addContainer(name?: any, options?: any)
+    addContainer(name: string, options: containerOptions)
     {
         if (name && name.constructor !== String)
         {
             console.warn(
                 "LiteGUI.Inspector.addContainer first parameter must be a string with the name");
         }
-        const element = this.startContainer(null, options);
+        const element = this.startContainer(options);
         this.endContainer();
         return element;
     };
     
     // Creates an empty container and sets its as active
-    startContainer(name: string | null, options?: any)
+    startContainer(options: containerOptions)
     {
-        options = this.processOptions(options);
-    
-        const element: any = document.createElement("DIV");
+        const element = document.createElement("DIV") as HTMLDivElementPlus;
         element.className = "wcontainer";
         this.applyOptions(element, options);
         this.row_number = 0;
@@ -3461,7 +3372,7 @@ export class Inspector
     
         if (options.height)
         {
-            element.style.height = LiteGUI.sizeToCSS(options.height);
+            element.style.height = LiteGUI.sizeToCSS(options.height)!;
             element.style.overflow = "auto";
         }
     
@@ -3473,15 +3384,14 @@ export class Inspector
         return element;
     };
     
-    endContainer(name?: any, options?: any)
+    endContainer()
     {
         this.popContainer();
     };
     
     // It is like a group but they cant be nested inside containers
-    addSection(name: string, options?: InspectorOptions)
+    addSection(name: string, options: InspectorOptions)
     {
-        let outOptions = this.processOptions(options);
         const that = this;
     
         if (this.current_section) {this.current_section.end();}
@@ -3489,28 +3399,28 @@ export class Inspector
         const element = (document.createElement("DIV") as HTMLDivElementPlus);
         element.className = "wsection";
         if (!name) {element.className += " notitle";}
-        if ((outOptions as InspectorOptions).className) 
+        if (options.className) 
         {
-            element.className += " " + (outOptions as InspectorOptions).className;
+            element.className += " " + options.className;
         }
-        if ((outOptions as InspectorOptions).collapsed && !(outOptions as InspectorOptions).no_collapse) 
+        if (options.collapsed && !options.no_collapse) 
         {
             element.className += " collapsed";
         }
     
-        if ((outOptions as InspectorOptions).id) 
+        if (options.id) 
         {
-            element.id = (outOptions as InspectorOptions).id || "";
+            element.id = options.id || "";
         }
-        if ((outOptions as InspectorOptions).instance) 
+        if (options.instance) 
         {
-            element.instance = (outOptions as InspectorOptions).instance || {};
+            element.instance = options.instance || {};
         }
     
         let code = "";
         if (name)
         {
-            code += "<div class='wsectiontitle'>"+((outOptions as InspectorOptions).no_collapse ? "" :
+            code += "<div class='wsectiontitle'>"+(options.no_collapse ? "" :
                 "<span class='switch-section-button'></span>")+name+"</div>";
         }
         code += "<div class='wsectioncontent'></div>";
@@ -3524,7 +3434,7 @@ export class Inspector
     
         element.sectiontitle = element.querySelector(".wsectiontitle")!;
     
-        if (name && !(outOptions as InspectorOptions).no_collapse)
+        if (name && !options.no_collapse)
         {
             element.sectiontitle?.addEventListener("click", (e: any) =>
             {
@@ -3540,16 +3450,16 @@ export class Inspector
             });
         }
     
-        if ((outOptions as InspectorOptions).collapsed && !(outOptions as InspectorOptions).no_collapse)
+        if (options.collapsed && !options.no_collapse)
         {
             (element!.querySelector(".wsectioncontent") as HTMLElementPlus)!.style.display = "none";
         }
     
         this.setCurrentSection(element);
     
-        if ((outOptions as InspectorOptions).widgets_per_row)
+        if (options.widgets_per_row)
         {
-            this.widgets_per_row = (outOptions as InspectorOptions).widgets_per_row!;
+            this.widgets_per_row = options.widgets_per_row;
         }
     
         element.refresh = function()
@@ -3609,40 +3519,38 @@ export class Inspector
     };
     
     // A container of widgets with a title
-    beginGroup(name: string, options?: any)
+    beginGroup(name: string, options: beginGroupOptions)
     {
-        options = this.processOptions(options);
-    
-        const element: any = document.createElement("DIV");
+        const element = document.createElement("DIV") as HTMLElementPlus;
         element.className = "wgroup";
         name = name || "";
         element.innerHTML = "<div class='wgroupheader "+ (options.title ? "wtitle" : "") +"'><span class='switch-section-button'></span>"+name+"</div>";
         element.group = true;
     
-        const content: any = document.createElement("DIV");
+        const content = document.createElement("DIV") as HTMLElementPlus;
         content.className = "wgroupcontent";
         if (options.collapsed) {content.style.display = "none";}
     
-        if (options.height) {content.style.height = LiteGUI.sizeToCSS(options.height);}
+        if (options.height) {content.style.height = LiteGUI.sizeToCSS(options.height)!;}
         if (options.scrollable) {content.style.overflow = "auto";}
     
         element.appendChild(content);
     
         let collapsed = options.collapsed || false;
         const header = element.querySelector(".wgroupheader");
-        if (collapsed) {header.classList.add("collapsed");}
-        header.addEventListener("click", (e: any) =>
+        if (collapsed) {header!.classList.add("collapsed");}
+        header!.addEventListener("click", (e: any) =>
         {
-            const style = element.querySelector(".wgroupcontent").style;
+            const style = (element.querySelector(".wgroupcontent") as HTMLElement).style;
             style.display = style.display === "none" ? "" : "none";
             collapsed = !collapsed;
             if (collapsed)
             {
-                header.classList.add("collapsed");
+                header!.classList.add("collapsed");
             }
             else
             {
-                header.classList.remove("collapsed");
+                header!.classList.remove("collapsed");
             }
             // Element.querySelector(".switch-section-button").innerHTML = (collapsed ? "+" : "-");
             e.preventDefault();
@@ -3670,11 +3578,9 @@ export class Inspector
      * @return {HTMLElement} the widget in the form of the DOM element that contains it
      *
      */
-    addTitle(title: any, options: any)
+    addTitle(title: string, options: addTitleOptions)
     {
-        options = this.processOptions(options);
-    
-        const element: any = document.createElement("DIV");
+        const element = document.createElement("DIV") as HTMLElementPlus;
         let code = "<span class='wtitle'><span class='text'>"+title+"</span>";
         if (options.help)
         {
@@ -3682,9 +3588,10 @@ export class Inspector
         }
         code += "</span>";
         element.innerHTML = code;
-        element.setValue = function(v: any)
+        element.setValue = function(v: string)
         {
-            this.querySelector(".text").innerHTML = v;
+            const tempo = this.querySelector(".text");
+            if(tempo) tempo.innerHTML = v;
         };
         this.row_number = 0;
         this.append(element, options);
@@ -3692,7 +3599,7 @@ export class Inspector
     };
     
     
-    scrollTo(id: any)
+    scrollTo(id: string)
     {
         const element = this.root.querySelector("#" + id) as HTMLElementPlus;
         if (!element) {return;}
@@ -3701,27 +3608,27 @@ export class Inspector
         (this.root.parentNode!.parentNode! as ParentNodePlus).scrollTop = delta;
     };
     
-    processOptions(options: InspectorOptions | Function | undefined)
+    /*processOptions(options: object | Function | undefined)
     {
         let outOptions: InspectorOptions | { callback: Function} | undefined;
         if (typeof(options) == "function")
         {
             outOptions = { callback: options };
         }
-        else
+        else if(options != undefined)
         {
-            outOptions = options;
+            outOptions = options as InspectorOptions;
         }
         return outOptions || {};
-    };
+    };*/
     
-    processElement(element: any, options: any)
+    processElement(element: any, options: processElementOptions)
     {
         if (options.callback_update && element.setValue)
         {
             element.on_update = function()
             {
-                this.setValue(options.callback_update.call(this), true);
+                this.setValue(options.callback_update!.call(this), true);
             };
         }
     };
@@ -3735,7 +3642,7 @@ export class Inspector
         }
     };
     
-    public static parseColor(color: any)
+    public static parseColor(color: Array<number>)
     {
         return "<span style='color: #FAA'>" + color[0].toFixed(2) +
             "</span>,<span style='color: #AFA'>" + color[1].toFixed(2) +

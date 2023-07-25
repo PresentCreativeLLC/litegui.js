@@ -1,21 +1,7 @@
-import { HTMLDivElementPlus } from "./@types/globals";
+import { DraggerOptions, HTMLDivElementPlus } from "./@types/globals";
 import { LiteGUI } from "./core";
 
-interface DraggerOptions
-{
-    precision?: number;
-    extraclass?: string;
-    full?: string;
-    disabled?: boolean;
-    dragger_class?: string;
-    tab_index?: number;
-    units?: string;
-    horizontal?: boolean;
-    linear?: boolean;
-    step?: number;
-    min?: number;
-    max?: number;
-}
+
 
 /** *** DRAGGER **********/
 export class Dragger

@@ -438,7 +438,7 @@ export class Dialog
 		this.root!.style.outline = "1px solid white";
 		const doc = this.root!.ownerDocument as DocumentPlus;
 		const w = doc.defaultView || doc.parentWindow;
-		w.focus();
+		w!.focus();
 		setTimeout((()=>
 		{
 			this.root!.style.outline = null!;
@@ -560,7 +560,7 @@ export class Dialog
 				const parent = doc.querySelector(".litegui-wrap") || doc.body;
 				parent.appendChild(this.root as HTMLDivElementPlus);
 				const w = doc.defaultView || doc.parentWindow;
-				w.focus();
+				w!.focus();
 			}
 			this.center();
 		}

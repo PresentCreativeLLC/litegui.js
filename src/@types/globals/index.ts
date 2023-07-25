@@ -45,7 +45,7 @@ export interface HTMLDivElementPlus extends HTMLDivElement
     _last_container_stack?: any[];
     sectiontitle?: Element;
     input?: HTMLInputElement;
-    // parentNode?: ParentNode;
+    parentNode: ParentNode | null;
 }
 
 export interface HTMLSpanElementPlus extends HTMLSpanElement
@@ -74,6 +74,7 @@ export interface HTMLScriptElementPlus extends HTMLScriptElement
 
 export interface EventTargetPlus extends EventTarget
 {
+    dragger: any;
 	parentNode: ParentNodePlus;
 	dataset: DOMStringMap;
 	value: any;
@@ -95,11 +96,13 @@ export interface HTMLLIElementPlus extends HTMLLIElement
 
 export interface HTMLInputElementPlus extends HTMLInputElement
 {
+	color: any;
 	getValue() : any;
 }
 
 export interface HTMLElementPlus extends HTMLElement
 {
+    group?: boolean;
 	name?: string;
 	order?: number;
 	separator?: boolean;
@@ -109,6 +112,10 @@ export interface HTMLElementPlus extends HTMLElement
 	root?: HTMLElement;
     update?: Function;
     dialog? : HTMLElementPlus;
+	setValue?: Function;
+	fireEvent?: Function;
+	value?: any;
+	jscStyle?: any;
 }
 
 export interface HTMLButtonElementPlus extends HTMLButtonElement
@@ -122,8 +129,9 @@ export interface ParentNodePlus extends ParentNode
 	dataset: any;
 	getBoundingClientRect: any;
 	scrollLeft: number;
-    offsetHeight: number;
     scrollTop: number;
+	offsetWidth : number;
+    offsetHeight : number;
 }
 
 export interface ElementPlus extends Element
@@ -147,15 +155,10 @@ export interface ChildNodePlus extends ChildNode
     innerHTML : string;
 }
 
-export interface ParentNodePlus extends ParentNode
-{
-    offsetWidth : number;
-    offsetHeight : number;
-}
-
 export interface DocumentPlus extends Document
 {
-    parentWindow : Window;
+	createEventObject?: Function;
+    parentWindow? : Window;
 }
 
 export interface HTMLParagraphElementPlus extends HTMLParagraphElement
@@ -202,6 +205,10 @@ export interface MenubarOptions
 	sort_entries: boolean;
 }
 
+export interface addTreeOptions extends createWidgetOptions
+{
+	tree_options: TreeOptions;
+}
 export interface TreeOptions
 {
 	allow_drag?: boolean;
@@ -228,7 +235,7 @@ export interface TreeNode
 	dataset?: any;
 	content?: any;
 	id?: string;
-	children?: Array<TreeNode>
+	children?: Array<TreeNode>;
 }
 
 export interface InspectorOptions
@@ -237,21 +244,20 @@ export interface InspectorOptions
     parent?: HTMLElementPlus;
     onchange?: Function;
     noscroll?: boolean;
-    widgets_width?: number | null;
-    name_width?: number | null;
-    height?: string | number | null | undefined;
-    width?: string | number | null | undefined;
+    widgets_width?: number;
+    name_width?: number;
+    height?: string | number;
+    width?: string | number;
     one_line?: boolean;
     full?: boolean;
-    offsetWidth?: number,
-    offsetHeight?: number,
-    className?: string,
-    id?: string,
-    collapsed?: boolean,
-    no_collapse?: boolean,
-    instance?: any,
-    widgets_per_row?: number,
-    
+    offsetWidth?: number;
+    offsetHeight?: number;
+    className?: string;
+    id?: string;
+    collapsed?: boolean;
+    no_collapse?: boolean;
+    instance?: any;
+    widgets_per_row?: number;
 }
 
 export interface PanelOptions
@@ -327,7 +333,7 @@ export interface SliderOptions
 	max?: number;
 }
 
-export interface LineEditorOptions
+export interface LineEditorOptions extends appendOptions
 {
 	callback?: Function;
 	height?: number;
@@ -404,6 +410,250 @@ export interface InstanceObject extends Object
 
 }
 
+export interface ItemOptions
+{
+	content: any;
+	title: string;
+	name: string;
+	style: string;
+	icon: string;
+	selected: boolean;
+}
+export interface createWidgetOptions extends appendOptions, processElementOptions
+{
+	focus?: boolean;
+	password?: boolean;
+	immediate?:any;
+	disabled?: boolean; 
+	callback?: Function; 
+	callback_keydown?: Function; 
+	height?: number | string;
+	widget_name?: string;
+	width?: number | string; 
+	name_width?: number | string; 
+	content_width?: number | string; 
+	pre_title?:string;
+	title?:string | string[];
+	className?:string; 
+	pretitle?: string;
+}
+export interface properties_info
+{
+	name?: string;
+	callback?: Function;
+	type?: string;
+	callback_update?: Function;
+	instance?: any;
+	varname?: string | number;
+	widget?: any;
+}
+
+export interface addSliderOptions extends processElementOptions, appendOptions
+{
+	min?: number;
+	max?: number;
+	step?: any;
+	callback?: Function;
+}
+
+export interface addStringButtonOptions extends addSliderOptions
+{
+	values?: any;
+	disabled?: boolean;
+	button?: string;
+	callback_button?: Function;
+	icon?: any;
+	button_width?: string | number;
+	widget_parent?: HTMLDivElementPlus;
+	replace?: HTMLDivElementPlus;
+}
+
+export interface addComboOptions extends createWidgetOptions
+{
+	value?: string[];
+	values?: string[];
+	disabled?: boolean;
+	callback?: Function;
+}
+
+export interface setupOptions
+{
+	type: string;
+	name: string;
+	value: string;
+	options: any;
+}
+
+export interface addListOptions extends createWidgetOptions
+{
+	height?: number;
+	disabled?: boolean;
+	callback_dblclick?: Function;
+	multiselection?: boolean;
+	skip_wchange?: boolean;
+	selected?: string;
+}
+
+export interface addButtonOptions extends createWidgetOptions
+{
+	micro?: boolean;
+	button_text?: string;
+}
+
+export interface addIconOptions extends createWidgetOptions
+{
+	image: string;
+	size?: number;
+	x?: number;
+	index?: number;
+	toggle: boolean;
+}
+
+export interface addColor extends createWidgetOptions
+{
+	show_rgb: boolean;
+	finalCallback?: Function;
+	add_dragger?: boolean;
+	step?: number;
+	dragger_class?: string;
+	position?: number;
+}
+
+export interface addFileOptions extends createWidgetOptions
+{
+	accept: boolean;
+	generate_url: boolean;
+	read_file: string;
+}
+export interface addArrayOptions
+{
+	data_type?: string;
+	max_items?: number;
+	callback?: Function;
+	data_options?: any;
+}
+export interface applyOptions
+{
+	className?: string;
+    id?: string;
+    width?: string | number;
+    height?: string | number;
+}
+
+export interface containerOptions extends applyOptions, addArrayOptions
+{
+	widgets_per_row?: number;
+}
+export interface addOptions
+{
+	type?: string;
+	name?: string;
+	value?: string;
+	callback: Function;
+}
+export interface addStringOptions extends createWidgetOptions
+{
+	width?: number;
+	callback?: Function;
+	password?: true;
+	focus?: boolean; 
+	immediate?: string; 
+	disabled?: boolean; 
+	placeHolder?: string; 
+	align?: string; 
+	callback_enter?: Function; 
+	icon?: string;
+}
+export interface addNumberOptions extends createWidgetOptions, DraggerOptions
+{
+	tab_index?: number;
+	extraclass?: string;
+	fullNum?: boolean;
+	precision?: number;
+	step?:number;
+	disabled?: boolean;
+	callback?: Function;
+	finalCallback?: Function;
+	units?: string;
+	callback_before?: Function;
+}
+export interface DraggerOptions
+{
+    precision?: number;
+    extraclass?: string;
+    full?: string;
+    disabled?: boolean;
+    dragger_class?: string;
+    tab_index?: number;
+    units?: string;
+    horizontal?: boolean;
+    linear?: boolean;
+    step?: number;
+    min?: number;
+    max?: number;
+}
+export interface VectorOptions extends processElementOptions, appendOptions, DraggerOptions
+{
+    fullVector?: boolean;
+    tab_index?: number;
+    step?: number;
+    finalCallback?: Function;
+    callback?: Function;
+    callback_before?: Function;
+} 
+export interface addPadOptions extends appendOptions, processElementOptions
+{
+	step?: number;
+	tab_index?: number;
+	full?: boolean;
+	min?: number;
+	minx?: number;
+	miny?: number;
+	max?: number;
+	maxx?: number;
+	maxy?: number;
+	background?: string;
+	callback?: Function;
+}
+export interface beginGroupOptions extends appendOptions
+{
+	title?: string;
+	collapsed: boolean;
+	height: number | string;
+	scrollable: boolean;
+}
+export interface addTitleOptions extends appendOptions
+{
+	help?: string;
+}
+export interface addInfoOptions extends appendOptions, processElementOptions
+{
+	className?: string;
+	name_width?: string;
+	width?: string | number;
+	height?: string | number;
+	callback?: Function;
+}
+export interface onWidgetChangeOptions
+{
+	skip_wchange?: boolean;
+	callback?: Function;
+}
+export interface addCheckboxOptions extends appendOptions, processElementOptions, onWidgetChangeOptions
+{
+	label_on: string;
+	label_off: string;
+}
+export interface appendOptions
+{
+	widget_parent? : HTMLDivElementPlus;
+	replace?: HTMLDivElementPlus;
+}
+
+export interface processElementOptions
+{
+	callback_update?: Function;
+}
 declare global
 {
     interface Window
