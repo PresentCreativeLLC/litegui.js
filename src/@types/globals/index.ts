@@ -182,8 +182,7 @@ export interface AreaOptions
     height?: number | string,
     content_id?: string,
     autoresize?: boolean,
-    main?: boolean,
-    immediateResize?: boolean,
+    main?: boolean
 }
 
 export interface AreaRoot
