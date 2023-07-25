@@ -15,15 +15,13 @@ module.exports =
 			path.resolve(__dirname, 'src/css/style.css'),
 			path.resolve(__dirname, 'src/css/normalize.css'),
 			path.resolve(__dirname, 'src/css/widgets.css'),
-		],
-		litegui: [path.resolve(__dirname, './src/index.ts')]
+		]
 	},
 	mode: "development",
 	devtool: false,
 	output: {
 		path: path.resolve(__dirname, "./dist"),
 		publicPath: "./",
-		filename: "[name].js"
 	},
 	plugins: [
 		new RemoveEmptyScriptsPlugin(),
@@ -39,15 +37,7 @@ module.exports =
 			{
 				test: /\.css$/i,
 				use: [MiniCssExtractPlugin.loader, "css-loader"],
-			},
-			{
-				test: /\.ts?$/,
-				use: 'ts-loader',
-				exclude: /node_modules/,
 			}
 		],
-	},
-	resolve: {
-		extensions: ['.ts', '.tsx', '.js']
 	}
 };

@@ -15,7 +15,7 @@
 	  "./src": "./src/"
   },
   "scripts": {
-	"build": "webpack --config webpack.build.config.js",
+	"build": "webpack --config webpack.build.config.js && tsc",
 	"pack": "webpack --config webpack.pack.config.js",
 	"build-var": "webpack --config webpack.var.config.js",
     "lint": "eslint . --fix --ext .js",
