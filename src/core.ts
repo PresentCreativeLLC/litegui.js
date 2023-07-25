@@ -1435,7 +1435,7 @@ export class Core
 	 * @return {Window} the window element
 	 *
 	 */
-	getElementWindow(v : HTMLElement) : Window
+	getElementWindow(v : HTMLElement) : Window | undefined
 	{
 		const doc = v.ownerDocument as DocumentPlus;
 		return doc.defaultView || doc.parentWindow;

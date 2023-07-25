@@ -136,10 +136,13 @@ export abstract class jscolor
 
     static addEvent(el: HTMLElement | Window, evnt: string, func: Function)
     {
-        if(el.addEventListener) {
+        if(el.addEventListener)
+		{
 			el.addEventListener(evnt, func as EventListenerOrEventListenerObject, false);
-		} else if(el.attachEvent) {
-			el.attachEvent('on'+evnt, func);
+		}
+		else if((el as any).attachEvent)
+		{
+			(el as any).attachEvent('on'+evnt, func);
 		}
     }
 
@@ -789,11 +792,11 @@ export abstract class jscolor
 				this.dispatchImmediateChange();
 			};
 			p.sldM.onmouseup =
-			p.sldM.onmouseout = function() 
+			p.sldM.onmouseout = ()=> 
             { 
                 if(this.holdSld) 
                 { 
-                    this.holdSld=false; 
+                    this.holdSld = false; 
                     jscolor.fireEvent(this.valueElement,'change'); 
                 } 
             };
@@ -864,12 +867,12 @@ export abstract class jscolor
 			} catch(eOldIE) {
 				p.sldM.style.cursor = 'hand';
 			}
-            var THIS = this;
+            let THIS = this;
 			// "close" button
 			function setBtnBorder() 
             {
-				var insetColors = THIS.pickerInsetColor.split(/\s+/);
-				var pickerOutsetColor = insetColors.length < 2 ? insetColors[0] :
+				let insetColors = THIS.pickerInsetColor.split(/\s+/);
+				let pickerOutsetColor = insetColors.length < 2 ? insetColors[0] :
                     insetColors[1] + ' ' + insetColors[0] + ' ' + insetColors[0] +
                     ' ' + insetColors[1];
 				p.btn.style.borderColor = pickerOutsetColor;
@@ -890,7 +893,7 @@ export abstract class jscolor
 			} catch(eOldIE) {
 				p.btn.style.cursor = 'hand';
 			}
-			p.btn.onmousedown = function () {
+			p.btn.onmousedown = () => {
 				this.hidePicker();
 			};
 			p.btnS.style.lineHeight = p.btn.style.height;
@@ -915,13 +918,13 @@ export abstract class jscolor
 
 			jscolor.picker.owner = this;
 
-			var doc = jscolor.picker.owner.valueElement.ownerDocument;
+			let doc = jscolor.picker.owner.valueElement.ownerDocument;
 			doc.getElementsByTagName('body')[0].appendChild(p.boxB);
         }
 
         getPickerDims(o: color): Array<number>
         {
-            var dims = [
+            let dims = [
 				2*o.pickerInset + 2*o.pickerFace + jscolor.images.pad[0] +
                 (o.slider ? 2*o.pickerInset + 2*jscolor.images.arrow[0] +
                 jscolor.images.sld[0] : 0), o.pickerClosable ?
@@ -940,21 +943,21 @@ export abstract class jscolor
 				case 0: yComponent = 1; break;
 				case 1: yComponent = 2; break;
 			}
-			var x = Math.round((this.hsv[0] / 6) * (jscolor.images.pad[0]-1));
-			var y = Math.round((1 - this.hsv[ yComponent ]) * (jscolor.images.pad[1]-1));
+			let x = Math.round((this.hsv[0] / 6) * (jscolor.images.pad[0]-1));
+			let y = Math.round((1 - this.hsv[ yComponent ]) * (jscolor.images.pad[1]-1));
 			jscolor.picker.padM.style.backgroundPosition =
 				(this.pickerFace+this.pickerInset+x - Math.floor(jscolor.images.cross[0]/2)) + 
                 'px ' + (this.pickerFace+this.pickerInset+y - Math.floor(jscolor.images.cross[1]/2)) + 'px';
 
 			// redraw the slider image
-			var seg = jscolor.picker.sld.childNodes;
-            var rgb, s, c;
+			let seg = jscolor.picker.sld.childNodes;
+            let rgb, s, c;
 			switch(this.modeID) 
             {
 				case 0:
 					rgb = this.HSV_RGB(this.hsv[0], this.hsv[1], 1);
-					for(var i=0; i<seg.length; i+=1) {
-						seg[i].style.backgroundColor = 'rgb('+
+					for(let i=0; i<seg.length; i+=1) {
+						(seg[i] as any).style.backgroundColor = 'rgb('+
 							(rgb[0]*(1-i/seg.length)*100)+'%,'+
 							(rgb[1]*(1-i/seg.length)*100)+'%,'+
 							(rgb[2]*(1-i/seg.length)*100)+'%)';
@@ -964,8 +967,8 @@ export abstract class jscolor
 					rgb = [ this.hsv[2], 0, 0 ];
                     s = [ this.hsv[2], 0, 0 ];
                     c = [ this.hsv[2], 0, 0 ];
-					var i = Math.floor(this.hsv[0]);
-					var f = i % 2 ? this.hsv[0] - i : 1 - (this.hsv[0]-i);
+					let i = Math.floor(this.hsv[0]);
+					let f = i % 2 ? this.hsv[0] - i : 1 - (this.hsv[0]-i);
 					switch(i) 
                     {
 						case 6:
@@ -976,12 +979,12 @@ export abstract class jscolor
 						case 4: rgb = [1,2,0]; break;
 						case 5: rgb = [0,2,1]; break;
 					}
-					for(var i=0; i < seg.length; i+=1) 
+					for(let i=0; i < seg.length; i+=1) 
                     {
 						s = 1 - 1 / (seg.length-1) * i;
 						c[1] = c[0] * (1 - s * f);
 						c[2] = c[0] * (1 - s);
-						seg[i].style.backgroundColor = 'rgb(' +
+						(seg[i] as any).style.backgroundColor = 'rgb(' +
 							(c[rgb[0]]*100)+'%,' +
 							(c[rgb[1]]*100)+'%,' +
 							(c[rgb[2]]*100)+'%)';
