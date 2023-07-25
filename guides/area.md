@@ -14,7 +14,7 @@ To create one first instantiate the class:
 You can pass several options as a parameter:
 
 ```javascript
-	var mainarea = new LiteGUI.Area({content_id:"workarea", height: "calc(100% - 30px)", autoresize: true, inmediateResize: true, minSplitSize: 200 });
+	var mainarea = new LiteGUI.Area({content_id:"workarea", height: "calc(100% - 30px)", autoresize: true, immediateResize: true, minSplitSize: 200 });
 ```
 
 ## Options ##

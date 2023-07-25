@@ -183,7 +183,7 @@ export interface AreaOptions
     content_id?: string,
     autoresize?: boolean,
     main?: boolean,
-    inmediateResize?: boolean,
+    immediateResize?: boolean,
 }
 
 export interface AreaRoot

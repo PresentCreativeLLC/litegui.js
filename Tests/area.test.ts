@@ -5,7 +5,7 @@ function Construct ()
 {
     LiteGUI.init(); 
     let mainArea = new Area({ id: "mainArea", content_id:"canvasarea",
-        height: "calc( 100% - 20px )", main: true, inmediateResize: true});
+        height: "calc( 100% - 20px )", main: true, immediateResize: true});
 	LiteGUI.add( mainArea );
     return mainArea;
 }
