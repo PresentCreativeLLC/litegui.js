@@ -13,7 +13,7 @@ afterEach(() => {
 });
 
 describe('Opens an html and add stuff on it', () => {
-  test('should return file:///D:/Users/Mario%20Villalvazo/Documents/GitHub/litegui.js/prueba.html', () => {
+  test('should return file:///D:/Users/Mario%20Villalvazo/Documents/GitHub/litegui.js/test.html', () => {
       windowSpy.mockImplementation(() => ({
           location: {
             origin: "https://google.com"

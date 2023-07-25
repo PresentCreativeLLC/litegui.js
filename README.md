@@ -1,7 +1,7 @@
-litegui.js
+litegui.ts
 ==========
 
-Litegui is a javascript library to create webapps with a desktop look-alike user interface. All the widgets, panels,
+Litegui.ts is a typescript library based on the litegui.js library to create webapps with a desktop look-alike user interface. All the widgets, panels,
 dialogs, etc are created from Javascript instead of HTML. The upside of this is that this helps to create more dynamic
 interfaces and gives a lot of flexibility. The downside is that you'll need to write some code to make it all work. If
 you're looking for a library that just needs some HTML and a couple of event handlers to work, litegui is not what
@@ -13,12 +13,7 @@ shines.
 Utils
 -----
 
-Litegui includes several commands in the utils folder to generate docs, check for errors and build minifyed versions.
-
-Feedback
---------
-
-You can write any feedback to javi.agenjo@gmail.com
+Litegui includes several commands in the utils folder to generate docs, check for errors and build minified versions.
 
 Creating a UI
 -----------
@@ -37,7 +32,7 @@ Start with the following index.html:
 
     <script type="text/javascript" src="litegui.js/external/jscolor/jscolor.js"></script>
 
-    <script type="application/javascript" src="litegui.js/build/litegui.js"></script>
+    <script type="application/javascript" src="litegui.ts/build/litegui.js"></script>
 </head>
 <body>
     <script src="init.js"></script>
@@ -68,7 +63,7 @@ LiteGUI.add(menu);
 ```
 
 Now open index.html in your browser. You should see a menu bar on the top of the screen. That might be pretty nifty,
-but it's not yet doing anything usefull. Let's fix that by adding a settings dialog
+but it's not yet doing anything useful. Let's fix that by adding a settings dialog
 
 Add the following code to init.js after the call to LiteGUI.init():
 ```javascript
@@ -83,7 +78,7 @@ function createSettingsDialog() {
 
     dialog.add(widgets);
 
-    // Placeholder function to show the new settings. Normally you would do something usefull here
+    // Placeholder function to show the new settings. Normally you would do something useful here
     // with the new settings.
     function applySettings() {
         console.log("Your name is " + nameWidget.getValue() + ", and you are " + ageWidget.getValue() + " years old");
