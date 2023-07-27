@@ -511,7 +511,7 @@ export interface addIconOptions extends createWidgetOptions
 
 export interface addColor extends createWidgetOptions
 {
-	show_rgb: boolean;
+	show_rgb?: boolean;
 	finalCallback?: Function;
 	add_dragger?: boolean;
 	step?: number;
@@ -521,7 +521,7 @@ export interface addColor extends createWidgetOptions
 
 export interface addFileOptions extends createWidgetOptions
 {
-	accept: boolean;
+	accept: string[];
 	generate_url: boolean;
 	read_file: string;
 }
