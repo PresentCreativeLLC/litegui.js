@@ -521,8 +521,8 @@ export interface addColor extends createWidgetOptions
 
 export interface addFileOptions extends createWidgetOptions
 {
-	accept: string[];
-	generate_url: boolean;
+	accept?: string[];
+	generate_url?: boolean;
 	read_file: string;
 }
 export interface addArrayOptions
