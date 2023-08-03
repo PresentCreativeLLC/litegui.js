@@ -724,7 +724,7 @@ export class LineEditor
 	{
 		this.options = options! || {};
 		const element = this.root = document.createElement("div") as HTMLDivElementPlus;
-		element.className = "curve " + (this.options.extraclass ? this.options.extraclass : "");
+		element.className = "curve " + (this.options.extra_class ? this.options.extra_class : "");
 		element.style.minHeight = "50px";
 		element.style.width = this.options.width?.toString() || "100%";
 
@@ -781,10 +781,12 @@ export class LineEditor
 
 	resample(samples: number)
 	{
-		const r = [];
+		const r:number[] = [];
 		const dx = (this.root.xrange![1] - this.root.xrange![0]) / samples;
-		for (let i = this.root.xrange![0]; i <= this.root.xrange![1]; i += dx) {
-			r.push(this.getValueAt(i));
+		for (let i = this.root.xrange![0]; i <= this.root.xrange![1]; i += dx)
+		{
+			const v = this.getValueAt(i);
+			if(v) { r.push(v); }
 		}
 		return r;
 	}
@@ -984,8 +986,9 @@ export class LineEditor
 		return selected;
 	}
 
-	sortValues() {
-		let v = null;
+	sortValues()
+	{
+		let v:number[] | undefined = undefined;
 		if (this.selected != -1) { v = this.root.valuesArray![this.selected]; }
 		this.root.valuesArray!.sort((a: number[], b: number[]) => { return a[0] - b[0]; });
 		if (v) { this.selected = this.root.valuesArray!.indexOf(v); }
@@ -998,10 +1001,10 @@ export class ComplexList
 	root: HTMLDivElement;
 	options: ComplexListOptions;
 	item_code: string;
-	selected: any | null;
-	onItemSelected: Function | null;
-	onItemToggled: Function | null;
-	onItemRemoved: Function | null;
+	selected?: HTMLDivElementPlus;
+	onItemSelected?: Function;
+	onItemToggled?: Function;
+	onItemRemoved?: Function;
 
 	constructor(options: ComplexListOptions)
 	{
@@ -1016,9 +1019,6 @@ export class ComplexList
 			this.root.style.height = LiteGUI.sizeToCSS(this.options.height) as string;
 		}
 
-		this.selected = null;
-		this.onItemSelected = null;
-		this.onItemToggled = null;
 		this.onItemSelected = options.onItemSelected;
 		this.onItemToggled = options.onItemToggled;
 		this.onItemRemoved = options.onItemRemoved;

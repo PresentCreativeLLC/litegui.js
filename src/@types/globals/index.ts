@@ -7,9 +7,9 @@ import { Tree } from "../../tree";
 import { Console } from "../../console";
 import { Button, SearchBox, ContextMenu, Checkbox, LiteBox, List, Slider, LineEditor, ComplexList } from "../../widgets";
 import { Area } from "../../area";
-import { jscolor } from "../../jscolor";
 import { Tabs } from "../../tabs"
 import { Dragger } from "../../dragger";
+import type { jscolor } from "../../jscolor";
 
 export interface HTMLDivElementPlus extends HTMLDivElement
 {
@@ -345,16 +345,16 @@ export interface LineEditorOptions extends appendOptions
 	linecolor?: string;
 	pointscolor?: string;
 	bgcolor?: string;
-	extraclass?: string;
+	extra_class?: string;
 }
 
 export interface ComplexListOptions
 {
 	height?: string | number;
 	item_code?: string;
-	onItemSelected: Function | null;
-	onItemToggled: Function | null;
-	onItemRemoved: Function | null;
+	onItemSelected?: (node: HTMLDivElementPlus, data: HTMLSpanElementPlus) => void;
+	onItemToggled?: (node: HTMLDivElementPlus, data: HTMLSpanElementPlus, isEnabled: boolean) => void;
+	onItemRemoved?: (node: HTMLDivElementPlus, data: HTMLSpanElementPlus) => void;
 }
 
 export interface DialogOptions
@@ -470,7 +470,14 @@ export interface addStringButtonOptions extends addSliderOptions
 
 export interface addComboOptions extends createWidgetOptions
 {
-	value?: string[];
+	values?: string[];
+	disabled?: boolean;
+	callback?: Function;
+}
+
+export interface addTagOptions extends createWidgetOptions
+{
+	default_tags?: string[];
 	values?: string[];
 	disabled?: boolean;
 	callback?: Function;
@@ -509,10 +516,11 @@ export interface addIconOptions extends createWidgetOptions
 	toggle: boolean;
 }
 
-export interface addColor extends createWidgetOptions
+export interface addColorOptions extends createWidgetOptions
 {
 	show_rgb?: boolean;
-	finalCallback?: Function;
+	callback?: (value: number[], hex:string, color:any) => void;
+	on_change?: (value: number[], hex:string, color:any) => void;
 	add_dragger?: boolean;
 	step?: number;
 	dragger_class?: string;
@@ -567,20 +575,20 @@ export interface addStringOptions extends createWidgetOptions
 export interface addNumberOptions extends createWidgetOptions, DraggerOptions
 {
 	tab_index?: number;
-	extraclass?: string;
-	fullNum?: boolean;
+	extra_class?: string;
+	full_num?: boolean;
 	precision?: number;
 	step?:number;
 	disabled?: boolean;
-	callback?: Function;
-	finalCallback?: Function;
+	on_change?: (value: number) => void;
+	callback?: (value: number) => void;
 	units?: string;
-	callback_before?: Function;
+	callback_before?: () => void;
 }
 export interface DraggerOptions
 {
     precision?: number;
-    extraclass?: string;
+    extra_class?: string;
     full?: string;
     disabled?: boolean;
     dragger_class?: string;
@@ -597,8 +605,8 @@ export interface VectorOptions extends processElementOptions, appendOptions, Dra
     fullVector?: boolean;
     tab_index?: number;
     step?: number;
-    finalCallback?: Function;
     callback?: Function;
+    on_change?: Function;
     callback_before?: Function;
 } 
 export interface addPadOptions extends appendOptions, processElementOptions

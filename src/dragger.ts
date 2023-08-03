@@ -34,11 +34,11 @@ export class Dragger
 		const precision = options?.precision != undefined ? options.precision : 3; // Num decimals
 
 		const element = document.createElement("div") as HTMLDivElementPlus;
-		element.className = "dragger " + (options?.extraclass ? options?.extraclass : "");
+		element.className = "dragger " + (options?.extra_class ? options?.extra_class : "");
 		this.root = element;
 
 		const wrap = document.createElement("span");
-		wrap.className = "inputfield " + (options?.extraclass ? options.extraclass : "") + (options?.full ? " full" : "");
+		wrap.className = "inputfield " + (options?.extra_class ? options.extra_class : "") + (options?.full ? " full" : "");
 		if (options?.disabled)
 		{wrap.className += " disabled";}
 		element.appendChild(wrap);

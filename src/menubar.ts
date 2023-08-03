@@ -49,7 +49,7 @@ export class Menubar
 		(panel.content as Element).insertBefore(this.root, (panel.content as Element).firstChild);
 	}
 
-	add(path: string, data: Function | object)
+	add(path: string, data: Function | object | undefined)
 	{
 		this.data = data || {};
 
@@ -146,14 +146,13 @@ export class Menubar
 		}
 	}
 
-	separator(path: string, order: number)
+	separator(path: string, order?: number)
 	{
 		const menu = this.findMenu(path);
-		if (!menu)
-		{return;}
+		if (!menu) {return;}
 		if (Array.isArray(menu))
 		{
-			// This means that it's intended to deleat a list and this is not allowed
+			// This means that it's intended to delete a list and this is not allowed
 			return console.warn("Can't separate an entire list");
 		}
 		if (menu.children)

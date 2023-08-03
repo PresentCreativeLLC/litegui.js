@@ -553,7 +553,9 @@ export class Dialog
 		if (!this.root?.parentNode)
 		{
 			if (!reference_element)
-			{LiteGUI.add(this);}
+			{
+				LiteGUI.add(this);
+			}
 			else
 			{
 				const doc = reference_element.ownerDocument as DocumentPlus;
