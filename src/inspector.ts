@@ -1,4 +1,4 @@
-import { EventTargetPlus, HTMLDivElementPlus, HTMLElementPlus, InspectorOptions, VectorOptions, addOptions, addStringOptions, addNumberOptions, InstanceObject, addPadOptions, onWidgetChangeOptions, addInfoOptions, addCheckboxOptions, processElementOptions, appendOptions, addTitleOptions, beginGroupOptions, addArrayOptions, containerOptions, addTreeOptions, applyOptions, addFileOptions, LineEditorOptions, addColorOptions, addIconOptions, MouseEventPlus, addButtonOptions, addListOptions, createWidgetOptions,addComboOptions, addSliderOptions, setupOptions, addStringButtonOptions, properties_info, ParentNodePlus, ItemOptions, TreeNode, addTagOptions, FileAddedResponse } from "./@types/globals";
+import { EventTargetPlus, HTMLDivElementPlus, HTMLElementPlus, InspectorOptions, VectorOptions, addOptions, addStringOptions, addNumberOptions, InstanceObject, addPadOptions, onWidgetChangeOptions, addInfoOptions, addCheckboxOptions, processElementOptions, appendOptions, addTitleOptions, beginGroupOptions, addArrayOptions, containerOptions, addTreeOptions, applyOptions, addFileOptions, LineEditorOptions, addColorOptions, addIconOptions, MouseEventPlus, addButtonOptions, addListOptions, createWidgetOptions,addComboOptions, addSliderOptions, setupOptions, addStringButtonOptions, properties_info, ParentNodePlus, ItemOptions, TreeNode, addTagOptions, FileAddedResponse, ChildNodePlus } from "./@types/globals";
 import { LiteGUI } from "./core";
 import { purgeElement } from "./core";
 import { Dragger } from "./dragger";
@@ -2230,8 +2230,8 @@ export class Inspector
         const element = this.createWidget(name,"<span class='inputfield full "+
             (options.disabled?"disabled":"")+"' style='height: 100%;'>"+code+"</span>", options);
     
-        const infocontent = element.querySelector(".info_content");
-        infocontent.style.height = "100%";
+        const infoContent = element.querySelector(".info_content");
+        infoContent.style.height = "100%";
     
         const list_element = element.querySelector(".lite-list");
         const inputfield = element.querySelector(".inputfield");
@@ -2246,7 +2246,7 @@ export class Inspector
             if (!selected)
             {return;}
     
-            if (e.keyCode == 13) // Intro
+            if (e.code == 'Enter') // Intro
             {
                 if (!selected)
                 {return;}
@@ -2254,7 +2254,7 @@ export class Inspector
                 if (options.callback_dblclick)
                 {options.callback_dblclick.call(that,value);}
             }
-            else if (e.keyCode == 40) // Arrow down
+            else if (e.code == 'ArrowDown') // Arrow down
             {
                 const next = selected.nextSibling;
                 if (next)
@@ -2262,7 +2262,7 @@ export class Inspector
                 if (selected.scrollIntoViewIfNeeded)
                 {selected.scrollIntoViewIfNeeded({block: "end", behavior: "smooth"});}
             }
-            else if (e.keyCode == 38) // Arrow up
+            else if (e.code == 'ArrowUp') // Arrow up
             {
                 const prev = selected.previousSibling;
                 if (prev)
@@ -2277,9 +2277,9 @@ export class Inspector
             e.stopPropagation();
             return true;
         };
-        const inner_item_click = (e: any) =>
+        const inner_item_click = (e: MouseEvent) =>
         {
-            const el = e.target;
+            const el = e.target as ChildNodePlus;
             if (options.multiselection)
             {
                 el.classList.toggle("selected");
@@ -2300,11 +2300,11 @@ export class Inspector
             this.onWidgetChange.call(that,element,name,value, options, null, null);
             LiteGUI.trigger(element, "wadded", value);
         };
-        const inner_item_dblclick = function(e: any)
+        const inner_item_dblclick = function(e: MouseEvent)
         {
-            const value = values[ e.target.dataset["pos"] ];
-            if (options.callback_dblclick)
-            {options.callback_dblclick.call(that,value);}
+            const el = e.target as ChildNodePlus;
+            const value = values[ el.dataset["pos"] ];
+            if (options.callback_dblclick) {options.callback_dblclick.call(that,value);}
         };
         const focusCallback = function()
         {
@@ -2545,22 +2545,23 @@ export class Inspector
         return element;
     };
     
-    addButton(name: string | null, value: string, options: addButtonOptions)
+    addButton(name: string | null, value: string, options?: addButtonOptions)
     {    
-        value = options.button_text || value || "";
+		const processedOptions = this.processOptions(options) as addButtonOptions;
+        value = processedOptions.button_text || value || "";
         const that = this;
     
         let button_classname = "";
         if (name == null)
         {button_classname = "single";}
-        if (options.micro)
+        if (processedOptions.micro)
         {button_classname += " micro";}
     
         let attrs = "";
-        if (options.disabled)
+        if (processedOptions.disabled)
         {attrs = "disabled='disabled'";}
     
-        const title = options.title || "";
+        const title = processedOptions.title || "";
     
         const element = this.createWidget(name,"<button tabIndex='"+ this.tab_index + "' "+attrs+"></button>", options);
         this.tab_index++;
@@ -2570,14 +2571,14 @@ export class Inspector
         button.innerHTML = value;
         button.addEventListener("click", (event: any) =>
         {
-            this.onWidgetChange.call(that, element, name, button.innerHTML, options, false, event);
+            this.onWidgetChange.call(that, element, name, button.innerHTML, processedOptions, false, event);
             LiteGUI.trigger(button, "wclick", value);
         });
         this.append(element,options);
     
         element.wclick = function(callback: Function)
         {
-            if (!options.disabled)
+            if (!processedOptions.disabled)
             {LiteGUI.bind(this, "wclick", callback);}
         };
     
@@ -2589,12 +2590,13 @@ export class Inspector
         element.disable = function() { button.disabled = true; };
         element.enable = function() { button.disabled = false; };
     
-        this.processElement(element, options);
+        this.processElement(element, processedOptions);
         return element;
     };
     
-    addButtons(name: string | null, value: string[], options: addButtonOptions)
+    addButtons(name: string | null, value: string[], options?: addButtonOptions)
     {
+		const processedOptions = this.processOptions(options) as addButtonOptions;
         const that = this;
     
         let code = "";
@@ -2604,7 +2606,7 @@ export class Inspector
         for (const i in value)
         {
             let title = "";
-            if (options.title) {options.title.constructor === Array ? title = options.title[i] : title = options.title as string}
+            if (processedOptions.title) {Array.isArray(processedOptions.title) ? title = processedOptions.title[i] : title = processedOptions.title as string}
             code += "<button class='litebutton' title='"+title+"' tabIndex='"+this.tab_index+"' style='"+style+"'>"+value[i]+"</button>";
             this.tab_index++;
         }
@@ -2613,7 +2615,7 @@ export class Inspector
         const buttons = element.querySelectorAll("button");
         const buttonCallback = (button: any, evt: any) =>
         {
-            this.onWidgetChange.call(that, element, name!, button.innerHTML, options, null, evt);
+            this.onWidgetChange.call(that, element, name!, button.innerHTML, processedOptions, null, evt);
             LiteGUI.trigger(element, "wclick",button.innerHTML);
         };
         for (let i = 0; i < buttons.length; ++i)
@@ -2623,28 +2625,29 @@ export class Inspector
         }
     
         this.append(element,options);
-        this.processElement(element, options);
+        this.processElement(element, processedOptions);
         return element;
     };
     
-    addIcon(name: string, value: boolean, options: addIconOptions)
-    {
+    addIcon(name: string, value: boolean, options?: addIconOptions)
+    {		
+		const processedOptions = this.processOptions(options) as addIconOptions;
         const that = this;
     
-        const img_url = options.image;
-        const width = options.width as number || options.size || 20;
-        const height = options.height as number || options.size || 20;
+        const img_url = processedOptions.image;
+        const width = processedOptions.width as number || processedOptions.size || 20;
+        const height = processedOptions.height as number || processedOptions.size || 20;
     
         const element = this.createWidget(name,"<span class='icon' " +
-            (options.title ? "title='"+options.title+"'" : "") +
-            " tabIndex='"+ this.tab_index + "'></span>", options);
+            (processedOptions.title ? "title='"+processedOptions.title+"'" : "") +
+            " tabIndex='"+ this.tab_index + "'></span>", processedOptions);
         this.tab_index++;
         const content = element.querySelector("span.wcontent");
         const icon = element.querySelector("span.icon");
     
-        let x = options.x || 0;
-        if (options.index)
-        {x = options.index * -width;}
+        let x = processedOptions.x || 0;
+        if (processedOptions.index)
+        {x = processedOptions.index * -width;}
         const y = value ? height : 0;
     
         element.style.minWidth = element.style.width = (width) + "px";
@@ -2662,7 +2665,7 @@ export class Inspector
         {
             e.preventDefault();
             value = !value;
-            const ret = this.onWidgetChange.call(that,element,name, value, options, null, null);
+            const ret = this.onWidgetChange.call(that,element,name, value, processedOptions, null, null);
             LiteGUI.trigger(element, "wclick", value);
     
             if (ret !== undefined)
@@ -2671,7 +2674,7 @@ export class Inspector
             const y = value ? height : 0;
             icon.style.backgroundPosition = x + "px " + y + "px";
     
-            if (options.toggle === false) // Blink
+            if (processedOptions.toggle === false) // Blink
             {setTimeout(()=> { icon.style.backgroundPosition = x + "px 0px"; value = false; },200);}
     
         });
@@ -2683,10 +2686,10 @@ export class Inspector
             const y = value ? height : 0;
             icon.style.backgroundPosition = x + "px " + y + "px";
             if (!skip_event)
-            {this.onWidgetChange.call(that,element,name, value, options, null, null);}
+            {this.onWidgetChange.call(that,element,name, value, processedOptions, null, null);}
         };
         element.getValue = function() { return value; };
-        this.processElement(element, options);
+        this.processElement(element, processedOptions);
         return element;
     };
     
@@ -2897,6 +2900,7 @@ export class Inspector
     
     addColorPosition(name: string, value: number[], options: addColorOptions)
     {    
+		
         value = value || [0.0,0.0,0.0];
         const that = this;
         this.values.set(name, value);
@@ -3587,8 +3591,9 @@ export class Inspector
      * @return {HTMLElement} the widget in the form of the DOM element that contains it
      *
      */
-    addTitle(title: string, options: addTitleOptions)
+    addTitle(title: string, options?: addTitleOptions)
     {
+		options = this.processOptions(options);
         const element = document.createElement("DIV") as HTMLElementPlus;
         let code = "<span class='wtitle'><span class='text'>"+title+"</span>";
         if (options.help)
