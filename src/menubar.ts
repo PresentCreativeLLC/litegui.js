@@ -49,7 +49,7 @@ export class Menubar
 		(panel.content as Element).insertBefore(this.root, (panel.content as Element).firstChild);
 	}
 
-	add(path: string, data?: (value:{checkbox:boolean})=>void | AddMenuOptions)
+	add(path: string, data?: ((value:{checkbox:boolean})=>void) | AddMenuOptions)
 	{		
 		const self = this;
 		if (typeof(data) == "function")
