@@ -49,12 +49,12 @@ export class Menubar
 		(panel.content as Element).insertBefore(this.root, (panel.content as Element).firstChild);
 	}
 
-	add(path: string, data: Function | object | undefined)
-	{
+	add(path: string, data?: Function | HTMLDivElementPlus)
+	{		
 		this.data = data || {};
-
-		if (typeof(data) == "function") {data = { callback: data };}
-
+		
+		if (typeof(data) == "function") {this.data = { callback: data };}
+		
 		const prev_length = this.menu.length;
 
 		const tokens = path.split("/");
@@ -71,17 +71,16 @@ export class Menubar
 			{
 				const v: SubMenu = { name: "", parent: last_item, children: [], data: null,
 					disable: function() { if (this.data) {this.data.disabled = true;} },
-					enable: function() { if (this.data) {delete this.data.disabled;} }
+					enable: function() { if (this.data) {this.data.disabled = undefined;} }
 				};
 				last_item = v;
-				if (current_token == tokens.length - 1)
-				{v.data = data;}
+
+				if (current_token == tokens.length - 1){v.data = this.data;}
 
 				v.name = tokens[ current_token ];
 				menu.push(v);
 				current_token++;
-				if (current_token == tokens.length)
-				{break;}
+				if (current_token == tokens.length) {break;}
 				v.children = [];
 				menu = v.children;
 				current_pos = 0;
@@ -324,7 +323,7 @@ export class Menubar
 					}
 				}
 
-				// To have a checkbox behaviour
+				// To have a checkbox behavior
 				if (item.data.checkbox != null)
 				{
 					item.data.checkbox = !item.data.checkbox;
@@ -366,16 +365,17 @@ export class Menubar
 		for (const i in sorted_entries)
 		{
 			const item = document.createElement("p") as HTMLParagraphElementPlus;
-			const menu_item = sorted_entries[i] as HTMLElementPlus;
+			const menu_item = sorted_entries[i] as HTMLDivElementPlus;
 
 			item.className = 'litemenu-entry ' + (item.children ? " submenu" : "");
 			const has_submenu = menu_item.children && menu_item.children.length;
 
-			if (has_submenu)
-			{item.classList.add("has_submenu");}
+			if (has_submenu) {item.classList.add("has_submenu");}
 
 			if (menu_item && menu_item.name)
-			{item.innerHTML = "<span class='icon'></span><span class='name'>" + menu_item.name + (has_submenu ? "<span class='more'>+</span>":"") + "</span>";}
+			{
+				item.innerHTML = "<span class='icon'></span><span class='name'>" + menu_item.name + (has_submenu ? "<span class='more'>+</span>":"") + "</span>";
+			}
 			else
 			{
 				item.classList.add("separator");
@@ -392,13 +392,11 @@ export class Menubar
 				const checked = (data.type == "checkbox" && data.instance && data.property && data.instance[ data.property ] == true) ||
 					data.checkbox == true ||
 					(data.instance && data.property && data.hasOwnProperty("value") && data.instance[data.property] == data.value) ||
-					(typeof(data.isChecked) == "function" && data.isChecked.call(data.instance, data));
+					(typeof(data.is_checked) == "function" && data.is_checked.call(data.instance, data));
 
-				if (checked)
-				{item.className += " checked";}
+				if (checked) {item.className += " checked";}
 
-				if (data.disabled)
-				{item.className += " disabled";}
+				if (data.disabled) {item.className += " disabled";}
 			}
 
 			item.addEventListener("click", clickCallback.bind(undefined, item));

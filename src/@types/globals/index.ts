@@ -48,6 +48,11 @@ export interface HTMLDivElementPlus extends HTMLDivElement
     parentNode: ParentNode | null;
 }
 
+export interface HTMLDivElementPlusData
+{
+	checkbox: boolean;
+}
+
 export interface HTMLSpanElementPlus extends HTMLSpanElement
 {
 	stopPropagation?: boolean;
@@ -163,7 +168,7 @@ export interface DocumentPlus extends Document
 
 export interface HTMLParagraphElementPlus extends HTMLParagraphElement
 {
-    data: any;
+    data: HTMLDivElementPlus;
 }
 
 export interface MouseEventPlus extends MouseEvent
@@ -204,6 +209,20 @@ export interface MenubarOptions
 	auto_open: boolean;
 	sort_entries: boolean;
 }
+export interface AddMenuOptionsDiv extends HTMLDivElement
+{
+	type: string;
+	checkbox: boolean;
+	keep_open:boolean;
+	name?:string;
+	disabled?:boolean;
+    instance?: any;
+	property?:any;
+	value?:any;
+	callback?: Function;
+	is_checked?: (data:AddMenuOptionsDiv)=>boolean;
+}
+
 
 export interface addTreeOptions extends createWidgetOptions
 {
