@@ -1175,9 +1175,9 @@ export class Inspector
     
         const draggers: Dragger[] = element.draggers = [];
     
-        const inner_before_change = function(e: any)
+        const inner_before_change = function(e: Event)
         {
-            if (options.callback_before) {options.callback_before!(e);}
+            if (options.callback_before) {options.callback_before(e);}
         };
     
         for (let i = 0; i < 2; i++)
@@ -1212,7 +1212,7 @@ export class Inspector
             {
                 const new_val = options.on_change!.call(element, r);
     
-                if (typeof(new_val) == "object" && new_val.length >= 2)
+                if (Array.isArray(new_val) && new_val.length >= 2)
                 {
                     for (let j = 0; j < elems.length; j++)
                     {
@@ -1233,7 +1233,7 @@ export class Inspector
                     new_val = options.on_change.call(element, r);
                 }
     
-                if (typeof(new_val) == "object" && new_val.length >= 2)
+                if (Array.isArray(new_val) && new_val.length >= 2)
                 {
                     for (let j = 0; j < elems.length; j++)
                     {
@@ -1348,7 +1348,7 @@ export class Inspector
             {
                 const new_val = options.on_change.call(element, r);
     
-                if (typeof(new_val) == "object" && new_val.length >= 2)
+                if (Array.isArray(new_val) && new_val.length >= 2)
                 {
                     for (let j = 0; j < elems.length; j++)
                     {
@@ -1369,7 +1369,7 @@ export class Inspector
                     new_val = options.on_change.call(element, r);
                 }
     
-                if (typeof(new_val) == "object" && new_val.length >= 2)
+                if (Array.isArray(new_val) && new_val.length >= 2)
                 {
                     for (let j = 0; j < elems.length; j++)
                     {
@@ -1483,7 +1483,7 @@ export class Inspector
             if (options.on_change && dragger.dragging)
             {
                 const new_val = options.on_change.call(element, r);
-                if (typeof(new_val) == "object" && new_val.length >= 4)
+                if (Array.isArray(new_val) && new_val.length >= 4)
                 {
                     for (let j = 0; j < elems.length; j++)
                     {
@@ -1504,7 +1504,7 @@ export class Inspector
                     new_val = options.on_change.call(element, r);
                 }
     
-                if (typeof(new_val) == "object" && new_val.length >= 4)
+                if (Array.isArray(new_val) && new_val.length >= 4)
                 {
                     for (let j = 0; j < elems.length; j++)
                     {

@@ -591,10 +591,10 @@ export interface addNumberOptions extends createWidgetOptions, DraggerOptions
 	full_num?: boolean;
 	precision?: number;
 	step?:number;
-	disabled?: boolean;
-	on_change?: (value: number) => void;
-	callback?: (value: number) => void;
 	units?: string;
+	disabled?: boolean;
+	on_change?: (value: number) => number|void;
+	callback?: (value: number) => void;
 	callback_before?: () => void;
 }
 export interface DraggerOptions
@@ -617,9 +617,9 @@ export interface VectorOptions extends processElementOptions, appendOptions, Dra
     fullVector?: boolean;
     tab_index?: number;
     step?: number;
-    callback?: Function;
-    on_change?: Function;
-    callback_before?: Function;
+    callback?: (value:number[])=>void;
+    on_change?: (value:number[])=>number[]|void;
+    callback_before?: (e:Event)=>void;
 } 
 export interface addPadOptions extends appendOptions, processElementOptions
 {
