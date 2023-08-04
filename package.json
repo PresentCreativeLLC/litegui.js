@@ -6,20 +6,20 @@
   "types": "dist/index.d.ts",
   "type": "commonjs",
   "files": [
-	  "dist/**/*",
-	  "src",
-	  "resources"
+    "dist/**/*",
+    "src",
+    "resources"
   ],
   "exports": {
-	  ".": "./dist/index.js",
-	  "./src": "./src/"
+    ".": "./dist/index.js",
+    "./src": "./src/"
   },
   "scripts": {
-	"build": "webpack --config webpack.build.config.js && tsc",
-	"pack": "webpack --config webpack.pack.config.js",
-	"build-var": "webpack --config webpack.var.config.js",
+    "build": "webpack --config webpack.build.config.js && tsc",
+    "pack": "webpack --config webpack.pack.config.js",
+    "build-var": "webpack --config webpack.var.config.js",
     "lint": "eslint . --fix --ext .js",
-	"prepare": "npm run build",
+    "prepare": "npm run build",
     "test": "jest"
   },
   "license": "MIT",
@@ -56,6 +56,5 @@
   },
   "lint-staged": {
     "*.js": "eslint --cache --fix"
-  },
-  "dependencies": {}
+  }
 }

@@ -541,9 +541,10 @@ export interface addColorOptions extends createWidgetOptions
 
 export interface addFileOptions extends createWidgetOptions
 {
-	accept?: string[];
+	accept?: string | string[];
 	generate_url?: boolean;
-	read_file: string;
+	read_file?: "binary"|"data_url"|string;
+	callbacks?: (data:FileAddedResponse)=>void;
 }
 export interface addArrayOptions
 {
@@ -654,6 +655,14 @@ export interface addInfoOptions extends appendOptions, processElementOptions
 	height?: string | number;
 	callback?: Function;
 }
+
+export interface FileAddedResponse extends File
+{
+	files:FileList,
+	url?:string,
+	data?:string | ArrayBuffer | null
+}
+
 export interface onWidgetChangeOptions
 {
 	skip_wchange?: boolean;

@@ -1,4 +1,4 @@
-import { EventTargetPlus, HTMLDivElementPlus, HTMLElementPlus, InspectorOptions, VectorOptions, addOptions, addStringOptions, addNumberOptions, InstanceObject, addPadOptions, onWidgetChangeOptions, addInfoOptions, addCheckboxOptions, processElementOptions, appendOptions, addTitleOptions, beginGroupOptions, addArrayOptions, containerOptions, addTreeOptions, applyOptions, addFileOptions, LineEditorOptions, addColorOptions, addIconOptions, MouseEventPlus, addButtonOptions, addListOptions, createWidgetOptions,addComboOptions, addSliderOptions, setupOptions, addStringButtonOptions, properties_info, ParentNodePlus, ItemOptions, TreeNode, addTagOptions } from "./@types/globals";
+import { EventTargetPlus, HTMLDivElementPlus, HTMLElementPlus, InspectorOptions, VectorOptions, addOptions, addStringOptions, addNumberOptions, InstanceObject, addPadOptions, onWidgetChangeOptions, addInfoOptions, addCheckboxOptions, processElementOptions, appendOptions, addTitleOptions, beginGroupOptions, addArrayOptions, containerOptions, addTreeOptions, applyOptions, addFileOptions, LineEditorOptions, addColorOptions, addIconOptions, MouseEventPlus, addButtonOptions, addListOptions, createWidgetOptions,addComboOptions, addSliderOptions, setupOptions, addStringButtonOptions, properties_info, ParentNodePlus, ItemOptions, TreeNode, addTagOptions, FileAddedResponse } from "./@types/globals";
 import { LiteGUI } from "./core";
 import { purgeElement } from "./core";
 import { Dragger } from "./dragger";
@@ -3094,60 +3094,65 @@ export class Inspector
         return element;
     };
     
-    addFile(name: string, value: string, options: addFileOptions)
+    addFile(name: string, value?: string, options?: ((data:FileAddedResponse)=>void) | addFileOptions)
     {
-        value = value || "";
         const that = this;
-        this.values.set(name, value);
+        this.values.set(name, {name:value||""});
+		const processedOptions:addFileOptions = that.processOptions(options);
     
-        const element = this.createWidget(name,"<span class='inputfield full whidden' style='width: calc(100% - 26px)'><span class='filename'></span></span><button class='litebutton' style='width:20px; margin-left: 2px;'>...</button><input type='file' size='100' class='file' value='"+value+"'/>", options);
+        const element = this.createWidget(name,"<span class='inputfield full whidden' style='width: calc(100% - 26px)'><span class='filename'></span></span><button class='litebutton' style='width:20px; margin-left: 2px;'>...</button><input type='file' size='100' class='file' value='"+value+"'/>", processedOptions);
         const content = element.querySelector(".wcontent");
         content.style.position = "relative";
-        const input = element.querySelector(".wcontent input");
-        if (options.accept) {input.accept = options.accept;}
-        const filename_element = element.querySelector(".wcontent .filename");
+        const input = element.querySelector(".wcontent input") as HTMLInputElement;
+        if (processedOptions.accept)
+		{
+			input.accept = typeof(processedOptions.accept) === "string" ? processedOptions.accept : processedOptions.accept.toString();
+		}
+        const filename_element = element.querySelector(".wcontent .filename") as HTMLElement;
         if (value) {filename_element.innerText = value;}
     
-        input.addEventListener("change", (e: any) =>
+        input.addEventListener("change", (e: Event) =>
         {
-            if (!e.target.files.length)
+			if(!e || !e.target) {return;}
+			const target = e.target as HTMLInputElement;
+			if(!target.files) {return;}
+            if (!target.files.length)
             {
                 // Nothing
                 filename_element.innerText = "";
-                this.onWidgetChange.call(that, element, name, null, options, null, null);
+                this.onWidgetChange.call(that, element, name, null, processedOptions, null, null);
                 return;
             }
     
             const url = null;
             // Var data = { url: url, filename: e.target.value, file: e.target.files[0], files: e.target.files };
-            const file = e.target.files[0];
-            file.files = e.target.files;
-            if (options.generate_url)
-            {file.url = URL.createObjectURL(e.target.files[0]);}
-            filename_element.innerText = file.name;
+			const result = target.files[0] as FileAddedResponse;
+			result.files = target.files
+            if (processedOptions.generate_url) {result.url = URL.createObjectURL(target.files[0]);}
+            filename_element.innerText = result.name;
     
-            if (options.read_file)
+            if (processedOptions.read_file)
             {
                  const reader = new FileReader();
-                 reader.onload = (e2: any) =>
+                 reader.onload = (e2: ProgressEvent<FileReader>) =>
                 {
-                    file.data = e2.target.result;
-                    this.onWidgetChange.call(that, element, name, file, options, null, null);
+                    result.data = e2.target?.result;
+                    this.onWidgetChange.call(that, element, name, result, processedOptions, null, null);
                  };
-                 if (options.read_file == "binary")
-                     {reader.readAsArrayBuffer(file);}
-                 else if (options.read_file == "data_url")
-                     {reader.readAsDataURL(file);}
+                 if (processedOptions.read_file == "binary")
+                     {reader.readAsArrayBuffer(result);}
+                 else if (processedOptions.read_file == "data_url")
+                     {reader.readAsDataURL(result);}
                  else
-                     {reader.readAsText(file);}
+                     {reader.readAsText(result);}
             }
             else
             {
-                this.onWidgetChange.call(that, element, name, file, options, null, null);
+                this.onWidgetChange.call(that, element, name, result, processedOptions, null, null);
             }
         });
     
-        this.append(element,options);
+        this.append(element,processedOptions);
         return element;
     };
     
@@ -3612,19 +3617,10 @@ export class Inspector
         (this.root.parentNode!.parentNode! as ParentNodePlus).scrollTop = delta;
     };
     
-    /*processOptions(options: object | Function | undefined)
+    processOptions(options: any | Function | undefined): {}
     {
-        let outOptions: InspectorOptions | { callback: Function} | undefined;
-        if (typeof(options) == "function")
-        {
-            outOptions = { callback: options };
-        }
-        else if(options != undefined)
-        {
-            outOptions = options as InspectorOptions;
-        }
-        return outOptions || {};
-    };*/
+        return typeof(options) === 'function' ? {callback: options} : options || {};
+    };
     
     processElement(element: any, options: processElementOptions)
     {
