@@ -216,7 +216,6 @@ export interface AddMenuOptions
 	callback?: (value:{checkbox:boolean})=>void;
 }
 
-
 export interface addTreeOptions extends createWidgetOptions
 {
 	tree_options: TreeOptions;
@@ -270,6 +269,7 @@ export interface InspectorOptions
     no_collapse?: boolean;
     instance?: any;
     widgets_per_row?: number;
+	callback?: (value:boolean) => void;
 }
 
 export interface PanelOptions

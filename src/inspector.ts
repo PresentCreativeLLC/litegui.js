@@ -3446,9 +3446,9 @@ export class Inspector
                 element.classList.toggle("collapsed");
                 const seccont: HTMLElementPlus = element.querySelector(".wsectioncontent")!;
                 seccont.style.display = seccont.style.display === "none" ? "" : "none";
-                if ((options as {callback: Function}).callback)
+                if (options.callback)
                 {
-                    (options as {callback: Function}).callback.call(element,
+                    options.callback.call(element,
                         element.classList.contains("collapsed"));
                 }
             });
