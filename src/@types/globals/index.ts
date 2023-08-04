@@ -209,18 +209,11 @@ export interface MenubarOptions
 	auto_open: boolean;
 	sort_entries: boolean;
 }
-export interface AddMenuOptionsDiv extends HTMLDivElement
+export interface AddMenuOptions
 {
-	type: string;
-	checkbox: boolean;
-	keep_open:boolean;
-	name?:string;
-	disabled?:boolean;
-    instance?: any;
-	property?:any;
-	value?:any;
-	callback?: Function;
-	is_checked?: (data:AddMenuOptionsDiv)=>boolean;
+	checkbox?: boolean;
+	keep_open?:boolean;
+	callback?: (value:{checkbox:boolean})=>void;
 }
 
 

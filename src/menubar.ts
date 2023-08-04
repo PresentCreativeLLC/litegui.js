@@ -1,5 +1,5 @@
 import { LiteGUI } from "./core";
-import { HTMLDivElementPlus, HTMLElementPlus, HTMLLIElementPlus, HTMLParagraphElementPlus, MenubarOptions } from "./@types/globals/index"
+import { AddMenuOptions, HTMLDivElementPlus, HTMLElementPlus, HTMLLIElementPlus, HTMLParagraphElementPlus, MenubarOptions } from "./@types/globals/index"
 import { Panel } from "./panel";
 
 /** ************ MENUBAR ************************/
@@ -14,7 +14,7 @@ export class Menubar
 	is_open: boolean;
 	auto_open: boolean;
 	sort_entries: boolean;
-	data?: object;
+	data?: AddMenuOptions;
 	closing_by_leave?: NodeJS.Timeout | null;
 
 	constructor(id: string, options?: MenubarOptions)
@@ -49,19 +49,25 @@ export class Menubar
 		(panel.content as Element).insertBefore(this.root, (panel.content as Element).firstChild);
 	}
 
-	add(path: string, data?: Function | HTMLDivElementPlus)
+	add(path: string, data?: (value:{checkbox:boolean})=>void | AddMenuOptions)
 	{		
-		this.data = data || {};
+		const self = this;
+		if (typeof(data) == "function")
+		{
+			self.data = { callback: data };
+		}
+		else
+		{
+			self.data = data || {};
+		}
 		
-		if (typeof(data) == "function") {this.data = { callback: data };}
-		
-		const prev_length = this.menu.length;
+		const prev_length = self.menu.length;
 
 		const tokens = path.split("/");
 		let current_token = 0;
 		let current_pos = 0;
-		let menu = this.menu;
-		let last_item = undefined;
+		let menu = self.menu;
+		let last_item: SubMenu | undefined = undefined;
 
 		while (menu)
 		{
@@ -75,7 +81,7 @@ export class Menubar
 				};
 				last_item = v;
 
-				if (current_token == tokens.length - 1){v.data = this.data;}
+				if (current_token == tokens.length - 1){v.data = self.data;}
 
 				v.name = tokens[ current_token ];
 				menu.push(v);
@@ -108,7 +114,7 @@ export class Menubar
 			current_pos++;
 		}
 
-		if (prev_length != this.menu.length) {this.updateMenu();}
+		if (prev_length != self.menu.length) {self.updateMenu();}
 	}
 
 	remove(path: string)
