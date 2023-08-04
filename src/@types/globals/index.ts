@@ -13,7 +13,7 @@ import type { jscolor } from "../../jscolor";
 
 export interface HTMLDivElementPlus extends HTMLDivElement
 {
-	_editing: boolean;
+	_editing?: boolean;
     disabled?: boolean;
     content?: HTMLElementPlus;
     name?: string | null;
@@ -45,7 +45,6 @@ export interface HTMLDivElementPlus extends HTMLDivElement
     _last_container_stack?: any[];
     sectiontitle?: Element;
     input?: HTMLInputElement;
-    parentNode: ParentNode | null;
 }
 
 export interface HTMLDivElementPlusData
@@ -67,7 +66,7 @@ export interface HTMLSpanElementPlus extends HTMLSpanElement
     setEmpty: Function;
     expand: Function;
     collapse: Function;
-    item?: HTMLDivElementPlus;
+    item?: HTMLDivElementPlus | number;
 	liteBox: LiteBox;
 }
 

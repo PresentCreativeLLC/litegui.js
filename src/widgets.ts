@@ -1001,7 +1001,7 @@ export class ComplexList
 	root: HTMLDivElement;
 	options: ComplexListOptions;
 	item_code: string;
-	selected?: HTMLDivElementPlus;
+	selected?: HTMLDivElementPlus | number;
 	onItemSelected?: Function;
 	onItemToggled?: Function;
 	onItemRemoved?: Function;
@@ -1044,15 +1044,19 @@ export class ComplexList
 		this.root.innerHTML = "";
 	};
 
-	addItem(item: HTMLDivElementPlus, text: string, is_enabled: boolean, can_be_removed: boolean)
+	addItem(item: HTMLDivElementPlus | number, text: string, is_enabled: boolean, can_be_removed: boolean)
 	{
-		const title = text || item.content || item.name;
+		const title = text || ((typeof item === 'object') ? (item.content || item.name) : "");
 		const elem = LiteGUI.createListItem(this.item_code, { ".title": title }) as HTMLSpanElementPlus;
 		elem.item = item;
 
 		if (is_enabled) { elem.classList.add("enabled"); }
 
-		if (!can_be_removed) { (elem.querySelector(".trash") as HTMLElement).style.display = "none"; }
+		if (!can_be_removed)
+		{
+			const trash = elem.querySelector<HTMLElement>(".trash");
+			if (trash) {trash.style.display = "none";}
+		}
 
 		const that = this;
 		elem.addEventListener("mousedown", (e: MouseEvent) => {
