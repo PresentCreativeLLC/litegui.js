@@ -651,8 +651,8 @@ export abstract class jscolor
 				if(m[1].length === 6) { // 6-char notation
 					this.fromRGB(
 						parseInt(m[1].substring(0,2),16) / 255,
-						parseInt(m[1].substring(2,2),16) / 255,
-						parseInt(m[1].substring(4,2),16) / 255,
+						parseInt(m[1].substring(2,4),16) / 255,
+						parseInt(m[1].substring(4,6),16) / 255,
 						flags
 					);
 				} else { // 3-char notation
