@@ -27,7 +27,7 @@ export abstract class jscolor
 {
     static dir: string | boolean = '';
     static bindClass: string = 'color';
-    static preloading: boolean =true;
+    static preloading: boolean = true;
     static binding: boolean = true;
     
     static images = 
@@ -59,7 +59,7 @@ export abstract class jscolor
     static getDir()
     {
 		if(!jscolor.dir) {
-			var detected = jscolor.detectDir();
+			const detected = jscolor.detectDir();
 			jscolor.dir = detected!==false ? detected : 'jscolor/';
 		}
 		return jscolor.dir;
@@ -75,10 +75,10 @@ export abstract class jscolor
 		}
 
 		let e = document.getElementsByTagName('script');
-		for(var i=0; i<e.length; i+=1) {
+		for(let i=0; i<e.length; i+=1) {
 			if(e[i].src && /(^|\/)jscolor(.*).js([?#].*)?$/i.test(e[i].src)) {
-				var src = new jscolor.URI(e[i].src);
-				var srcAbs = src.toAbsolute(base) as any;
+				const src = new jscolor.URI(e[i].src);
+				const srcAbs = src.toAbsolute(base) as any;
 				srcAbs.path = srcAbs.path.replace(/[^\/]+$/, ''); // remove filename
 				srcAbs.query = null;
 				srcAbs.fragment = null;
@@ -90,12 +90,12 @@ export abstract class jscolor
     
     static bind()
     {
-        var matchClass = new RegExp('(^|\\s)('+jscolor.bindClass+')\\s*(\\{[^}]*\\})?', 'i');
-		var e = document.getElementsByTagName('input') as HTMLCollectionOf<HTMLInputElementPlus>;
-		for(var i=0; i<e.length; i+=1) {
-			var m;
+        const matchClass = new RegExp('(^|\\s)('+jscolor.bindClass+')\\s*(\\{[^}]*\\})?', 'i');
+		const e = document.getElementsByTagName('input') as HTMLCollectionOf<HTMLInputElementPlus>;
+		for(let i=0; i<e.length; i+=1) {
+			let m;
 			if(!e[i].color && e[i].className && (m = e[i].className.match(matchClass))) {
-				var prop = {};
+				const prop = {};
 				if(m[3]) {
 					try {
 						eval('prop='+m[3]);
@@ -108,7 +108,7 @@ export abstract class jscolor
 
     static preload()
     {
-        for(var fn in jscolor.imgRequire) {
+        for(const fn in jscolor.imgRequire) {
 			if(jscolor.imgRequire.hasOwnProperty(fn)) {
 				jscolor.loadImage(fn);
 			}
@@ -151,27 +151,29 @@ export abstract class jscolor
         if(!el) {
 			return;
 		}
-        var ev;
-		if(document.createEvent) 
+		if(document.createEvent !== undefined) 
         {
-			ev = document.createEvent('HTMLEvents');
-			ev.initEvent(evnt, true, true);
+			const ev = new Event(evnt, {
+				bubbles: true,
+				cancelable: true
+			});
 			el.dispatchEvent(ev);
 		} 
         else if((document as DocumentPlus).createEventObject) 
         {
-			ev = (document as DocumentPlus).createEventObject!();
+			const ev = (document as DocumentPlus).createEventObject!();
 			el.fireEvent!('on'+evnt, ev);
 		} 
-        else if(el['on'+evnt as keyof object]) { // alternatively use the traditional event model (IE5)
+        else if(el['on'+evnt as keyof object])
+		{ // alternatively use the traditional event model (IE5)
 			(el['on'+evnt as keyof object] as Function)();
 		}
     }
 
     static getElementPos(e: HTMLElement): Array<number>
     {
-        var e1 : HTMLElement=e, e2=e;
-		var x=0, y=0;
+        let e1 : HTMLElement=e, e2=e;
+		let x=0, y=0;
 		if(e1.offsetParent) {
 			do {
 				x += e1.offsetLeft;
@@ -192,7 +194,7 @@ export abstract class jscolor
 
     static getRelMousePos(e: MouseEventPlus): Position
     {
-        var x = 0, y = 0;
+        let x = 0, y = 0;
 		if (!e) { e = window.event as MouseEventPlus; }
 		if (typeof e.offsetX === 'number') {
 			x = e.offsetX;
@@ -253,7 +255,7 @@ export abstract class jscolor
 
         parse(uri: string)
         {
-            var m: RegExpMatchArray | null = uri.match(/^(([A-Za-z][0-9A-Za-z+.-]*)(:))?((\/\/)([^\/?#]*))?([^?#]*)((\?)([^#]*))?((#)(.*))?/);
+            const m: RegExpMatchArray | null = uri.match(/^(([A-Za-z][0-9A-Za-z+.-]*)(:))?((\/\/)([^\/?#]*))?([^?#]*)((\?)([^#]*))?((#)(.*))?/);
 			const a : string  = m![0];
 			this.scheme = m![3] ? m![2] : null;
 			this.authority = m![5] ? m![6] : null;
@@ -265,7 +267,7 @@ export abstract class jscolor
 
         toString(): string
         {
-            var result = '';
+            let result = '';
 			if(this.scheme !== null) { result = result + this.scheme + ':'; }
 			if(this.authority !== null) { result = result + '//' + this.authority; }
 			if(this.path !== null) { result = result + this.path; }
@@ -276,9 +278,9 @@ export abstract class jscolor
         
         toAbsolute(_base: string)
         {
-            var base = new jscolor.URI(_base);
-			var r = this;
-			var t = new jscolor.URI();
+            const base = new jscolor.URI(_base);
+			const r = this;
+			const t = new jscolor.URI();
 
 			if(base.scheme === null) { return false; }
 
@@ -328,7 +330,7 @@ export abstract class jscolor
 
         removeDotSegments(path: string): string
         {
-            var out = '';
+            let out = '';
 			while(path) {
 				if(path.substring(0,3)==='../' || path.substring(0,2)==='./') {
 					path = path.replace(/^\.+/,'').substring(1);
@@ -340,7 +342,7 @@ export abstract class jscolor
 				} else if(path==='.' || path==='..') {
 					path = '';
 				} else {
-					var rm = path.match(/^\/?[^\/]*/)![0];
+					const rm = path.match(/^\/?[^\/]*/)![0];
 					path = path.substring(rm.length);
 					out = out + rm;
 				}
@@ -432,7 +434,7 @@ export abstract class jscolor
             this.holdPad = false,
             this.holdSld = false;
             this.target = target;
-            for(var p in prop) 
+            for(const p in prop) 
             {
                 if(prop.hasOwnProperty(p)) 
                 {
@@ -462,7 +464,7 @@ export abstract class jscolor
             // valueElement
             if(this.valueElement) 
             {
-                var updateField = () => 
+                const updateField = () => 
                 {
                     this.fromString(this.valueElement.value, this.leaveValue);
                     this.dispatchImmediateChange();
@@ -506,29 +508,32 @@ export abstract class jscolor
         {
             if(!this.isPickerOwner()) 
             {
-				var tp = jscolor.getElementPos(this.target); // target pos
-				var ts = jscolor.getElementSize(this.target); // target size
-				var vp = jscolor.getViewPos(); // view pos
-				var vs = jscolor.getViewSize(); // view size
-				var ps = this.getPickerDims(this); // picker size
-				var a, b, c;
+				const tp = jscolor.getElementPos(this.target); // target pos
+				const ts = jscolor.getElementSize(this.target); // target size
+				const vp = jscolor.getViewPos(); // view pos
+				const vs = jscolor.getViewSize(); // view size
+				const ps = this.getPickerDims(this); // picker size
+				let a, b, c;
 				switch(this.pickerPosition.toLowerCase()) {
 					case 'left': a=1; b=0; c=-1; break;
 					case 'right':a=1; b=0; c=1; break;
 					case 'top':  a=0; b=1; c=-1; break;
 					default:     a=0; b=1; c=1; break;
 				}
-				var l = (ts[b]+ps[b])/2;
+				const l = (ts[b]+ps[b])/2;
 
 				// picker pos
+				let pp:number[];
 				if (!this.pickerSmartPosition) 
                 {
-					var pp = [
+					pp = [
 						tp[a],
 						tp[b]+ts[b]-l+l*c
 					];
-				} else {
-					var pp = [
+				}
+				else
+				{
+					pp = [
 						-vp[a]+tp[a]+ps[a] > vs[a] ?
 							(-vp[a]+tp[a]+ts[a]/2 > vs[a]/2 && tp[a]+ts[a]-ps[a] >= 0 ? tp[a]+ts[a]-ps[a] : tp[a]) :
 							tp[a],
@@ -583,7 +588,7 @@ export abstract class jscolor
         {
             flags = flags ? flags : 0;
             if(!(flags & this.leaveValue!) && this.valueElement) {
-				var value = this.toString();
+				let value = this.toString();
 				if(this.caps) { value = value.toUpperCase(); }
 				if(this.hash) { value = '#'+value; }
 				this.valueElement.value = value;
@@ -608,26 +613,32 @@ export abstract class jscolor
 
         fromHSV(h: number | null, s: number | null, v: number | null, flags?: number)
         {
-            h ?? (h! < 0 && (h=0) || h! > 6 && (h = 6));
-			s ?? (s!<0 && (s=0) || s!>1 && (s=1));
-			v ?? (v!<0 && (v=0) || v!>1 && (v=1));
+            h = h ?? this.hsv[0];
+			s = s ?? this.hsv[1];
+			v = v ?? this.hsv[2];
+            h = h<0 ? 0 : h>6 ? 6 : h;
+			s = s<0 ? 0 : s>1 ? 1 : s;
+			v = v<0 ? 0 : v>1 ? 1 : v;
 			this.rgb = this.HSV_RGB(
-				h===null ? this.hsv[0] : (this.hsv[0]=h),
-				s===null ? this.hsv[1] : (this.hsv[1]=s),
-				v===null ? this.hsv[2] : (this.hsv[2]=v)
+				this.hsv[0]=h,
+				this.hsv[1]=s,
+				this.hsv[2]=v
 			);
 			this.exportColor(flags);
         }
 
         fromRGB(r: number, g: number, b: number, flags?: number | undefined)
         {
-            r<0 && (r=0) || r>1 && (r=1);
-			g<0 && (g=0) || g>1 && (g=1);
-			b<0 && (b=0) || b>1 && (b=1);
-			var hsv = this.RGB_HSV(
-				r===null ? this.rgb[0] : (this.rgb[0]=r),
-				g===null ? this.rgb[1] : (this.rgb[1]=g),
-				b===null ? this.rgb[2] : (this.rgb[2]=b)
+			r = r ?? this.rgb[0];
+			g = g ?? this.rgb[1];
+			b = b ?? this.rgb[2];
+            r = r<0 ? 0 : r>1 ? 1 : r;
+            g = g<0 ? 0 : g>1 ? 1 : g;
+            b = b<0 ? 0 : b>1 ? 1 : b;
+			const hsv = this.RGB_HSV(
+				this.rgb[0]=r,
+				this.rgb[1]=g,
+				this.rgb[2]=b
 			) as Array<number>;
 			if(hsv[0] !== null) {
 				this.hsv[0] = hsv[0];
@@ -641,7 +652,7 @@ export abstract class jscolor
         
         fromString(hex: string, flags?: number | undefined): boolean
         {
-			var m = hex.match(/^\W*([0-9A-F]{3}([0-9A-F]{3})?)\W*$/i);
+			const m = hex.match(/^\W*([0-9A-F]{3}([0-9A-F]{3})?)\W*$/i);
 			if(!m) 
             {
 				return false;
@@ -678,21 +689,21 @@ export abstract class jscolor
         
         RGB_HSV(r: number, g: number, b: number): Array<number | null>
         {
-			var n = Math.min(Math.min(r,g),b);
-			var v = Math.max(Math.max(r,g),b);
-			var m = v - n;
+			const n = Math.min(Math.min(r,g),b);
+			const v = Math.max(Math.max(r,g),b);
+			const m = v - n;
 			if(m === 0) { return [ null, 0, v ]; }
-			var h = r===n ? 3+(b-g)/m : (g===n ? 5+(r-b)/m : 1+(g-r)/m);
+			const h = r===n ? 3+(b-g)/m : (g===n ? 5+(r-b)/m : 1+(g-r)/m);
 			return [ h===6 ? 0 : h, m/v, v ];
         }
         
         HSV_RGB(h: number, s: number, v: number): Array<number>
         {
 			if(h === null) { return [ v, v, v ]; }
-			var i = Math.floor(h);
-			var f = i%2 ? h-i : 1-(h-i);
-			var m = v * (1 - s);
-			var n = v * (1 - s*f);
+			const i = Math.floor(h);
+			const f = i%2 ? h-i : 1-(h-i);
+			const m = v * (1 - s);
+			const n = v * (1 - s*f);
 			switch(i) {
 				case 6:
 				case 0: return [v,n,m];
@@ -708,7 +719,7 @@ export abstract class jscolor
 
         removePicker()
         {
-			var doc = jscolor.picker.owner.valueElement.ownerDocument;
+			const doc = jscolor.picker.owner.valueElement.ownerDocument;
 			delete jscolor.picker.owner;
 			doc.getElementsByTagName('body')[0].removeChild(jscolor.picker.boxB);
         }
@@ -729,9 +740,9 @@ export abstract class jscolor
 					btnS : document.createElement('span'),
 					btnT : document.createTextNode(this.pickerCloseText)
 				};
-				for(var i=0,segSize=4; i<jscolor.images.sld[1]; i+=segSize) 
+				for(let i=0,segSize=4; i<jscolor.images.sld[1]; i+=segSize) 
                 {
-					var seg = document.createElement('div');
+					const seg = document.createElement('div');
 					seg.style.height = segSize+'px';
 					seg.style.fontSize = '1px';
 					seg.style.lineHeight = '0';
@@ -749,7 +760,7 @@ export abstract class jscolor
 				jscolor.picker.boxB.appendChild(jscolor.picker.box);
 			}
 
-			var p = jscolor.picker;
+			const p = jscolor.picker;
 
 			// controls interaction
 			p.box.onmouseup =
@@ -808,7 +819,7 @@ export abstract class jscolor
 			};
 
 			// picker
-			var dims = this.getPickerDims(this);
+			const dims = this.getPickerDims(this);
 			p.box.style.width = dims[0] + 'px';
 			p.box.style.height = dims[1] + 'px';
 
@@ -897,7 +908,7 @@ export abstract class jscolor
 				this.hidePicker();
 			};
 			p.btnS.style.lineHeight = p.btn.style.height;
-            var padImg;
+            let padImg;
 			// load images in optimal order
 			switch(this.modeID) 
             {
@@ -937,17 +948,17 @@ export abstract class jscolor
 
         redrawPad()
         {
-            var yComponent: number = 0;
+            let yComponent: number = 0;
             // redraw the pad pointer
 			switch(this.modeID) {
 				case 0: yComponent = 1; break;
 				case 1: yComponent = 2; break;
 			}
-			let x = Math.round((this.hsv[0] / 6) * (jscolor.images.pad[0]-1));
-			let y = Math.round((1 - this.hsv[ yComponent ]) * (jscolor.images.pad[1]-1));
+			const x = Math.round((this.hsv[0] / 6) * (jscolor.images.pad[0]-1));
+			const y = Math.round((1 - this.hsv[ yComponent ]) * (jscolor.images.pad[1]-1));
 			jscolor.picker.padM.style.backgroundPosition =
-				(this.pickerFace+this.pickerInset+x - Math.floor(jscolor.images.cross[0]/2)) + 
-                'px ' + (this.pickerFace+this.pickerInset+y - Math.floor(jscolor.images.cross[1]/2)) + 'px';
+				(this.pickerFace+this.pickerInset+x - Math.floor(jscolor.images.cross[0]/2)) + 'px ' + 
+                (this.pickerFace+this.pickerInset+y - Math.floor(jscolor.images.cross[1]/2)) + 'px';
 
 			// redraw the slider image
 			let seg = jscolor.picker.sld.childNodes;
@@ -995,14 +1006,14 @@ export abstract class jscolor
 
         redrawSld()
         {
-            var yComponent: number = 0;
+            let yComponent: number = 0;
 			// redraw the slider pointer
 			switch(this.modeID) 
             {
 				case 0: yComponent = 2; break;
 				case 1: yComponent = 1; break;
 			}
-			var y = Math.round((1-this.hsv[yComponent]) * (jscolor.images.sld[1]-1));
+			const y = Math.round((1-this.hsv[yComponent]) * (jscolor.images.sld[1]-1));
 			jscolor.picker.sldM.style.backgroundPosition =
 				'0 ' + (this.pickerFace+this.pickerInset + y -
                 Math.floor(jscolor.images.arrow[1]/2)) + 'px';
@@ -1035,21 +1046,19 @@ export abstract class jscolor
 
         setPad(e: MouseEvent)
         {
-			var mpos = jscolor.getRelMousePos(e as MouseEventPlus);
-			var x = mpos.x - this.pickerFace - this.pickerInset;
-			var y = mpos.y - this.pickerFace - this.pickerInset;
+			const mpos = jscolor.getRelMousePos(e as MouseEventPlus);
+			const x = mpos.x - this.pickerFace - this.pickerInset;
+			const y = mpos.y - this.pickerFace - this.pickerInset;
 			switch(this.modeID) {
-				case 0: this.fromHSV(x*(6/(jscolor.images.pad[0]-1)), 1 -
-                    y/(jscolor.images.pad[1]-1), null, this.leaveSld); break;
-				case 1: this.fromHSV(x*(6/(jscolor.images.pad[0]-1)), null, 1 -
-                    y/(jscolor.images.pad[1]-1), this.leaveSld); break;
+				case 0: this.fromHSV(x*(6/(jscolor.images.pad[0]-1)), 1 - y/(jscolor.images.pad[1]-1), null, this.leaveSld); break;
+				case 1: this.fromHSV(x*(6/(jscolor.images.pad[0]-1)), null, 1 - y/(jscolor.images.pad[1]-1), this.leaveSld); break;
 			}
         }
 
         setSld(e: MouseEvent)
         {
-			var mpos = jscolor.getRelMousePos(e as MouseEventPlus);
-			var y = mpos.y - this.pickerFace - this.pickerInset;
+			const mpos = jscolor.getRelMousePos(e as MouseEventPlus);
+			const y = mpos.y - this.pickerFace - this.pickerInset;
 			switch(this.modeID) 
             {
 				case 0: this.fromHSV(null, null, 1 - y/(jscolor.images.sld[1]-1), this.leavePad); break;
