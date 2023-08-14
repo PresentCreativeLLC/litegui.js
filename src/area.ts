@@ -1,7 +1,7 @@
 // Enclose in a scope
 /** **************** AREA **************/
 
-import { AreaOptions, HTMLDivElementPlus, LiteguiObject, ParentNodePlus } from "./@types/globals";
+import { AreaOptions, AreaElement, LiteguiObject, ParentNodePlus } from "./@types/globals";
 import { LiteGUI } from "./core";
 
 
@@ -16,7 +16,7 @@ import { LiteGUI } from "./core";
  */
 export class Area
 {
-    root: HTMLDivElementPlus;
+    root: AreaElement;
     options: AreaOptions;
     content: HTMLDivElement;
     _computed_size: number[];
@@ -36,7 +36,7 @@ export class Area
         let optionsTemp: AreaOptions | undefined = options;
 
         /* The root element containing all sections */
-        const root = document.createElement("div") as HTMLDivElementPlus;
+        const root = document.createElement("div") as AreaElement;
         root.className = "litearea";
         if (optionsTemp?.id)
         {root.id = optionsTemp.id;}
@@ -50,9 +50,13 @@ export class Area
         let height = optionsTemp?.height || "100%";
 
         if (typeof (width) == 'number' && width < 0)
-        {width = 'calc( 100% - '+Math.abs(width as number)+'px)';}
+        {
+			width = 'calc( 100% - '+Math.abs(width as number)+'px)';
+		}
         if (typeof (height) == 'number' && height < 0)
-        {height = 'calc( 100% - '+ Math.abs(height as number)+'px)';}
+        {
+			height = 'calc( 100% - '+ Math.abs(height as number)+'px)';
+		}
 
         root.style.width = width as string;
         root.style.height = height as string;
@@ -118,11 +122,15 @@ export class Area
         {
             for (let j = 0; j < this.root.childNodes.length; j++)
             {
-                const element: HTMLDivElementPlus = this.root.childNodes[j] as HTMLDivElementPlus;
+                const element = this.root.childNodes[j] as AreaElement;
                 if (element.litearea)
-                {element.litearea.onResize();}
+                {
+					element.litearea.onResize();
+				}
                 else
-                {LiteGUI.trigger(element, "resize");}
+                {
+					LiteGUI.trigger(element, "resize");
+				}
             }
         }
         LiteGUI.sizeToCSS()
@@ -166,16 +174,18 @@ export class Area
     split(direction: string, sizes: (string | null | number)[], editable: boolean)
     {
         if (!direction || direction.constructor !== String)
-        {throw ("First parameter must be a string: 'vertical' or 'horizontal'");}
+        {
+			throw ("First parameter must be a string: 'vertical' or 'horizontal'");
+		}
 
-        if (!sizes)
-        {sizes = ["50%",null];}
+        if (!sizes) {sizes = ["50%",null];}
 
         if (direction != "vertical" && direction != "horizontal")
-        {throw ("First parameter must be a string: 'vertical' or 'horizontal'");}
+        {
+			throw ("First parameter must be a string: 'vertical' or 'horizontal'");
+		}
 
-        if (this.sections.length)
-        {throw "cannot split twice";}
+        if (this.sections.length) {throw "cannot split twice";}
 
         // Create areas
         const area1 = new Area({ content_id: this.content.id } as AreaOptions);
@@ -192,9 +202,13 @@ export class Area
             splitbar = document.createElement("div");
             splitbar.className = "litesplitbar " + direction;
             if (direction == "vertical")
-            {splitbar.style.height = Area.splitbar_size + "px";}
+            {
+				splitbar.style.height = Area.splitbar_size + "px";
+			}
             else
-            {splitbar.style.width = Area.splitbar_size + "px";}
+            {
+				splitbar.style.width = Area.splitbar_size + "px";
+			}
             this.splitbar = splitbar;
             splitbar.addEventListener("mousedown", inner_mousedown);
         }
@@ -303,8 +317,7 @@ export class Area
         area1.content = this.content;
 
         this.root.appendChild(area1.root);
-        if (splitbar)
-        {this.root.appendChild(splitbar);}
+        if (splitbar) {this.root.appendChild(splitbar);}
         this.root.appendChild(area2.root);
 
         this.sections = [area1, area2];
@@ -428,8 +441,7 @@ export class Area
             }
         }
 
-        if (this.splitbar)
-        {this.splitbar.style.display = "none";}
+        if (this.splitbar) {this.splitbar.style.display = "none";}
 
         this.sendResizeEvent();
     };
@@ -561,7 +573,7 @@ export class Area
  */
 export class Split 
 {
-    root: HTMLDivElementPlus;
+    root: HTMLDivElement;
     sections: any;
     constructor(sections: any, options: any, legacy: any) 
     {
@@ -575,7 +587,7 @@ export class Split
             console.warn("LiteGUI.Split legacy parameter, use sections as first parameter instead of id.");
         }
 
-        const root = document.createElement("div") as HTMLDivElementPlus;
+        const root = document.createElement("div") as HTMLDivElement;
         this.root = root;
         if (options.id) { root.id = options.id; }
         root.className = "litesplit " + (options.vertical ? "vsplit" : "hsplit");

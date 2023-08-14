@@ -1,5 +1,5 @@
 import { LiteGUI } from "./core";
-import { AddMenuOptions, HTMLDivElementPlus, HTMLElementPlus, HTMLLIElementPlus, HTMLParagraphElementPlus, MenubarOptions } from "./@types/globals/index"
+import { AddMenuOptions, HTMLElementPlus, HTMLLIElementPlus, HTMLParagraphElementPlus, MenuBarElement, MenubarOptions } from "./@types/globals/index"
 import { Panel } from "./panel";
 
 /** ************ MENUBAR ************************/
@@ -7,7 +7,7 @@ export class Menubar
 {
 	closing_time: number;
 	options: MenubarOptions;
-	root: HTMLDivElementPlus;
+	root: MenuBarElement;
 	menu: SubMenu[];
 	panels: Array<HTMLDivElement>;
 	content: HTMLUListElement;
@@ -24,7 +24,7 @@ export class Menubar
 		this.menu = [];
 		this.panels = [];
 
-		this.root = document.createElement("div") as HTMLDivElementPlus;
+		this.root = document.createElement("div");
 		this.root.id = id;
 		this.root.className = "litemenubar";
 
@@ -83,7 +83,7 @@ export class Menubar
 
 				if (current_token == tokens.length - 1){v.data = self.data;}
 
-				v.name = tokens[ current_token ];
+				v.name = tokens[current_token];
 				menu.push(v);
 				current_token++;
 				if (current_token == tokens.length) {break;}
@@ -94,13 +94,13 @@ export class Menubar
 			}
 
 			// Token found in this menu, get inside for next token
-			if (menu[ current_pos ] && tokens[ current_token ] == menu[ current_pos ].name)
+			if (menu[current_pos] && tokens[current_token] == menu[current_pos].name)
 			{
 				if (current_token < tokens.length - 1)
 				{
-					last_item = menu[ current_pos ];
-					if (menu[ current_pos ].children != undefined)
-					{menu = menu[ current_pos ].children!;}
+					last_item = menu[current_pos];
+					if (menu[current_pos].children != undefined)
+					{menu = menu[current_pos].children!;}
 					current_pos = 0;
 					current_token++;
 					continue;
@@ -125,7 +125,7 @@ export class Menubar
 
 		if (Array.isArray(menu))
 		{
-			// This means that it's intended to deleat a list and this is not allowed
+			// This means that it's intended to delete a list and this is not allowed
 			return console.warn("Can't remove an entire list");
 		}
 		//We are going to remove a single menu
@@ -172,7 +172,7 @@ export class Menubar
 		let current_pos = 0;
 		let menu = this.menu;
 
-		while (current_pos <= 5)
+		while (current_token <= 5)
 		{
 			// No more tokens, return last found menu
 			if (current_token == tokens.length) {return menu;}
@@ -180,21 +180,20 @@ export class Menubar
 			// This menu doesn't have more entries
 			if (menu.length <= current_pos) {return undefined;}
 
-			if (tokens[ current_token ] == "*") {return menu[ current_pos ].children;}
+			if (tokens[current_token] == "*") {return menu[current_pos].children;}
 
 			// Token found in this menu, get inside for next token
-			if (tokens[ current_token ] == menu[ current_pos ].name)
+			if (tokens[current_token] == menu[current_pos].name)
 			{
 				if (current_token == tokens.length - 1) // Last token
 				{
-					return menu[ current_pos ];
+					return menu[current_pos];
 				}
-				if (menu[ current_pos ].children)
-				menu = menu[ current_pos ].children!;
+				if (menu[current_pos].children)
+				menu = menu[current_pos].children!;
 				current_pos = 0;
 				current_token++;
 				continue;
-
 			}
 
 			// Check next entry in this menu
@@ -371,7 +370,7 @@ export class Menubar
 		for (const i in sorted_entries)
 		{
 			const item = document.createElement("p") as HTMLParagraphElementPlus;
-			const menu_item = sorted_entries[i] as HTMLDivElementPlus;
+			const menu_item = sorted_entries[i] as MenuBarElement;
 
 			item.className = 'litemenu-entry ' + (item.children ? " submenu" : "");
 			const has_submenu = menu_item.children && menu_item.children.length;
@@ -395,8 +394,8 @@ export class Menubar
 			{
 				const data = item.data.data;
 
-				const checked = (data.type == "checkbox" && data.instance && data.property && data.instance[ data.property ] == true) ||
-					data.checkbox == true ||
+				const checked = (data.type == "checkbox" && data.instance && data.property &&
+					data.instance[ data.property ] == true) || data.checkbox == true ||
 					(data.instance && data.property && data.hasOwnProperty("value") && data.instance[data.property] == data.value) ||
 					(typeof(data.is_checked) == "function" && data.is_checked.call(data.instance, data));
 

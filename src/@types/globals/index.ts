@@ -192,15 +192,9 @@ export interface AreaOptions
     main?: boolean
 }
 
-export interface AreaRoot
+export interface AreaElement extends HTMLDivElement
 {
-    offsetWidth?: number,
-    offsetHeight?: number,
-    className?: string,
-    id?: string,
     litearea?: Area,
-    style?: any,
-
 }
 
 export interface MenubarOptions
@@ -208,6 +202,12 @@ export interface MenubarOptions
 	auto_open: boolean;
 	sort_entries: boolean;
 }
+
+export interface MenuBarElement extends HTMLDivElement
+{
+	name?: string;
+}
+
 export interface AddMenuOptions
 {
 	checkbox?: boolean;
