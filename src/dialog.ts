@@ -13,7 +13,7 @@ export class Dialog
 	footer!: HTMLDivElement;
 	dialog_window?: Window;
 	old_box?: DOMRect;
-	minimized: Array<Dialog> = [];
+	minimized: Dialog[] = [];
 	header?: HTMLDivElement;
 	detach_window?: boolean;
 	resizable: boolean = false;
@@ -221,15 +221,15 @@ export class Dialog
 		if (options.draggable)
 		{
 			this.draggable = true;
-			const element = panel.querySelector(".panel-header");
+			const element = panel.querySelector(".panel-header") as HTMLElement | undefined;
 			if(element)
 			{
-				LiteGUI.draggable(panel, element as HTMLElement, ()=>
+				LiteGUI.draggable(panel, element, ()=>
 				{
 					that.bringToFront();
 				},()=>{}, ()=>
 				{
-					return that.minimized;
+					return !that.minimized.includes(that);
 				});
 			}
 		}
