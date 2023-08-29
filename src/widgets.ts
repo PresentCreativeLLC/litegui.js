@@ -615,10 +615,10 @@ export class Slider
 	value: number;
 	options: SliderOptions;
 	doc_binded?: Document;
-	onChange?: Function;
-
+	onChange?: (value: number)=>void;
 	mouseMoveBind = this.onMouseMove.bind(this);
 	mouseUpBind = this.onMouseUp.bind(this);
+
 	constructor(value: number, options?: SliderOptions)
 	{
 		this.options = options! || {};

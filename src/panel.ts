@@ -1,54 +1,47 @@
-import { HTMLDivElementPlus, LiteguiObject, PanelOptions } from "./@types/globals";
+import { LiteguiObject, PanelOptions, PanelRoot } from "./@types/globals";
 import { LiteGUI } from "./core";
 
 /** **************** PANEL **************/
 export class Panel
 {
-	root?: HTMLDivElementPlus;
-	static title_height: string;
-	options: PanelOptions | {};
-	content?: Element | string | null;
-	header?: Element;
-	footer?: Element;
+	root: PanelRoot;
+	title_height: string;
+	options: PanelOptions;
+	content: HTMLDivElement | string;
+	header?: HTMLDivElement;
+	footer: HTMLDivElement;
 
-	constructor(id: string, options?: PanelOptions | string | {})
+	constructor(id: string | PanelOptions, options?: PanelOptions)
 	{
-		if (!options && id && id.constructor !== String)
+		if (!options && id && typeof id != 'string')
 		{
 			options = id;
 			id = "";
 		}
 
-		this.options = options = options || {};
+		const op = this.options = options = options ?? {};
+	
+		this.content = op.content ?? "";
 
-		const op = options as PanelOptions;
+		const root = this.root = document.createElement("div") as PanelRoot;
+		if (id) {root.id = id as string;}
 
-		this.content = op.content || "";
-
-		const root = this.root = document.createElement("div") as HTMLDivElementPlus;
-		if (id)
-		{root.id = id;}
-
-		root.className = "litepanel " + (op.className || "");
+		root.className = "litepanel " + (op.className ?? "");
 		root.data = this;
 
 		let code = "";
-		if (op.title)
-		{code += "<div class='panel-header'>"+op.title+"</div>";}
+		if (op.title) {code += "<div class='panel-header'>"+op.title+"</div>";}
 		code += "<div class='content'>"+this.content+"</div>";
 		code += "<div class='panel-footer'></div>";
 		root.innerHTML = code;
 
-		if (op.title)
-		{this.header = this.root.querySelector(".panel-header")!;}
+		if (op.title) {this.header = this.root.querySelector(".panel-header")!;}
 
-		this.content = this.root.querySelector(".content");
-		this.footer = this.root.querySelector(".panel-footer")!;
+		this.content = this.root.querySelector(".content") as HTMLDivElement;
+		this.footer = this.root.querySelector(".panel-footer") as HTMLDivElement;
 
-		if (op.width)
-		{this.root.style.width = LiteGUI.sizeToCSS(op.width) as string;}
-		if (op.height)
-		{this.root.style.height = LiteGUI.sizeToCSS(op.height) as string;}
+		if (op.width) {this.root.style.width = LiteGUI.sizeToCSS(op.width) as string;}
+		if (op.height) {this.root.style.height = LiteGUI.sizeToCSS(op.height) as string;}
 		if (op.position)
 		{
 			this.root.style.position = "absolute";
@@ -57,9 +50,8 @@ export class Panel
 		}
 
 		// If(options.scroll == false)	this.content.style.overflow = "hidden";
-		if (op.scroll == true)
-		{(this.content as HTMLDivElementPlus).style.overflow = "auto";}
-		Panel.title_height = "20px";
+		if (op.scroll == true) {this.content.style.overflow = "auto";}
+		this.title_height = "20px";
 	}
 
 	add(litegui_item: LiteguiObject)
@@ -70,6 +62,8 @@ export class Panel
 	clear()
 	{
 		while ((this.content as Element).firstChild)
-		{(this.content as Element).removeChild((this.content as Element).firstChild!);}
+		{
+			(this.content as Element).removeChild((this.content as Element).firstChild!);
+		}
 	};
 }

@@ -1,4 +1,5 @@
-import { DraggerOptions, HTMLDivElementPlus } from "./@types/globals";
+import { DraggerOptions } from "./@types/Inspector";
+import { HTMLDivElementPlus } from "./@types/globals";
 import { LiteGUI } from "./core";
 
 

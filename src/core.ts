@@ -626,7 +626,9 @@ export class Core
 		if (request.data)
 		{
 			for (const i in request.data)
-			{data.append(i,request.data[i]);}
+			{
+				data.append(i,request.data[i]);
+			}
 		}
 
 		xhr.send(data);
@@ -960,14 +962,13 @@ export class Core
 
 	showMessage(content : string, options? : DialogOptions)
 	{
-		options = options || {};
+		options = options ?? {};
 
 		options.title = options.title || "Attention";
 		options.content = content;
 		options.close = 'fade';
 		const dialog = new LiteGUI.Dialog(options);
-		if (!options.noclose)
-		{dialog.addButton("Close",{ close: true });}
+		if (options.closable) {dialog.addButton("Close",{ close: true });}
 		dialog.makeModal();
 		return dialog;
 	}
@@ -981,18 +982,16 @@ export class Core
 	 */
 	popup(content : string, options? : DialogOptions) : Dialog
 	{
-		options = options || {};
+		options = options ?? {};
 
 		options.min_height = 140;
-		if (typeof(content) == "string")
-		{content = "<p>" + content + "</p>";}
+		if (typeof content == "string") {content = "<p>" + content + "</p>";}
 
 		options.content = content;
 		options.close = 'fade';
 
 		const dialog = new LiteGUI.Dialog(options);
-		if (!options.noclose)
-		{dialog.addButton("Close",{ close: true });}
+		if (options.closable) {dialog.addButton("Close",{ close: true });}
 		dialog.show();
 		return dialog;
 	}
@@ -1419,9 +1418,8 @@ export class Core
 	 * @return {String} valid css size string
 	 *
 	 */
-	sizeToCSS(v?: number | string) : string | null
+	sizeToCSS(value?: number | string) : string | null
 	{
-		const value = v;
 		if (value ===  undefined || value === null) {return null;}
 		if (value.constructor === String) {return value;}
 		if (typeof (value) == 'number' && value >= 0) {return (value as number|0) + "px";}

@@ -42,8 +42,6 @@ export interface HTMLDivElementPlus extends HTMLDivElement
     getValueAt?: Function;
     position?: string;
     instance?: any;
-    _last_container_stack?: any[];
-    sectiontitle?: Element;
     input?: HTMLInputElement;
 }
 
@@ -159,12 +157,6 @@ export interface ChildNodePlus extends ChildNode
     innerHTML : string;
 }
 
-export interface DocumentPlus extends Document
-{
-	createEventObject?: Function;
-    parentWindow? : Window;
-}
-
 export interface HTMLParagraphElementPlus extends HTMLParagraphElement
 {
     data: HTMLDivElementPlus;
@@ -215,7 +207,7 @@ export interface AddMenuOptions
 	callback?: (value:{checkbox:boolean})=>void;
 }
 
-export interface addTreeOptions extends createWidgetOptions
+export interface addTreeOptions extends CreateWidgetOptions
 {
 	tree_options: TreeOptions;
 }
@@ -248,27 +240,12 @@ export interface TreeNode
 	children?: Array<TreeNode>;
 }
 
-export interface InspectorOptions
+
+
+export interface PanelRoot extends HTMLDivElement
 {
-    type?: string;
-    parent?: HTMLElementPlus;
-    onchange?: Function;
-    noscroll?: boolean;
-    widgets_width?: number;
-    name_width?: number;
-    height?: string | number;
-    width?: string | number;
-    one_line?: boolean;
-    full?: boolean;
-    offsetWidth?: number;
-    offsetHeight?: number;
-    className?: string;
-    id?: string;
-    collapsed?: boolean;
-    no_collapse?: boolean;
-    instance?: any;
-    widgets_per_row?: number;
-	callback?: (value:boolean) => void;
+	data: Panel | Dialog;
+	id: string;
 }
 
 export interface PanelOptions
@@ -344,7 +321,7 @@ export interface SliderOptions
 	max?: number;
 }
 
-export interface LineEditorOptions extends appendOptions
+export interface LineEditorOptions extends AppendOptions
 {
 	callback?: Function;
 	height?: number;
@@ -371,7 +348,6 @@ export interface ComplexListOptions
 export interface DialogOptions
 {
 	min_height?: number;
-	noclose?: boolean;
 	parent?: string | HTMLElementPlus;
 	attach?: boolean;
 	scroll?: boolean;
@@ -392,6 +368,7 @@ export interface DialogOptions
 	id?: string;
 	resizable?: boolean;
 	draggable?: boolean;
+	on_close?: ()=>void;
 }
 
 export interface DialogButtonOptions
@@ -400,6 +377,17 @@ export interface DialogButtonOptions
 	className?: string;
 	callback?: Function;
 	close?: boolean;
+}
+
+export interface DialogReferenceElement extends HTMLElement
+{
+	ownerDocument: DocumentPlus;
+}
+
+export interface DocumentPlus extends Document
+{
+	createEventObject?: Function;
+    parentWindow? : Window;
 }
 
 export interface MessageOptions
@@ -414,13 +402,6 @@ export interface MessageOptions
     noclose? : boolean; 
 }
 
-export interface InstanceObject extends Object
-{
-    getProperties: Function,
-    getInspectorProperties: Function,
-
-}
-
 export interface ItemOptions
 {
 	content: any;
@@ -429,24 +410,6 @@ export interface ItemOptions
 	style: string;
 	icon: string;
 	selected: boolean;
-}
-export interface createWidgetOptions extends appendOptions, processElementOptions
-{
-	focus?: boolean;
-	password?: boolean;
-	immediate?:any;
-	disabled?: boolean; 
-	callback?: Function; 
-	callback_keydown?: Function; 
-	height?: number | string;
-	widget_name?: string;
-	width?: number | string; 
-	name_width?: number | string; 
-	content_width?: number | string; 
-	pre_title?:string;
-	title?:string | string[];
-	className?:string; 
-	pretitle?: string;
 }
 export interface properties_info
 {
@@ -457,68 +420,10 @@ export interface properties_info
 	instance?: any;
 	varname?: string | number;
 	widget?: any;
+	step?: number;
 }
 
-export interface addSliderOptions extends processElementOptions, appendOptions
-{
-	min?: number;
-	max?: number;
-	step?: any;
-	callback?: Function;
-}
-
-export interface addStringButtonOptions extends addSliderOptions
-{
-	values?: any;
-	disabled?: boolean;
-	button?: string;
-	callback_button?: Function;
-	icon?: any;
-	button_width?: string | number;
-	widget_parent?: HTMLDivElementPlus;
-	replace?: HTMLDivElementPlus;
-}
-
-export interface addComboOptions extends createWidgetOptions
-{
-	values?: string[];
-	disabled?: boolean;
-	callback?: Function;
-}
-
-export interface addTagOptions extends createWidgetOptions
-{
-	default_tags?: string[];
-	values?: string[];
-	disabled?: boolean;
-	callback?: Function;
-}
-
-export interface setupOptions
-{
-	type: string;
-	name: string;
-	value: string;
-	options: any;
-}
-
-export interface addListOptions extends createWidgetOptions
-{
-	height?: number;
-	disabled?: boolean;
-	callback_dblclick?: Function;
-	multiselection?: boolean;
-	skip_wchange?: boolean;
-	selected?: string;
-}
-
-export interface addButtonOptions extends createWidgetOptions
-{
-	micro?: boolean;
-	button_text?: string;
-}
-
-export interface addIconOptions extends createWidgetOptions
+export interface addIconOptions extends CreateWidgetOptions
 {
 	image: string;
 	size?: number;
@@ -527,7 +432,7 @@ export interface addIconOptions extends createWidgetOptions
 	toggle: boolean;
 }
 
-export interface addColorOptions extends createWidgetOptions
+export interface addColorOptions extends CreateWidgetOptions
 {
 	show_rgb?: boolean;
 	callback?: (value: number[], hex:string, color:any) => void;
@@ -538,121 +443,28 @@ export interface addColorOptions extends createWidgetOptions
 	position?: number;
 }
 
-export interface addFileOptions extends createWidgetOptions
+export interface addFileOptions extends CreateWidgetOptions
 {
 	accept?: string | string[];
 	generate_url?: boolean;
 	read_file?: "binary"|"data_url"|string;
 	callbacks?: (data:FileAddedResponse)=>void;
 }
-export interface addArrayOptions
-{
-	data_type?: string;
-	max_items?: number;
-	callback?: Function;
-	data_options?: any;
-}
-export interface applyOptions
-{
-	className?: string;
-    id?: string;
-    width?: string | number;
-    height?: string | number;
-}
 
-export interface containerOptions extends applyOptions, addArrayOptions
+export interface containerOptions extends applyOptions, AddArrayOptions
 {
 	widgets_per_row?: number;
 }
-export interface addOptions
-{
-	type?: string;
-	name?: string;
-	value?: string;
-	callback: Function;
-}
-export interface addStringOptions extends createWidgetOptions
-{
-	width?: number;
-	callback?: Function;
-	password?: true;
-	focus?: boolean; 
-	immediate?: string; 
-	disabled?: boolean; 
-	placeHolder?: string; 
-	align?: string; 
-	callback_enter?: Function; 
-	icon?: string;
-}
-export interface addNumberOptions extends createWidgetOptions, DraggerOptions
-{
-	tab_index?: number;
-	extra_class?: string;
-	full_num?: boolean;
-	precision?: number;
-	step?:number;
-	units?: string;
-	disabled?: boolean;
-	on_change?: (value: number) => number|void;
-	callback?: (value: number) => void;
-	callback_before?: () => void;
-}
-export interface DraggerOptions
-{
-    precision?: number;
-    extra_class?: string;
-    full?: string;
-    disabled?: boolean;
-    dragger_class?: string;
-    tab_index?: number;
-    units?: string;
-    horizontal?: boolean;
-    linear?: boolean;
-    step?: number;
-    min?: number;
-    max?: number;
-}
-export interface VectorOptions extends processElementOptions, appendOptions, DraggerOptions
-{
-    fullVector?: boolean;
-    tab_index?: number;
-    step?: number;
-    callback?: (value:number[])=>void;
-    on_change?: (value:number[])=>number[]|void;
-    callback_before?: (e:Event)=>void;
-} 
-export interface addPadOptions extends appendOptions, processElementOptions
-{
-	step?: number;
-	tab_index?: number;
-	full?: boolean;
-	min?: number;
-	minx?: number;
-	miny?: number;
-	max?: number;
-	maxx?: number;
-	maxy?: number;
-	background?: string;
-	callback?: Function;
-}
-export interface beginGroupOptions extends appendOptions
+export interface beginGroupOptions extends AppendOptions
 {
 	title?: string;
 	collapsed: boolean;
 	height: number | string;
 	scrollable: boolean;
 }
-export interface addTitleOptions extends appendOptions
+export interface addTitleOptions extends AppendOptions
 {
 	help?: string;
-}
-export interface addInfoOptions extends appendOptions, processElementOptions
-{
-	className?: string;
-	name_width?: string;
-	width?: string | number;
-	height?: string | number;
-	callback?: Function;
 }
 
 export interface FileAddedResponse extends File
@@ -662,26 +474,6 @@ export interface FileAddedResponse extends File
 	data?:string | ArrayBuffer | null
 }
 
-export interface onWidgetChangeOptions
-{
-	skip_wchange?: boolean;
-	callback?: Function;
-}
-export interface addCheckboxOptions extends appendOptions, processElementOptions, onWidgetChangeOptions
-{
-	label_on: string;
-	label_off: string;
-}
-export interface appendOptions
-{
-	widget_parent? : HTMLDivElementPlus;
-	replace?: HTMLDivElementPlus;
-}
-
-export interface processElementOptions
-{
-	callback_update?: Function;
-}
 declare global
 {
     interface Window

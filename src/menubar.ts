@@ -58,7 +58,7 @@ export class Menubar
 		}
 		else
 		{
-			self.data = data || {};
+			self.data = data ?? {};
 		}
 		
 		const prev_length = self.menu.length;
@@ -129,8 +129,7 @@ export class Menubar
 			return console.warn("Can't remove an entire list");
 		}
 		//We are going to remove a single menu
-		if (!menu.parent || !menu.parent.children)
-		{return console.warn("menu without parent?");}
+		if (!menu.parent || !menu.parent.children) {return console.warn("menu without parent?");}
 
 		const index = menu.parent.children.indexOf(menu);
 		if (index != -1)
@@ -465,7 +464,7 @@ export interface SubMenu
 {
 	name: string;
 	parent?: SubMenu;
-	children: SubMenu[] | undefined;
+	children?: SubMenu[];
 	data?: any;
 	disable?: Function;
 	enable?: Function;
