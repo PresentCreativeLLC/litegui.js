@@ -13,7 +13,7 @@ export class Dialog
 	footer: HTMLDivElement | null = null;
 	dialog_window?: Window;
 	old_box?: DOMRect;
-	minimized: Array<Dialog> = [];
+	minimized: Dialog[] = [];
 	header?: HTMLDivElement | null = null;
 	detach_window: any; //It's not used anywhere in the code, just a check in "show" that will always be false
 	resizable: boolean = false;
@@ -237,7 +237,7 @@ export class Dialog
 				that.bringToFront();
 			},()=>{}, ()=>
 			{
-				return !that.minimized;
+				return !that.minimized.includes(that);
 			});
 		}
 
