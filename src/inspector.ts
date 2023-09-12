@@ -17,7 +17,6 @@ import { HTMLDivElementOptions,
 	InspectorNumberWidget,
 	InspectorNumberVectorWidget,
 	AddVectorOptions,
-	VectorInput,
 	InspectorPadWidget,
 	AddPadOptions,
 	AddInfoOptions,
@@ -30,14 +29,12 @@ import { HTMLDivElementOptions,
 	AddComboOptions,
 	InspectorComboWidget,
 	InspectorComboButtonsWidget,
-	InspectorTagsWidget,
 	AddTagOptions,
 	AddListOptions,
 	InspectorListWidget,
 	AddButtonOptions,
-	InspectorButtonWidget} from "./@types/Inspector";
-import { EventTargetPlus,
-	HTMLDivElementPlus,
+	AddArrayOptions} from "./@types/Inspector";
+import { HTMLDivElementPlus,
 	HTMLElementPlus,
 	addTitleOptions,
 	beginGroupOptions,
@@ -49,26 +46,27 @@ import { EventTargetPlus,
 	addIconOptions,
 	properties_info,
 	ParentNodePlus,
-	ItemOptions,
 	TreeNode,
-	FileAddedResponse,
-	ChildNodePlus } from "./@types/globals";
+	FileAddedResponse} from "./@types/globals";
 import { LiteGUI } from "./core";
 import { purgeElement } from "./core";
-import { Dragger } from "./dragger";
+import { AddButton, AddButtons } from "./inspector/button";
+import { AddCheckbox } from "./inspector/checkbox";
+import { AddCombo } from "./inspector/combo";
+import { AddComboButtons } from "./inspector/comboButtons";
+import { AddFlags } from "./inspector/flag";
+import { AddInfo } from "./inspector/info";
+import { AddList } from "./inspector/list";
+import { AddNumber } from "./inspector/number";
+import { AddPad } from "./inspector/pad";
+import { AddSlider } from "./inspector/slider";
+import { AddString } from "./inspector/string";
+import { AddStringButton } from "./inspector/stringButton";
+import { AddTags } from "./inspector/tags";
+import { AddTextArea } from "./inspector/textArea";
+import { AddVector } from "./inspector/vector";
 import { jscolor } from "./jscolor";
 import { LineEditor } from "./widgets";
-
-
-
-
-declare global
-{
-    interface Window
-    {
-        jscolor: jscolor;
-    }
-}
 
 export class Inspector 
 {
@@ -893,82 +891,7 @@ export class Inspector
      */
     addString(name?: string,  value?: string, options?: AddStringOptions) : InspectorStringWidget
     {
-		const that = this;
-		value = value ?? '';
-        options = options ?? {};
-		const valueName = this.getValueName(name, options);
-        this.values.set(valueName, value);
-    
-        const inputType = options.password ? "password": "text";
-        const focus = options.focus ? "autofocus" : "";
-		const isDisabledText = options.disabled ? "disabled" : "";
-    
-        const element = this.createWidget(name,"<span class='inputfield full "+isDisabledText+
-            "'><input type='"+inputType+"' tabIndex='"+this.tab_index+"' "+focus+" class='text string' value='" +
-            value+"' "+isDisabledText+"/></span>", options) as InspectorStringWidget;
-        const input = element.querySelector(".wcontent input") as HTMLInputElement;
-    
-        if (options.placeHolder) {input.setAttribute("placeHolder",options.placeHolder);}
-    
-        if (options.align == "right")
-        {
-            input.style.direction = "rtl";
-            // Input.style.textAlign = "right";
-        }
-    
-        input.addEventListener(options.immediate ? "keyup" : "change", (e: Event) =>
-        {
-			const target = e.target as HTMLInputElement;
-			const value = target.value;
-            const r = this.onWidgetChange.call(that, element, valueName, value, options!);
-            if (r !== undefined) {input.value = r;}
-        });
-    
-        if (options.callback_enter)
-        {
-            input.addEventListener("keydown" , (e: KeyboardEvent) =>
-            {
-                if (e.key === 'Enter')
-                {
-					const target = e.target as HTMLInputElement;
-					const value = target.value;
-                    const r = this.onWidgetChange.call(that, element, name!, value, options!);
-                    if(options!.callback_enter) { options!.callback_enter(); }
-                    e.preventDefault();
-                }
-            });
-        }
-    
-        this.tab_index += 1;
-    
-        element.setIcon = function(img: string)
-        {
-            if (!img)
-            {
-                input.style.background = "";
-                input.style.paddingLeft = "";
-            }
-            else
-            {
-                input.style.background = `transparent url('${img}') no-repeat left 4px center`;
-                input.style.paddingLeft = "1.7em";
-            }
-        };
-        if (options.icon) {element.setIcon(options.icon);}
-    
-        element.setValue = function(value?: string, skip_event?: boolean)
-        {
-            if (value === undefined || value === input.value) {return;}
-            input.value = value;
-            if (!skip_event) {LiteGUI.trigger(input, "change");}
-        };
-        element.getValue = function() { return input.value; };
-        element.focus = function() { this.querySelector("input")?.focus(); };
-        element.disable = function() { input.disabled = true; };
-        element.enable = function() { input.disabled = false; };
-        this.appendWidget(element, options);
-        this.processElement(element, options);
-        return element;
+		return AddString(this, name, value, options);
     };
     
     /**
@@ -986,69 +909,7 @@ export class Inspector
      */
     addStringButton(name?: string, value?: string, options?: AddStringButtonOptions) : InspectorStringWidget
     {
-        const that = this;
-		value = value ?? '';
-		options = options ?? {};
-		const valueName = this.getValueName(name, options);
-        this.values.set(valueName!, value);
-
-        const element = this.createWidget(name,
-            "<span class='inputfield button'><input type='text' tabIndex='" + this.tab_index +
-            "' class='text string' value='' "+(options.disabled?"disabled":"") +
-            "/></span><button class='micro'>"+(options.button ?? "...")+"</button>", options) as InspectorStringWidget;
-        const input = element.querySelector(".wcontent input") as HTMLInputElement;
-        input.value = value;
-        input.addEventListener("change", (e: Event) =>
-        {
-            const r = this.onWidgetChange.call(that,element,valueName,(e.target as HTMLInputElement)!.value, options!);
-            if (r !== undefined) { input.value = r; }
-        });
-    
-        if (options.disabled) {input.setAttribute("disabled","disabled");}
-    
-        element.setIcon = function(img: string)
-        {
-            if (!img)
-            {
-                input.style.background = "";
-                input.style.paddingLeft = "";
-            }
-            else
-            {
-                input.style.background = "transparent url('"+img+"') no-repeat left 4px center";
-                input.style.paddingLeft = "1.7em";
-            }
-        };
-        if (options.icon) {element.setIcon(options.icon);}
-    
-        const button = element.querySelector(".wcontent button") as HTMLInputElement;
-        button.addEventListener("click", (e: Event) =>
-        {
-            if (options!.callback_button) {options!.callback_button.call(element, input.value, e);}
-        });
-    
-        if (options.button_width)
-        {
-            button.style.width = LiteGUI.sizeToCSS(options.button_width) ?? '0px';
-            const inputField = element.querySelector(".inputfield") as HTMLInputElement;
-            inputField.style.width = "calc( 100% - " + button.style.width + " - 6px)";
-        }
-    
-    
-        this.tab_index += 1;
-        this.appendWidget(element,options);
-        element.setValue = function(value?: string, skip_event?: boolean)
-        {
-            if (value === undefined || value === input.value) {return;}
-            input.value = value;
-            if (!skip_event) {LiteGUI.trigger(input, "change");}
-        };
-        element.disable = function() { input.disabled = true; button.disabled = true; };
-        element.enable = function() { input.disabled = false; button.disabled = false; };
-        element.getValue = function() { return input.value; };
-        element.focus = function() { LiteGUI.focus(input); };
-        this.processElement(element, options);
-        return element;
+        return AddStringButton(this, name, value, options);
     };
     
     /**
@@ -1067,51 +928,7 @@ export class Inspector
      */
     addTextArea(name?: string, value?: string, options?: AddTextAreaOptions): InspectorStringWidget
     {
-        const that = this;
-        value = value ?? "";
-        options = options ?? {};
-		const valueName = this.getValueName(name, options);
-        this.values.set(valueName!, value);
-		
-		const isDisabledText = options.disabled?"disabled":"";
-        const element = this.createWidget(name,"<span class='inputfield textarea "+
-			isDisabledText+"'><textarea tabIndex='"+this.tab_index+"' "+
-			isDisabledText+"></textarea></span>", options) as InspectorStringWidget;
-        this.tab_index++;
-        const textarea = element.querySelector(".wcontent textarea") as HTMLTextAreaElement;
-        textarea.value = value;    
-        if (options.placeHolder) {textarea.setAttribute("placeHolder",options.placeHolder);}
-        textarea.addEventListener(options.immediate ? "keyup" : "change", (e: Event) =>
-        {
-            this.onWidgetChange.call(that,element,valueName,(e.target as HTMLTextAreaElement)?.value, options!, false, e);
-        });
-        if (options.callback_keydown)
-        {
-            textarea.addEventListener("keydown", options.callback_keydown);
-        }
-    
-        if (options.height)
-        {
-            textarea.style.height = "calc( " + LiteGUI.sizeToCSS(options.height) + " - 5px )";
-        }
-        // Textarea.style.height = LiteGUI.sizeToCSS( options.height );
-        this.appendWidget(element, options);
-        element.setValue = function(result?: string, skip_event?: boolean)
-        {
-            if (result === undefined || result == textarea.value) {return;}
-            value = result;
-            textarea.value = result;
-            if (!skip_event) {LiteGUI.trigger(textarea,"change");}
-        };
-        element.getValue = function()
-        {
-            return textarea.value;
-        };
-        element.focus = function() { LiteGUI.focus(textarea); };
-        element.disable = function() { textarea.disabled = true;};
-        element.enable = function() { textarea.disabled = false;};
-        this.processElement(element, options);
-        return element;
+		return AddTextArea(this, name, value, options);
     };
     
     /**
@@ -1132,92 +949,7 @@ export class Inspector
      */
     addNumber( name?: string, value?: number, options?: AddNumberOptions): InspectorNumberWidget
     {
-        const that = this;
-        value = value ?? 0;
-        options = options ?? {};
-		const valueName = this.getValueName(name, options);
-        this.values.set(valueName, value);
-    
-        const element = this.createWidget(name,"", options) as InspectorNumberWidget;
-        this.appendWidget(element, options);
-    
-        options.extra_class = "full";
-        options.tab_index = this.tab_index;
-        // Options.dragger_class = "full";
-        options.full_num = true;
-        options.precision = options.precision !== undefined ? options.precision : 2;
-        options.step = options.step === undefined ? (options.precision == 0 ? 1 : 0.1) : options.step;
-    
-        this.tab_index++;
-    
-        const dragger = new LiteGUI.Dragger(value, options);
-        dragger.root.style.width = "calc( 100% - 1px )";
-        element.querySelector(".wcontent")!.appendChild(dragger.root);
-    
-        const inner_before_change = function(options: AddNumberOptions)
-        {
-            if (options.callback_before) {options.callback_before.call(element);}
-        };
-        dragger.root.addEventListener("start_dragging", inner_before_change.bind(undefined,options));
-        element.dragger = dragger;
-    
-        if (options.disabled) {dragger.input.setAttribute("disabled","disabled");}
-    
-        const input = element.querySelector("input") as HTMLInputElement;    
-        input.addEventListener("change", (e: Event) =>
-        {
-            const el = e.target as EventTargetPlus;
-            LiteGUI.trigger(element, "wbeforechange", el.value);
-    
-            this.values.set(valueName, el.value);
-            if(options == undefined || typeof(options) == "function") { return; }
-            if (options.on_change && dragger.dragging)
-            {
-                const ret = options.on_change.call(element, parseFloat(el.value));
-                if (typeof(ret) == "number") { el.value = ret; }
-            }
-            else if ((options.on_change || options.callback) && !dragger.dragging)
-            {
-                let ret = undefined;
-                if (options.callback)
-                {
-                    ret = options.callback.call(element, parseFloat(el.value));
-                }
-                else if (options.on_change)
-                {
-                    ret = options.on_change.call(element, parseFloat(el.value));
-                }
-                if (typeof(ret) == "number") {el.value = ret;}
-            }
-            LiteGUI.trigger(element, "wchange", el.value);
-            if (that.onchange) {that.onchange(valueName,el.value,element);}
-        });
-    
-        dragger.root.addEventListener("stop_dragging", (e: any) =>
-        {
-            LiteGUI.trigger(input, "change");
-        });
-    
-        element.setValue = function(value?: number | string, skip_event?: boolean)
-        {
-            if(options == undefined || typeof options == "function") { return; }
-            if (value === undefined) {return;}
-            if (typeof value == 'string') {value = parseFloat(value as string);}
-            if (options.precision) {value = value.toFixed(options.precision);}
-			value = value.toString();
-            value += options.units ?? '';
-            if (input.value == value) {return;}
-            input.value = value;
-            if (!skip_event) {LiteGUI.trigger(input,"change");}
-        };
-    
-        element.setRange = function(min: number, max: number) { dragger.setRange(min,max); };
-        element.getValue = function() { return parseFloat(input.value); };
-        element.focus = function() { LiteGUI.focus(input); };
-        element.disable = function() { input.disabled = true;};
-        element.enable = function() { input.disabled = false;};
-        this.processElement(element, options);
-        return element;
+		return AddNumber(this, name, value, options);
     };
 	
     /**
@@ -1239,118 +971,7 @@ export class Inspector
      */
     addVector(name: string | undefined, value: number[], options?: AddVectorOptions): InspectorNumberVectorWidget
     {
-        const that = this;
-        options = options ?? {};
-		const valueName = this.getValueName(name, options);
-        this.values.set(valueName, value);
-    
-        const element = this.createWidget(name,"", options) as InspectorNumberVectorWidget;
-		const initLength = value.length;
-        options.step = options.step ?? 0.1;
-        options.tab_index = this.tab_index;
-        options.fullVector = true;
-        if (!options.step) {options.step = 0.1;}
-        this.tab_index++;
-    
-        const draggers: Dragger[] = element.draggers = [];
-    
-        const inner_before_change = function(e: Event)
-        {
-            if (options!.callback_before) {options!.callback_before(e);}
-        };
-    
-        for (let i = 0; i < value.length; i++)
-        {
-            const dragger: Dragger = new LiteGUI.Dragger(value[i], options);
-            dragger.root.style.marginLeft = '0';
-            dragger.root.style.width = "calc( 25% - 1px )";
-            element.querySelector(".wcontent")!.appendChild(dragger.root);
-            options.tab_index = this.tab_index;
-            this.tab_index++;
-            dragger.root.addEventListener("start_dragging", inner_before_change);
-            draggers.push(dragger);
-        }
-    
-        const inputs = element.querySelectorAll("input") as NodeListOf<VectorInput>;
-        const onChangeCallback = (e: Event) =>
-        {
-            // Gather all three parameters
-            let r = [];
-            for (let j = 0; j < inputs.length; j++)
-            {
-                r.push(parseFloat(inputs[j].value));
-            }
-    
-            LiteGUI.trigger(element, "wbeforechange", [r]);
-    
-            this.values.set(valueName, r);
-    
-            const dragger = (e.target as VectorInput).dragger;
-            if (options!.on_change && dragger.dragging)
-            {
-                const new_val = options!.on_change.call(element, r);
-    
-                if (Array.isArray(new_val) && new_val.length >= initLength)
-                {
-                    for (let j = 0; j < inputs.length; j++)
-                    {
-                        inputs[j].value = new_val[j].toString();
-                    }
-                    r = new_val;
-                }
-            }
-            else if ((options!.on_change || options!.callback) && !dragger.dragging)
-            {
-                let new_val = undefined;
-                if (options!.callback)
-                {
-                    new_val = options!.callback.call(element, r);
-                }
-                else if (options!.on_change)
-                {
-                    new_val = options!.on_change.call(element, r);
-                }
-    
-                if (Array.isArray(new_val) && new_val.length >= initLength)
-                {
-                    for (let j = 0; j < inputs.length; j++)
-                    {
-                        inputs[j].value = new_val[j].toString();
-                    }
-                    r = new_val;
-                }
-            }
-    
-            LiteGUI.trigger(element, "wchange", [r]);
-            if (that.onchange) {that.onchange(valueName, r, element);}
-        };
-        const onStopDragging = function(input: VectorInput)
-        {
-            LiteGUI.trigger(input, "change");
-        };
-        for (let i = 0; i < inputs.length; ++i)
-        {
-            const dragger = draggers[i];
-            const input = inputs[i];
-            input.dragger = dragger;
-            input.addEventListener("change" , onChangeCallback);
-            dragger.root.addEventListener("stop_dragging", onStopDragging.bind(undefined, input));
-        }
-    
-        this.appendWidget(element,options);
-    
-        element.setValue = function(value?: (number|string)[], skip_event?: boolean)
-        {
-            if (value == undefined) {return;}
-            for (let i = 0; i < draggers.length; i++)
-            {
-                draggers[i].setValue(value[i],skip_event ?? i < draggers.length - 1);
-            }
-        };
-        element.setRange = function(min: number, max: number) { for (const i in draggers) { draggers[i].setRange(min,max); } };
-    
-        this.processElement(element, options);
-        return element;
+        return AddVector(this, name, value, options);
     };
     
     /**
@@ -1374,7 +995,7 @@ export class Inspector
     {
         value = value ?? [0,0];
         options = options ?? {};
-        return this.addVector(name, value, options);
+        return AddVector(this, name, value, options);
     };
     
     /**
@@ -1398,7 +1019,7 @@ export class Inspector
     {
         value = value ?? [0,0,0];
         options = options ?? {};
-        return this.addVector(name, value, options);
+        return AddVector(this, name, value, options);
     };
     
     /**
@@ -1422,7 +1043,7 @@ export class Inspector
     {
         value = value ?? [0,0,0,0];
         options = options ?? {};
-        return this.addVector(name, value, options);
+        return AddVector(this, name, value, options);
     };
     
     /**
@@ -1449,123 +1070,7 @@ export class Inspector
      */
     addPad(name?: string, value?: [number, number], options?: AddPadOptions): InspectorPadWidget
     {
-        const that = this;
-        value = value ?? [0,0];
-        options = options ?? {};
-		const valueName = this.getValueName(name, options);
-        this.values.set(valueName, value);
-    
-        const element = this.createWidget(name,"", options) as InspectorPadWidget;
-    
-        options.step = options.step || 0.1;
-        options.tab_index = this.tab_index;
-        options.full = true;
-        this.tab_index++;
-    
-        const min_x = options.min_x ?? options.min ?? 0;
-        const min_y = options.min_y ?? options.min ?? 0;
-        const max_x = options.max_x ?? options.max ?? 1;
-        const max_y = options.max_y ?? options.max ?? 1;
-    
-        const wcontent = element.querySelector(".wcontent") as HTMLElement;
-    
-        const pad = document.createElement("div") as HTMLDivElement;
-        pad.className = "litepad";
-        wcontent.appendChild(pad);
-        pad.style.width = "100%";
-        pad.style.height = "100px";
-        if (options.background)
-        {
-            pad.style.backgroundImage = "url('" + options.background + "')";
-            pad.style.backgroundSize = "100%";
-            pad.style.backgroundRepeat = "no-repeat";
-        }
-    
-        const handler = document.createElement("div");
-        handler.className = "litepad-handler";
-        pad.appendChild(handler);
-    
-        options.tab_index = this.tab_index;
-        this.tab_index++;
-    
-        let dragging = false;
-
-        function mouseDown(e: MouseEvent)
-        {
-            e.preventDefault();
-            e.stopPropagation();
-
-            document.body.addEventListener("mousemove", mouseMove);
-            document.body.addEventListener("mouseup", mouseUp);
-            dragging = true;
-        }
-
-        function mouseMove(e: MouseEvent)
-        {
-            const b = pad.getBoundingClientRect();
-            
-            const mouse_x = e.pageX - b.left;
-            const mouse_y = e.pageY - b.top;
-            e.preventDefault();
-            e.stopPropagation();
-
-            let x = mouse_x / (b.width);
-			let y = mouse_y / (b.height);
-
-			x = x * (max_x - min_x) + min_x;
-			y = y * (max_y - min_y) + min_x;
-
-			const r = [x,y] as [number,number];
-
-			LiteGUI.trigger(element, "wbeforechange", [r]);
-			element.setValue(r);
-
-			if (options!.callback)
-			{
-				const new_val = options!.callback.call(element, r);
-				if (new_val && new_val.length >= 2)
-				{
-					element.setValue(new_val);
-				}
-			}
-
-			LiteGUI.trigger(element, "wchange",[r]);
-			if (that.onchange) {that.onchange(valueName,r,element);}
-        }
-
-        function mouseUp(e: MouseEvent)
-        {
-            e.preventDefault();
-            e.stopPropagation();
-
-            dragging = false;
-            document.body.removeEventListener("mousemove", mouseMove);
-            document.body.removeEventListener("mouseup", mouseUp);
-        }
-
-        pad.addEventListener("mousedown", mouseDown);
-    
-        element.setValue = function(value?: [number, number])
-        {
-            if (value == undefined) {return;}
-    
-            const b = pad.getBoundingClientRect();
-            let x = (value[0] - min_x) / (max_x - min_x);
-            let y = (value[1] - min_y) / (max_y - min_y);
-            x = Math.max(0, Math.min(x, 1)); // Clamp
-            y = Math.max(0, Math.min(y, 1));
-
-            const w = ((b.width - 10) / b.width) * 100;
-            const h = ((b.height - 10) / b.height) * 100;
-            handler.style.left = (x * w).toFixed(1) + "%";
-            handler.style.top = (y * h).toFixed(1) + "%";
-        };
-    
-        this.appendWidget(element,options);    
-        element.setValue(value);    
-        this.processElement(element, options);
-
-        return element;
+        return AddPad(this, name, value, options);
     };
     
     /**
@@ -1581,60 +1086,7 @@ export class Inspector
      */
     addInfo(name?: string, value?: string, options?: AddInfoOptions): InspectorInfoWidget
     {
-        value = value ?? '';
-        options = options ?? {};
-        let element:InspectorInfoWidget | undefined = undefined;
-        if (name !== undefined)
-        {
-			element = this.createWidget(name, value, options) as InspectorInfoWidget;
-		}
-        else
-        {
-            element = document.createElement("div") as InspectorInfoWidget;
-            if (options.className) {element.className = options.className;}
-
-            element.innerHTML = "<span class='winfo'>"+value+"</span>";
-        }
-    
-        const info:HTMLElement = element.querySelector(".winfo") ?? element.querySelector(".wcontent") as HTMLElement;
-    
-        if (options.callback) {element.addEventListener("click",options.callback.bind(element));}
-    
-        element.setValue = function(value?: string)
-        {
-            if (value == undefined) {return;}
-            if (info) {info.innerHTML = value;}
-        };
-    
-        let content = element.querySelector("span.info_content") as HTMLElement;
-        if (!content) {content = element.querySelector(".winfo") as HTMLElement;}
-		element.content = content;
-    
-        if (options.width)
-        {
-            element.style.width = LiteGUI.sizeToCSS(options.width) ?? '0';
-            element.style.display = "inline-block";
-            if (!name) {info.style.margin = "2px";}
-        }
-        if (options.height)
-        {
-            content.style.height = LiteGUI.sizeToCSS(options.height) ?? '0';
-            content.style.overflow = "auto";
-        }
-    
-        element.scrollToBottom = function()
-        {
-            content.scrollTop = content.offsetTop;
-        };
-    
-        element.add = function(e: Node)
-        {
-            content.appendChild(e);
-        };
-
-        this.appendWidget(element, options);
-        this.processElement(element, options);
-        return element;
+        return AddInfo(this, name, value, options);
     };
     
     /**
@@ -1652,61 +1104,7 @@ export class Inspector
      */
     addSlider(name?: string, value?: number, options?: AddSliderOptions): InspectorSliderWidget
     {
-        const that = this;
-        value = value ?? 0;
-        options = options ?? {};
-		options.min = options.min ?? 0;
-		options.max = options.max ?? 1;
-		options.step = options.step || 0.01;
-		const valueName = this.getValueName(name, options);
-        this.values.set(valueName, value);
-    
-        const element = this.createWidget(name,
-            "<span class='inputfield full'>\n<input tabIndex='" + this.tab_index +
-            "' type='text' class='slider-text fixed liteslider-value' value='' /><span class='slider-container'></span></span>",
-            options) as InspectorSliderWidget;
-    
-        const slider_container = element.querySelector(".slider-container") as HTMLElement;
-    
-        const slider = new LiteGUI.Slider(value,options);
-		element.slider = slider;
-        slider_container.appendChild(slider.root);
-    
-        // Text change -> update slider
-        const skip_change = false; // Used to avoid recursive loops
-        const text_input = element.querySelector(".slider-text") as HTMLInputElement;
-        text_input.value = value.toString();
-        text_input.addEventListener('change', () =>
-        {
-            if (skip_change) {return;}
-            const v = parseFloat(text_input.value);
-            value = v;
-            slider.setValue(v);
-            this.onWidgetChange.call(that,element,valueName,v, options!);
-        });
-    
-        // Slider change -> update Text
-        slider.onChange = (value: number) =>
-        {
-            text_input.value = value.toString();
-            this.onWidgetChange.call(that, element, valueName, value, options!);
-        };
-    
-        this.appendWidget(element, options);
-    
-        element.setValue = function(v?: number, skip_event?: boolean)
-        {
-            if (v === undefined) {return;}
-            value = v;
-            slider.setValue(v,skip_event);
-        };
-        element.getValue = function()
-        {
-            return value;
-        };
-    
-        this.processElement(element, options);
-        return element;
+        return AddSlider(this, name, value, options);
     };
     
     /**
@@ -1724,65 +1122,7 @@ export class Inspector
      */
     addCheckbox(name: string, value: boolean, options?: AddCheckboxOptions): InspectorCheckboxWidget
     {
-        const that = this;
-        value = value ?? false;
-        options = options ?? {};
-		const valueName = this.getValueName(name, options);
-        this.values.set(valueName, value);
-    
-        const label_on = options.label_on ?? options.label ?? "on";
-        const label_off = options.label_off ?? options.label ?? "off";
-        const label = (value ? label_on : label_off);
-    
-        // Var element = this.createWidget(name,"<span class='inputfield'><span class='fixed flag'>"+(value ? "on" : "off")+"</span><span tabIndex='"+this.tab_index+"'class='checkbox "+(value?"on":"")+"'></span></span>", options );
-        const element = this.createWidget(name,"<span class='inputfield'><span tabIndex='"
-			+this.tab_index+"' class='fixed flag checkbox "+(value ? "on" : "off")+"'>"+label+
-			"</span></span>", options) as InspectorCheckboxWidget;
-        this.tab_index++;
-    
-        const checkbox = element.querySelector(".wcontent .checkbox") as HTMLElement;
-        checkbox.addEventListener("keypress", (e: any) =>
-        {
-            if (e.keyCode == 32) { LiteGUI.trigger(checkbox, "click"); }
-        });
-    
-        element.addEventListener("click", () =>
-        {
-            value = !value;
-            element.querySelector("span.flag")!.innerHTML = value ? label_on : label_off;
-            if (value)
-            {
-                checkbox.classList.add("on");
-            }
-            else
-            {
-                checkbox.classList.remove("on");
-            }
-            this.onWidgetChange.call(that,element,valueName,value, options!);
-        });
-    
-        element.getValue = function()
-        {
-            return value;
-        };
-    
-        element.setValue = (v?: boolean, skip_event?: boolean)=>
-        {
-            if (v === undefined) {return;}
-			if (value != v)
-			{
-				value = v;
-				this.values.set(valueName, v);
-				if (!skip_event)
-				{
-					LiteGUI.trigger(checkbox, "click");
-				}
-			}
-        };
-    
-        this.appendWidget(element,options);
-        this.processElement(element, options);
-        return element;
+		return AddCheckbox(this, name, value, options);
     };
     
     /**
@@ -1797,58 +1137,7 @@ export class Inspector
     addFlags(flags: {[key:string]:boolean}, force_flags?: {[key:string]:(boolean | undefined)},
 		options?: AddCheckboxOptions | AddFlagsOptions): InspectorCheckboxWidget[]
     {
-		options = options ?? {};
-        const f:{[key:string]:boolean} = {};
-        for (const i in flags)
-        {
-            f[i] = flags[i];
-        }
-        if (force_flags)
-        {
-            for (const i in force_flags)
-            {
-                if (typeof f[i] == "undefined")
-                {
-                    f[i] = force_flags[i] ?? false;
-                }
-            }
-        }
-		let defaultOpt:AddCheckboxOptions | undefined = undefined;
-		if (options.hasOwnProperty('default'))
-		{
-			defaultOpt = (options as AddFlagsOptions).default;
-		}
-		const result:InspectorCheckboxWidget[] = [];
-        for (const i in f)
-        {
-			let opt:AddCheckboxOptions | undefined = undefined;
-			if (options.hasOwnProperty(i))
-			{
-				opt = (options as AddFlagsOptions)[i];
-			}
-			else if (defaultOpt)
-			{
-				opt = defaultOpt;
-			}
-			else
-			{
-				opt = options as AddCheckboxOptions;
-			}
-
-            const flag_options:AddCheckboxOptions = {};
-            for (const j in opt)
-            {
-                (flag_options as any)[j] = (opt as any)[j];
-            }
-    
-            flag_options.callback = function(v: boolean)
-			{
-				flags[i] = v;
-			};
-    
-            result.push(this.addCheckbox(i, f[i], flag_options));
-        }
-		return result;
+		return AddFlags(this, flags, force_flags, options);
     };
     
     /**
@@ -1865,104 +1154,7 @@ export class Inspector
      */
     addCombo(name?: string, value?: string, options?: AddComboOptions): InspectorComboWidget
     {    
-        const that = this;
-        value = value ?? '';
-        options = options ?? {};
-		const valueName = this.getValueName(name, options);
-        this.values.set(valueName, value);
-    
-        this.tab_index++;
-    
-		const isDisabledText = options.disabled ? "disabled" : "";
-        const element = this.createWidget(name,"<span class='inputfield full inputcombo " +
-			isDisabledText + "'></span>", options) as InspectorComboWidget;
-        element.options = options;
-    
-        let values: string[] = options.values ?? [];
-    
-        /*
-         *If(!values)
-         *	values = [];
-         *
-         *const index = 0;
-         *for(const i in values)
-         *{
-         *	const item_value = values[i];
-         *	const item_index = values.constructor === Array ? index : i;
-         *	const item_title = values.constructor === Array ? item_value : i;
-         *	if(item_value && item_value.title)
-         *		item_title = item_value.title;
-         *	code += "<option value='"+item_index+"' "+( item_value == value ? " selected":"")+" data-index='"+item_index+"'>" + item_title + "</option>";
-         *	index++;
-         *}
-         */
-    
-        const code = "<select tabIndex='"+this.tab_index+"' "+isDisabledText+" class='"+isDisabledText+"'></select>";
-        element.querySelector("span.inputcombo")!.innerHTML = code;
-        setValues(values);
-    
-        let stop_event = false; // Used internally
-    
-        const select = element.querySelector(".wcontent select") as HTMLSelectElement;
-        select.addEventListener("change", (e: Event) =>
-        {
-            const v = (e.target as HTMLSelectElement).value;
-            value = v;
-            if (stop_event) {return;}
-            this.onWidgetChange.call(that,element,valueName,value, options!);
-        });
-    
-        element.getValue = function()
-        {
-            return value;
-        };
-    
-        element.setValue = function(v: string, skip_event?: boolean)
-        {
-            value = v;
-            const select = element.querySelector("select") as HTMLSelectElement;
-            const items = select.querySelectorAll("option");
-            const index = values.indexOf(v) ?? -1;
-            if (index == -1) {return;}
-    
-            stop_event = skip_event ?? false;
-    
-            for (const i in items)
-            {
-                const item = items[i];
-                if (!item || !item.dataset) {continue;}
-				const setIndex = item.dataset['index'];
-                if (setIndex && parseFloat(setIndex) == index)
-                {
-                    item.selected = true;
-                    select.selectedIndex = index;
-                }
-                else
-                {
-					item.removeAttribute("selected");
-				}
-            }
-    
-            stop_event = false;
-        };
-    
-        function setValues(v: string[], selected?: string)
-        {
-            values = v;
-            if (selected) {value = selected;}
-            let code = "";
-            for (const i in values)
-            {
-                code += "<option value='"+i+"' "+(values[i] == value ? " selected":"")+" data-index='"+i+"'>" + values[i] + "</option>";
-            }
-            element.querySelector("select")!.innerHTML = code;
-        }
-    
-        element.setOptionValues = setValues;
-    
-        this.appendWidget(element,options);
-        this.processElement(element, options);
-        return element;
+        return AddCombo(this, name, value, options);
     };
     
     /**
@@ -1979,50 +1171,14 @@ export class Inspector
      */
     addComboButtons(name?: string, value?: string, options?: AddComboOptions): InspectorComboButtonsWidget
     {    
-		const that = this;
-        value = value ?? '';
-        options = options ?? {};
-		const valueName = this.getValueName(name, options);
-        this.values.set(valueName, value);
-    
-        let code = "";
-        if (options.values)
-        {
-            for (const i in options.values)
-            {
-                code += "<button class='wcombobutton "+(value == options.values[i] ? "selected":"")+"' data-name='options.values[i]'>" + options.values[i] + "</button>";
-            }
-        }
-    
-        const element = this.createWidget(name,code, options) as InspectorComboButtonsWidget;
-        const buttons = element.querySelectorAll(".wcontent button") as NodeListOf<HTMLButtonElement>;
-		element.buttons = buttons;
-        LiteGUI.bind(buttons, "click", (e: Event) =>
-        {
-            const el = e.target as HTMLElement;
-            const buttonName = el.innerHTML;
-            that.values.set(valueName, buttonName);
-    
-            const elements = element.querySelectorAll(".selected");
-            for (let i = 0; i < elements.length; ++i)
-            {
-                elements[i].classList.remove("selected");
-            }
-            el.classList.add("selected");
-    
-            this.onWidgetChange.call(that,element,valueName,buttonName, options!);
-        });
-    
-        this.appendWidget(element,options);
-        this.processElement(element, options);
-        return element;
+		return AddComboButtons(this, name, value, options);
     };
     
     /**
      * Widget with an array of buttons that return the name of the button when pressed and remains selected
      * @method addTags
      * @param {string | undefined} name
-     * @param {string[] | undefined} value
+     * @param {string[] | undefined} value String array of values
      * @param {AddTagOptions | undefined} options, here is a list for this widget (check createWidget for a list of generic options):
      * - values: a list with all the possible values, it could be an array, or an object, in case of an object, the key is the string to show, the value is the value to assign
      * - disabled: true to disable
@@ -2032,542 +1188,54 @@ export class Inspector
      */
     addTags(name?: string, value?: string[], options?: AddTagOptions)
     {
-        const that = this;
-        value = value ?? [];
-        options = options ?? {};
-		const valueName = this.getValueName(name, options);
-        this.values.set(valueName, value);
-
-        let code = "<select>";
-        if (options.values)
-        {
-            for (const i in options.values)
-            {
-				code += "<option>" + options.values[i] + "</option>";
-			}
-        }
-    
-        code += "</select><div class='wtagscontainer inputfield'></div>";
-    
-        const element = this.createWidget(name,"<span class='inputfield full'>"+code+"</span>", options) as InspectorTagsWidget;
-        element.tags = {};
-    
-        // Add default tags
-        if(options.default_tags)
-		{
-            for (const i in options.default_tags)
-            {
-				inner_add_tag(options.default_tags[i]);
-			}
-        }
-    
-        // Combo change
-        const select_element = element.querySelector(".wcontent select") as HTMLSelectElement;
-        select_element.addEventListener("change", (e: any) =>
-        {
-            inner_add_tag(e.target.value);
-        });
-    
-        function inner_add_tag(tagname: string)
-        {
-            if (element.tags[tagname]) {return;} // Avoid repeated tags
-    
-            LiteGUI.trigger(element, "wbeforechange", element.tags);
-    
-            element.tags[tagname] = true;
-    
-            const tag = document.createElement("div") as HTMLDivElementPlus;
-            tag.data = tagname;
-            tag.className = "wtag";
-            tag.innerHTML = tagname+"<span class='close'>X</span>";
-    
-            tag.querySelector(".close")!.addEventListener("click", (e: any) =>
-            {
-                const tagname = tag.data;
-                delete element.tags[tagname];
-                LiteGUI.remove(tag);
-                LiteGUI.trigger(element, "wremoved", tagname);
-                that.onWidgetChange.call(that,element,valueName,element.tags, options!);
-            });
-    
-            element.querySelector(".wtagscontainer")!.appendChild(tag);
-    
-            that.values.set(valueName, element.tags);
-            if (options!.callback) {options!.callback.call(element, element.tags);}
-            LiteGUI.trigger(element, "wchange", element.tags);
-            LiteGUI.trigger(element, "wadded", tagname);
-            if (that.onchange) {that.onchange(valueName, element.tags, element);}
-        }
-    
-        this.appendWidget(element,options);
-        this.processElement(element, options);
-        return element;
+        return AddTags(this, name, value, options);
     };
     
     /**
      * Widget to select from a list of items
      * @method addList
-     * @param {string | undefined} name
-     * @param {string[] | undefined} value [Array or Object]
-     * @param {AddListOptions | undefined} options, here is a list for this widget (check createWidget for a list of generic options):
+     * @param {string} [name]
+     * @param {string[]} [value] String array of values
+     * @param {AddListOptions} [options] here is a list for this widget (check createWidget for a list of generic options):
      * - multiselection: allow multiple selection
      * - callback: function to call once an items is clicked
      * - selected: the item selected
-     * @return {HTMLElement} the widget in the form of the DOM element that contains it
+     * @return {InspectorListWidget} the widget in the form of the DOM element that contains it
      *
      */
     addList(name?: string, values?: string[], options?: AddListOptions): InspectorListWidget
     {    
-        const that = this;
-        values = values ?? [];
-        options = options ?? {};
-		const valueName = this.getValueName(name, options);
-		if (options == undefined) {options = {};}
-
-        let list_height = "";
-        if (options.height) {list_height = "style='height: 100%; overflow: auto;'";}
-        // Height = "style='height: "+options.height+"px; overflow: auto;'";
-    
-        const code = "<ul class='lite-list' "+list_height+" tabIndex='"+this.tab_index+"'><ul>";
-        this.tab_index++;
-    
-        const element = this.createWidget(name,"<span class='inputfield full "+
-            (options.disabled?"disabled":"")+"' style='height: 100%;'>"+code+"</span>", options) as InspectorListWidget;
-    
-        const infoContent = element.querySelector(".info_content") as HTMLElement;
-        infoContent.style.height = "100%";
-    
-        const list_element = element.querySelector(".lite-list");
-        const inputfield = element.querySelector(".inputfield") as HTMLInputElement;
-        inputfield.style.height = "100%";
-        inputfield.style.paddingBottom = "0.2em";
-    
-        const ul_elements = element.querySelectorAll("ul");
-    
-        const inner_key = function(e: KeyboardEvent)
-        {
-            const selected = element.querySelector("li.selected") as HTMLLIElement;
-            if (!selected) {return;}
-    
-            if (e.code == 'Enter') // Intro
-            {
-                if (!selected) {return;}
-				let pos: string | number | undefined = selected.dataset["pos"];
-				if (pos == undefined) {return;}
-				pos = typeof pos == "string" ? parseFloat(pos) : 0; 
-                const value = values![pos];
-                if (options!.callback_dblclick)  {options!.callback_dblclick.call(that,value);}
-            }
-            else if (e.code == 'ArrowDown') // Arrow down
-            {
-                const next = selected.nextSibling;
-                if (next) {LiteGUI.trigger(next, "click");}
-				selected.scrollIntoView({block: "end", behavior: "smooth"});
-            }
-            else if (e.code == 'ArrowUp') // Arrow up
-            {
-                const prev = selected.previousSibling;
-                if (prev) {LiteGUI.trigger(prev,"click");}
-				selected.scrollIntoView({block: "end", behavior: "smooth"});
-            }
-            else
-            {
-				return;
-			}
-    
-            e.preventDefault();
-            e.stopPropagation();
-            return true;
-        };
-        const inner_item_click = (e: MouseEvent) =>
-        {
-            const el = e.target as HTMLLIElement;
-            if (options!.multiselection)
-            {
-                el.classList.toggle("selected");
-            }
-            else
-            {
-                // Batch action, jquery...
-                const lis = element.querySelectorAll("li");
-                for (let i = 0; i < lis.length; ++i)
-                {
-                    lis[i].classList.remove("selected");
-                }
-                el.classList.add("selected");
-            }
-    
-			let pos: string | number | undefined = el.dataset["pos"];
-			if (pos == undefined) {return;}
-			pos = typeof pos == "string" ? parseFloat(pos) : 0; 
-            const value = values![pos];
-            this.onWidgetChange.call(that,element,valueName!,value, options!);
-            LiteGUI.trigger(element, "wadded", value);
-        };
-        const inner_item_dblclick = function(e: MouseEvent)
-        {
-            const el = e.target as HTMLLIElement;
-			let pos: string | number | undefined = el.dataset["pos"];
-			if (pos == undefined) {return;}
-			pos = typeof pos == "string" ? parseFloat(pos) : 0; 
-            const value = values![pos];
-            if (options!.callback_dblclick) {options!.callback_dblclick.call(that,value);}
-        };
-        const focusCallback = function()
-        {
-            document.addEventListener("keydown",inner_key,true);
-        };
-        const blurCallback = function()
-        {
-            document.removeEventListener("keydown",inner_key,true);
-        };
-    
-        for (let i = 0; i < ul_elements.length; ++i)
-        {
-            const ul = ul_elements[i];
-            ul.addEventListener("focus", focusCallback);
-            ul.addEventListener("blur", blurCallback);
-        }
-    
-    
-        element.updateItems = function(new_values: string[], item_selected?: string)
-        {
-            item_selected = item_selected ?? options!.selected;
-			if (!item_selected && new_values.length > 0)
-			{
-				item_selected = new_values[0] ?? '';
-			}
-			else
-			{
-				item_selected = '';
-			}
-            values = new_values;
-            const ul = this.querySelector("ul") as HTMLElement;
-            ul.innerHTML = "";
-    
-            if (values)
-            {
-                for (const i in values)
-                {
-                    const li_element = insert_item(values[i], item_selected==values[i] ? true: false, i);
-                    ul.appendChild(li_element);
-                }
-            }
-    
-            const li = ul.querySelectorAll("li");
-            LiteGUI.bind(li, "click", inner_item_click);
-        };
-    
-        function insert_item(value: string | number | ItemOptions, selected: boolean, index?: string)
-        {
-            const item_index = index; // To reference it
-            let item_title = ""; // To show in the list
-    
-            let item_style = null;
-            let icon = "";
-
-            if (value.constructor === String || value.constructor === Number)
-            {
-                item_title = value.toString();
-            }
-            else
-            {
-                item_title = (value as ItemOptions).content || (value as ItemOptions).title || (value as ItemOptions).name || index;
-                item_style = (value as ItemOptions).style;
-                if ((value as ItemOptions).icon)
-                {icon = "<img src='"+(value as ItemOptions).icon+"' class='icon' /> ";}
-                if ((value as ItemOptions).selected)
-                {selected = true;}
-            }
-            
-    
-            let item_name = item_title;
-            item_name = item_name.replace(/<(?:.|\n)*?>/gm, ''); // Remove html tags that could break the html
-    
-            const li_element = document.createElement("li");
-            li_element.classList.add('item-' + LiteGUI.safeName(item_index || ""));
-            if (selected) {li_element.classList.add('selected');}
-            li_element.dataset["name"] = item_name;
-            li_element.dataset["pos"] = item_index;
-            li_element.value = (value as number);
-            if (item_style) {li_element.setAttribute("style", item_style);}
-            li_element.innerHTML = icon + item_title;
-            li_element.addEventListener("click", inner_item_click);
-            if (options!.callback_dblclick)
-            {
-                li_element.addEventListener("dblclick", inner_item_dblclick);
-            }
-            return li_element;
-        }
-    
-        element.addItem = function(value: string, selected: boolean)
-        {
-            values!.push(value);
-            const ul = this.querySelector("ul") as HTMLElement;
-            const li_element = insert_item(value, selected);
-            ul.appendChild(li_element);
-        };
-    
-        element.removeItem = function(name: string)
-        {
-            const items = element.querySelectorAll(".wcontent li") as NodeListOf<HTMLLIElement>;
-            for (let i = 0; i < items.length; i++)
-            {
-                if (items[i].dataset["name"] == name)
-                {
-					LiteGUI.remove(items[i]);
-				}
-            }
-        };
-    
-        element.updateItems(values, options.selected);
-        this.appendWidget(element,options);
-    
-        element.getSelected = function()
-        {
-            const r:string[] = [];
-            const selected = this.querySelectorAll("ul li.selected") as NodeListOf<HTMLLIElement>;
-            for (let i = 0; i < selected.length; ++i)
-            {
-				r.push(selected[i].dataset["name"] as string);
-			}
-            return r;
-        };
-    
-        element.getByIndex = function(index: number)
-        {
-            const items = this.querySelectorAll("ul li") as NodeListOf<HTMLLIElement>;
-            return items[index] as HTMLElement;
-        };
-    
-        element.selectIndex = function(num: number, add_to_selection?: boolean)
-        {
-            const items = this.querySelectorAll("ul li") as NodeListOf<HTMLLIElement>;
-            for (let i = 0; i < items.length; ++i)
-            {
-                const item = items[i];
-                if (i == num)
-                {
-					item.classList.add("selected");
-				}
-                else if (!add_to_selection)
-                {
-					item.classList.remove("selected");
-				}
-            }
-            return items[num];
-        };
-    
-        element.deselectIndex = function(num: number)
-        {
-            const items = this.querySelectorAll("ul li") as NodeListOf<HTMLLIElement>;
-            const item = items[num];
-            if (item) {item.classList.remove("selected");}
-            return item;
-        };
-    
-        element.scrollToIndex = function(num: number)
-        {
-            const items = this.querySelectorAll("ul li") as NodeListOf<HTMLLIElement>;
-            const item = items[num];
-            if (!item) {return;}
-            this.scrollTop = item.offsetTop;
-        };
-    
-        element.selectAll = function()
-        {
-            const items = this.querySelectorAll("ul li");
-            for (let i = 0; i < items.length; ++i)
-            {
-                const item = items[i];
-                if (item.classList.contains("selected")) {continue;}
-                LiteGUI.trigger(item, "click");
-            }
-        };
-    
-        element.deselectAll = function()
-        {
-            // There has to be a more efficient way to do this
-            const items = this.querySelectorAll("ul li");
-            for (let i = 0; i < items.length; ++i)
-            {
-                const item = items[i];
-                if (!item.classList.contains("selected")) {continue;}
-                LiteGUI.trigger(item, "click");
-            }
-        };
-    
-        element.setValue = function(v: string[])
-        {
-            this.updateItems(v);
-        };
-    
-        element.getNumberOfItems = function()
-        {
-            const items = this.querySelectorAll("ul li");
-            return items.length;
-        };
-    
-        element.filter = function(callback?: string |
-			((value:number, item:HTMLElement, selected:boolean)=>boolean),
-			case_sensitive?: boolean)
-        {
-            const items = this.querySelectorAll("ul li") as NodeListOf<HTMLLIElement>;
-            let use_string = false;
-			let string_callback: ((value:string, item:HTMLElement, selected:boolean)=>boolean) | undefined = undefined;
-    
-            if (typeof callback == 'string')
-            {
-                const needle = callback;
-                if (case_sensitive) {needle.toLowerCase();}
-                use_string = true;
-                string_callback = function(v: string){ return ((case_sensitive ? v : v.toLowerCase()).indexOf(needle) != -1); };
-            }
-    
-            for (let i = 0; i < items.length; ++i)
-            {
-                const item = items[i];
-                if (callback == undefined)
-                {
-                    item.style.display = "";
-                    continue;
-                }
-    
-                let value:number | string = item.value;
-                if (use_string && typeof value !== "string" && string_callback)
-                {
-					value = item.innerHTML;
-					if (!string_callback(value, item, item.classList.contains("selected")))
-					{
-						item.style.display = "none";
-					}
-					else
-					{
-						item.style.display = "";
-					}
-				}
-				else if (typeof callback != "string")
-				{
-					if (!callback(value, item, item.classList.contains("selected")))
-					{
-						item.style.display = "none";
-					}
-					else
-					{
-						item.style.display = "";
-					}
-				}
-            }
-        };
-    
-        element.selectByFilter = function(callback: ((value:number, item:HTMLElement, selected:boolean)=>boolean))
-        {
-            const items = this.querySelectorAll("ul li") as NodeListOf<HTMLLIElement>;
-            for (let i = 0; i < items.length; ++i)
-            {
-                const item = items[i];
-                const r = callback(item.value, item, item.classList.contains("selected"));
-                if (r === true)
-                {
-					item.classList.add("selected");
-				}
-                else if (r === false)
-                {
-					item.classList.remove("selected");
-				}
-            }
-        };
-    
-        if (options.height) {element.scrollTop = 0;}
-        this.processElement(element, options);
-        return element;
+        return AddList(this, name, values, options);
     };
     
+    /**
+     * Creates an HTML button widget with optional name, value, and options.
+	 * @method addButton
+	 *
+     * @param {string} [name] - The name of the button.
+     * @param {string} [value] - The value of the button.
+     * @param {AddButtonOptions | (() => void)} [options] - The options for the button.
+     * @returns {InspectorButtonWidget} - The created button widget element.
+     */
     addButton(name?: string, value?: string, options?: AddButtonOptions | (()=>void))
     {    
-        const that = this;
-		const processedOptions = this.processOptions(options) as AddButtonOptions;
-        value = processedOptions.button_text ?? value ?? "";
-		name = name ?? value;
-		name = this.getValueName(name, processedOptions);
-    
-        let button_classname = "";
-        if (name == null) {button_classname = "single";}
-        if (processedOptions.micro) {button_classname += " micro";}
-    
-        let attrs = "";
-        if (processedOptions.disabled) {attrs = "disabled='disabled'";}
-    
-        const title = processedOptions.title?.toString() ?? "";
-    
-        const element = this.createWidget(name,"<button tabIndex='" +
-			this.tab_index + "' "+attrs+"></button>", processedOptions) as InspectorButtonWidget;
-        this.tab_index++;
-        const button = element.querySelector("button") as HTMLButtonElement;
-        button.setAttribute("title",title);
-        button.className = "litebutton " + button_classname;
-        button.innerHTML = value;
-        button.addEventListener("click", (event: any) =>
-        {
-            this.onWidgetChange.call(that, element, name!, button.innerHTML, processedOptions, false, event);
-            LiteGUI.trigger(button, "wclick", value);
-        });
-        this.appendWidget(element,processedOptions);
-    
-        element.wclick = function(callback: Function)
-        {
-            if (!processedOptions.disabled) {LiteGUI.bind(this, "wclick", callback);}
-        };
-    
-        element.setValue = function(v: string)
-        {
-            button.innerHTML = v;
-        };
-    
-        element.disable = function() { button.disabled = true; };
-        element.enable = function() { button.disabled = false; };
-    
-        this.processElement(element, processedOptions);
-        return element;
+        return AddButton(this, name, value, options);
     };
-    
-    addButtons(name?: string, values?: string[], options?: addButtonOptions | (()=>void))
+
+	/**
+	 * Creates an HTML buttons widget with optional name, value, and options.
+	 * @method addButtons
+	 *
+	 * @param {string} [name] - The name of the buttons.
+	 * @param {string[]} [values] - The values to be displayed on the buttons.
+	 * @param {AddButtonOptions | (() => void)} [options] - The options for the buttons.
+	 * @returns {HTMLElement} - The element containing the buttons.
+	 */
+    addButtons(name?: string, values?: string[], options?: AddButtonOptions | (()=>void))
     {
-        const that = this;
-		const processedOptions = this.processOptions(options) as addButtonOptions;
-		values = values ?? [];
-		name = this.getValueName(name, processedOptions);
-    
-        let code = "";
-        // Var w = "calc("+(100/value.length).toFixed(3)+"% - "+Math.floor(16/value.length)+"px);";
-        const w = "calc( " + (100/values.length).toFixed(3) + "% - 4px )";
-        const style = "width:"+w+"; width: -moz-"+w+"; width: -webkit-"+w+"; margin: 2px;";
-        for (const i in values)
-        {
-            let title = "";
-            if (processedOptions.title) {Array.isArray(processedOptions.title) ? title = processedOptions.title[i] : title = processedOptions.title as string}
-            code += "<button class='litebutton' title='"+title+"' tabIndex='"+this.tab_index+"' style='"+style+"'>"+values[i]+"</button>";
-            this.tab_index++;
-        }
-        
-        const element = this.createWidget(name, code, processedOptions);
-        const buttons = element.querySelectorAll("button");
-        const buttonCallback = (button: any, evt: any) =>
-        {
-            this.onWidgetChange.call(that, element, name!, button.innerHTML, processedOptions, false, evt);
-            LiteGUI.trigger(element, "wclick",button.innerHTML);
-        };
-        for (let i = 0; i < buttons.length; ++i)
-        {
-            const button = buttons[i];
-            button.addEventListener("click", buttonCallback.bind(undefined,button));
-        }
-    
-        this.appendWidget(element,processedOptions);
-        this.processElement(element, processedOptions);
-        return element;
+        return AddButtons(this, name, values, options);
     };
-    
+
     addIcon(name: string, value: boolean, options?: addIconOptions)
     {		
 		const processedOptions = this.processOptions(options) as addIconOptions;

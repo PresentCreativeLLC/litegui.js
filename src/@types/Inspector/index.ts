@@ -203,12 +203,27 @@ export interface AddComboOptions extends CreateWidgetOptions, WidgetChangeOption
 	callback?: (value:string)=>void;
 }
 
+export interface TagElement extends HTMLDivElement
+{
+	data: string;
+}
+
 export interface AddTagOptions extends CreateWidgetOptions, WidgetChangeOptions
 {
 	default_tags?: string[];
 	values?: string[];
 	disabled?: boolean;
 	callback?: (value:{[key: string]: boolean})=>void;
+}
+
+export interface ItemOptions
+{
+	content: any;
+	title: string;
+	name: string;
+	style: string;
+	icon: string;
+	selected: boolean;
 }
 
 export interface AddListOptions extends CreateWidgetOptions, WidgetChangeOptions

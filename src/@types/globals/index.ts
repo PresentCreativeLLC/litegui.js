@@ -11,6 +11,14 @@ import { Tabs } from "../../tabs"
 import { Dragger } from "../../dragger";
 import type { jscolor } from "../../jscolor";
 
+declare global
+{
+    interface Window
+    {
+        jscolor: jscolor;
+    }
+}
+
 export interface HTMLDivElementPlus extends HTMLDivElement
 {
 	_editing?: boolean;
@@ -400,16 +408,6 @@ export interface MessageOptions
     height? : number; 
     content? : string; 
     noclose? : boolean; 
-}
-
-export interface ItemOptions
-{
-	content: any;
-	title: string;
-	name: string;
-	style: string;
-	icon: string;
-	selected: boolean;
 }
 export interface properties_info
 {
