@@ -3532,11 +3532,12 @@ export class Inspector
     };
     
     // A container of widgets with a title
-    beginGroup(name: string, options: beginGroupOptions)
+    beginGroup(name?: string, options?: beginGroupOptions)
     {
         const element = document.createElement("DIV") as HTMLElementPlus;
         element.className = "wgroup";
-        name = name || "";
+        name = name ?? "";
+        options = options ?? {};
         element.innerHTML = "<div class='wgroupheader "+ (options.title ? "wtitle" : "") +"'><span class='switch-section-button'></span>"+name+"</div>";
         element.group = true;
     
@@ -3549,7 +3550,7 @@ export class Inspector
     
         element.appendChild(content);
     
-        let collapsed = options.collapsed || false;
+        let collapsed = options.collapsed ?? false;
         const header = element.querySelector(".wgroupheader");
         if (collapsed) {header!.classList.add("collapsed");}
         header!.addEventListener("click", (e: any) =>

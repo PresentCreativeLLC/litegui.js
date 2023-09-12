@@ -638,9 +638,9 @@ export interface addPadOptions extends appendOptions, processElementOptions
 export interface beginGroupOptions extends appendOptions
 {
 	title?: string;
-	collapsed: boolean;
-	height: number | string;
-	scrollable: boolean;
+	collapsed?: boolean;
+	height?: number | string;
+	scrollable?: boolean;
 }
 export interface addTitleOptions extends appendOptions
 {
