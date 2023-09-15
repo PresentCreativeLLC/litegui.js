@@ -68,7 +68,7 @@ export function AddButton(that:Inspector, name?: string, value?: string, options
  * @param {string} [name] - The name of the buttons.
  * @param {string[]} [values] - The values to be displayed on the buttons.
  * @param {AddButtonOptions | (() => void)} [options] - The options for the buttons.
- * @returns {HTMLElement} - The element containing the buttons.
+ * @returns {InspectorButtonWidget} - The element containing the buttons.
  */
 export function AddButtons(that:Inspector, name?: string, values?: string[], options?: AddButtonOptions | (()=>void)): InspectorButtonWidget
 {

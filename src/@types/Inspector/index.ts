@@ -7,7 +7,7 @@ import { Inspector } from "../../inspector";
  */
 
 export type InspectorValue = number | string | boolean | InspectorValue[] |
-	{[key:string]:InspectorValue} | undefined;
+	{[key:string]:InspectorValue} | FileAddedResponse | undefined;
 export type InspectorWidgetTypes = 'null' | 'undefined' |
 	'title' | 'info' | 'number' | 'slide' |
 	'string' | 'text' | 'textarea' | 'color' |
@@ -243,6 +243,42 @@ export interface AddButtonOptions extends CreateWidgetOptions, WidgetChangeOptio
 	callback?: (value?:string)=>void;
 }
 
+export interface AddIconOptions extends CreateWidgetOptions, WidgetChangeOptions
+{
+	image: string;
+	size?: number;
+	x?: number;
+	index?: number;
+	toggle?: boolean;
+}
+
+export interface AddColorOptions extends CreateWidgetOptions
+{
+	show_rgb?: boolean;
+	callback?: (value: number[], hex:string, color:any) => void;
+	on_change?: (value: number[], hex:string, color:any) => void;
+	add_dragger?: boolean;
+	step?: number;
+	dragger_class?: string;
+	position?: number;
+	disabled?: boolean;
+}
+
+export interface FileAddedResponse extends File
+{
+	files:FileList,
+	url?:string,
+	data?:string | ArrayBuffer | null
+}
+
+export interface AddFileOptions extends CreateWidgetOptions, WidgetChangeOptions
+{
+	accept?: string | string[];
+	generate_url?: boolean;
+	read_file?: "binary"|"data_url"|string;
+	callbacks?: (data:FileAddedResponse)=>void;
+}
+
 export interface AddArrayOptions extends CreateWidgetOptions, WidgetChangeOptions
 {
 	data_type?: InspectorWidgetTypes;
@@ -382,4 +418,14 @@ export interface InspectorListWidget extends InspectorActiveWidget
 export interface InspectorButtonWidget extends InspectorWidget
 {
 	wclick: (callback: Function)=>void;
+}
+
+export interface InspectorIconWidget extends InspectorWidget
+{
+	setValue: (value: boolean, skip_event?: boolean)=>void;
+}
+
+export interface ColorInput extends HTMLInputElement
+{
+	focused?: boolean;
 }

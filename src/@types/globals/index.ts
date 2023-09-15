@@ -421,34 +421,6 @@ export interface properties_info
 	step?: number;
 }
 
-export interface addIconOptions extends CreateWidgetOptions
-{
-	image: string;
-	size?: number;
-	x?: number;
-	index?: number;
-	toggle: boolean;
-}
-
-export interface addColorOptions extends CreateWidgetOptions
-{
-	show_rgb?: boolean;
-	callback?: (value: number[], hex:string, color:any) => void;
-	on_change?: (value: number[], hex:string, color:any) => void;
-	add_dragger?: boolean;
-	step?: number;
-	dragger_class?: string;
-	position?: number;
-}
-
-export interface addFileOptions extends CreateWidgetOptions
-{
-	accept?: string | string[];
-	generate_url?: boolean;
-	read_file?: "binary"|"data_url"|string;
-	callbacks?: (data:FileAddedResponse)=>void;
-}
-
 export interface containerOptions extends applyOptions, AddArrayOptions
 {
 	widgets_per_row?: number;
@@ -463,13 +435,6 @@ export interface beginGroupOptions extends AppendOptions
 export interface addTitleOptions extends AppendOptions
 {
 	help?: string;
-}
-
-export interface FileAddedResponse extends File
-{
-	files:FileList,
-	url?:string,
-	data?:string | ArrayBuffer | null
 }
 
 declare global

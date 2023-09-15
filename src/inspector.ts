@@ -52,9 +52,13 @@ import { LiteGUI } from "./core";
 import { purgeElement } from "./core";
 import { AddButton, AddButtons } from "./inspector/button";
 import { AddCheckbox } from "./inspector/checkbox";
+import { AddColor } from "./inspector/color";
+import { AddColorPosition } from "./inspector/colorPosition";
 import { AddCombo } from "./inspector/combo";
 import { AddComboButtons } from "./inspector/comboButtons";
+import { AddFile } from "./inspector/file";
 import { AddFlags } from "./inspector/flag";
+import { AddIcon } from "./inspector/icon";
 import { AddInfo } from "./inspector/info";
 import { AddList } from "./inspector/list";
 import { AddNumber } from "./inspector/number";
@@ -1236,537 +1240,60 @@ export class Inspector
         return AddButtons(this, name, values, options);
     };
 
-    addIcon(name: string, value: boolean, options?: addIconOptions)
+	/**
+	 * Creates an HTML buttons widget with optional name, value, and options.
+	 * @method addButtons
+	 *
+	 * @param {string} [name] - The name of the buttons.
+	 * @param {string[]} [values] - The values to be displayed on the buttons.
+	 * @param {AddButtonOptions | (() => void)} [options] - The options for the buttons.
+	 * @returns {InspectorButtonWidget} - The element containing the buttons.
+	 */
+    addIcon(name?: string, value?: boolean, options?: addIconOptions)
     {		
-		const processedOptions = this.processOptions(options) as addIconOptions;
-        const that = this;
-    
-        const img_url = processedOptions.image;
-        const width = processedOptions.width ?? processedOptions.size ?? 20;
-        const height = processedOptions.height ?? processedOptions.size ?? 20;
-    
-        const element = this.createWidget(name,"<span class='icon' " +
-            (processedOptions.title ? "title='"+processedOptions.title+"'" : "") +
-            " tabIndex='"+ this.tab_index + "'></span>", processedOptions);
-        this.tab_index++;
-        const content = element.querySelector("span.wcontent");
-        const icon = element.querySelector("span.icon");
-    
-        let x = processedOptions.x || 0;
-        if (processedOptions.index)
-        {x = processedOptions.index * -width;}
-        const y = value ? height : 0;
-    
-        element.style.minWidth = element.style.width = (width) + "px";
-        element.style.margin = "0 2px"; element.style.padding = "0";
-        content.style.margin = "0"; content.style.padding = "0";
-    
-        icon.style.display = "inline-block";
-        icon.style.cursor = "pointer";
-        icon.style.width = width + "px";
-        icon.style.height = height + "px";
-        icon.style.backgroundImage = "url('"+img_url+"')";
-        icon.style.backgroundPosition = x + "px " + y + "px";
-    
-        icon.addEventListener("mousedown", (e: MouseEvent) =>
-        {
-            e.preventDefault();
-            value = !value;
-            const ret = this.onWidgetChange.call(that,element,name, value, processedOptions, null, null);
-            LiteGUI.trigger(element, "wclick", value);
-    
-            if (ret !== undefined) {value = ret;}
-    
-            const y = value ? height : 0;
-            icon.style.backgroundPosition = x + "px " + y + "px";
-    
-            if (processedOptions.toggle === false) // Blink
-            {
-				setTimeout(()=> { icon.style.backgroundPosition = x + "px 0px"; value = false; },200);
-			}
-    
-        });
-        this.appendWidget(element,options);
-    
-        element.setValue = (v: boolean, skip_event: boolean) =>
-        {
-            value = v;
-            const y = value ? height : 0;
-            icon.style.backgroundPosition = x + "px " + y + "px";
-            if (!skip_event)
-            {
-				this.onWidgetChange.call(that,element,name, value, processedOptions, null, null);
-			}
-        };
-        element.getValue = function() { return value; };
-        this.processElement(element, processedOptions);
-        return element;
+		return AddIcon(this, name, value, options);
     };
     
-    addColor(name: string, value: number[], options: addColorOptions)
+	/**
+	 * Adds a color input widget to the Inspector.
+	 * @method addColor
+	 *
+	 * @param {string} name - The name of the color input.
+	 * @param {number[]} [value=[0.0, 0.0, 0.0]] - The initial RGB value of the color input.
+	 * @param {AddColorOptions} [options] - Additional options for the color input.
+	 * @returns {InspectorWidget} The created color input widget.
+	 */
+    addColor(name: string, value?: [number, number, number], options?: addColorOptions)
     {
-        value = value || [0.0,0.0,0.0];
-        const that = this;
-        this.values.set(name, value);
-    
-        let code = "<input tabIndex='"+this.tab_index+"' id='colorpicker-"+name+"' class='color' value='"+(value[0]+","+value[1]+","+value[2])+"' "+(options.disabled?"disabled":"")+"/>";
-        this.tab_index++;
-    
-        if (options.show_rgb) {code += "<span class='rgb-color'>"+Inspector.parseColor(value)+"</span>";}
-        const element = this.createWidget(name,code, options);
-        this.appendWidget(element,options); // Add now or jscolor dont work
-    
-        // Create jsColor
-        const input_element = element.querySelector("input.color");
-        window.jscolor = jscolor;
-        let myColor: any = null;
-        if (window.jscolor)
-        {
-            /*
-             * SHOWS CONTEXTUAL MENU
-             * block focusing
-             */
-            /*
-             *Input_element.addEventListener("contextmenu", function(e) {
-             *	if(e.button != 2) //right button
-             *		return false;
-             *	//create the context menu
-             *	var contextmenu = new LiteGUI.ContextMenu( ["Copy in HEX","Copy in RGBA"], { event: e, callback: inner_action });
-             *	e.preventDefault();
-             *	e.stopPropagation();
-             *
-             *	input_element.addEventListener("focus", block_focus , true);
-             *	setTimeout(function(){ input_element.removeEventListener("focus", block_focus , true);},1000);
-             *
-             *	return false;
-             *},true);
-             *
-             *function block_focus(e)
-             *{
-             *	e.stopPropagation();
-             *	e.stopImmediatePropagation();
-             *	e.preventDefault();
-             *	return false;
-             *}
-             *
-             *function inner_action(v)
-             *{
-             *	if(v == "Copy in HEX")
-             *	{
-             *		LiteGUI.toClipboard( "in HEX");
-             *	}
-             *	else
-             *	{
-             *		LiteGUI.toClipboard( "in RGB");
-             *	}
-             *}
-             */
-
-            myColor = new jscolor.color(input_element);
-            myColor.pickerFaceColor = "#333";
-            myColor.pickerBorderColor = "black";
-            myColor.pickerInsetColor = "#222";
-            let rgb_intensity = 1.0;
-    
-            if (options.disabled)
-            {myColor.pickerOnfocus = false;} // This doesnt work
-    
-            if (value.length > 2)
-            {
-                const intensity = 1.0;
-                myColor.fromRGB(value[0]*intensity, value[1]*intensity, value[2]*intensity);
-                rgb_intensity = intensity;
-            }
-    
-            // Update values in rgb format
-            input_element.addEventListener("change", () =>
-            {
-                const rgbelement = element.querySelector(".rgb-color");
-                if (rgbelement)
-                {rgbelement.innerHTML = LiteGUI.Inspector.parseColor(myColor.rgb);}
-            });
-            input_element.addEventListener("focusin", () =>
-            {
-                input_element.focused = true;
-            });
-            input_element.addEventListener("focusout", () =>
-            {
-                input_element.focused = false;
-                const v = [ myColor.rgb[0] * rgb_intensity, myColor.rgb[1] * rgb_intensity,
-                    myColor.rgb[2] * rgb_intensity ];
-                if (options.callback)
-                {
-                    options.callback.call(element, v.concat(), "#" + myColor.toString(), myColor);
-                }
-                else if (options.on_change)
-                {
-                    options.on_change.call(element, v.concat(), "#" + myColor.toString(), myColor);
-                }
-            });
-    
-            if (options.add_dragger)
-            {
-                myColor.onImmediateChange = (dragging: boolean) =>
-                {
-                    const v = [ myColor.rgb[0] * rgb_intensity, myColor.rgb[1] * rgb_intensity,
-                        myColor.rgb[2] * rgb_intensity ];
-                    // Inspector.onWidgetChange.call(that,element,name,v, options);
-                    const event_data = [v.concat(), myColor.toString()];
-                    LiteGUI.trigger(element, "wbeforechange", event_data);
-                    this.values.set(name, v);
-                    if (options.on_change && dragging)
-                    {
-                        options.on_change.call(element, v.concat(), "#" + myColor.toString(), myColor);
-                    }
-                    else if ((options.on_change || options.callback) && !dragging)
-                    {
-                        if (options.callback)
-                        {
-                            options.callback.call(element, v.concat(), "#" + myColor.toString(), myColor);
-                        }
-                        else if (options.on_change)
-                        {
-                            options.on_change.call(element, v.concat(), "#" + myColor.toString(), myColor);
-                        }
-                    }
-                    LiteGUI.trigger(element, "wchange", event_data);
-                    if (that.onchange) {that.onchange(valueName, v.concat(), element);}
-                };
-    
-                // Alpha dragger
-                options.step = options.step || 0.01;
-                options.dragger_class = "nano";
-    
-                const dragger = new LiteGUI.Dragger(1, options);
-                element.querySelector('.wcontent').appendChild(dragger.root);
-                const callOnInmediateChange = function(dragging: boolean)
-                {
-                    if (myColor.onImmediateChange)
-                    {myColor.onImmediateChange(dragging);}
-                };
-                const callOnStopDragging = function()
-                {
-                    if (!input_element.focused)
-                    {
-                        callOnInmediateChange(false);
-                    }
-                };
-                dragger.root.addEventListener("stop_dragging", callOnStopDragging);
-                dragger.input.addEventListener("change", () =>
-                {
-                    const v = parseFloat(dragger.input.value);
-                    rgb_intensity = v;
-                    callOnInmediateChange(dragger.dragging);
-                });
-    
-                element.setValue = function(value: number[], skip_event: boolean)
-                {
-                    myColor.fromRGB(value[0],value[1],value[2]);
-                    if (!skip_event)
-                    {LiteGUI.trigger(dragger.input, "change");}
-                };
-            }
-            else
-            {
-                myColor.onImmediateChange = () =>
-                {
-                    const v = [ myColor.rgb[0] * rgb_intensity, myColor.rgb[1] *
-                        rgb_intensity, myColor.rgb[2] * rgb_intensity ];
-                    // Inspector.onWidgetChange.call(that,element,name,v, options);
-                    const event_data = [v.concat(), myColor.toString()];
-                    LiteGUI.trigger(element, "wbeforechange", event_data);
-                    this.values.set(name, v);
-                    if (options.on_change)
-                    {
-                        options.on_change.call(element, v.concat(), "#" + myColor.toString(), myColor);
-                    }
-                    LiteGUI.trigger(element, "wchange", event_data);
-                    if (that.onchange) {that.onchange(name, v.concat(), element);}
-                };
-                element.setValue = function(value: number[])
-                {
-                    myColor.fromRGB(value[0],value[1],value[2]);
-                };
-            }
-    
-            element.getValue = function()
-            {
-                return value;
-            };
-        }
-        else
-        {
-            input_element.addEventListener("change", () =>
-            {
-                const rgbelement = element.querySelector(".rgb-color");
-                if (rgbelement) {rgbelement.innerHTML = LiteGUI.Inspector.parseColor(myColor.rgb);}
-            });
-        }
-    
-        this.processElement(element, options);
-        return element;
+        return AddColor(this, name, value, options);
     };
     
-    addColorPosition(name: string, value: number[], options: addColorOptions)
+	/**
+	 * Creates a color picker widget with optional dragger and RGB display.
+	 * @method addColorPosition
+	 *
+	 * @param {string} name - The name of the color picker.
+	 * @param {Array<number>} [value=[0.0,0.0,0.0]] - The initial RGB value of the color picker.
+	 * @param {addColorOptions} [options] - Additional options for the color picker.
+	 * @returns The created color picker element.
+	 */
+    addColorPosition(name: string, value: [number, number, number], options: addColorOptions)
     {    
-		
-        value = value || [0.0,0.0,0.0];
-        const that = this;
-        this.values.set(name, value);
-    
-        let code = "<input tabIndex='"+this.tab_index+"' id='colorpicker-"+name+"' class='color' value='"+
-            (value[0]+","+value[1]+","+value[2])+"' "+(options.disabled?"disabled":"")+"/>";
-        this.tab_index++;
-    
-        if (options.show_rgb)
-        {code += "<span class='rgb-color'>"+Inspector.parseColor(value)+"</span>";}
-        const element = this.createWidget(name,code, options);
-        this.appendWidget(element,options); // Add now or jscolor dont work
-    
-        // Create jsColor
-        const input_element = element.querySelector("input.color");
-        let myColor: any = null;
-    
-        if (window.jscolor)
-        {
-    
-            /*
-             * SHOWS CONTEXTUAL MENU
-             * block focusing
-             */
-            /*
-             *Input_element.addEventListener("contextmenu", function(e) {
-             *	if(e.button != 2) //right button
-             *		return false;
-             *	//create the context menu
-             *	var contextmenu = new LiteGUI.ContextMenu( ["Copy in HEX","Copy in RGBA"], { event: e, callback: inner_action });
-             *	e.preventDefault();
-             *	e.stopPropagation();
-             *
-             *	input_element.addEventListener("focus", block_focus , true);
-             *	setTimeout(function(){ input_element.removeEventListener("focus", block_focus , true);},1000);
-             *
-             *	return false;
-             *},true);
-             *
-             *function block_focus(e)
-             *{
-             *	e.stopPropagation();
-             *	e.stopImmediatePropagation();
-             *	e.preventDefault();
-             *	return false;
-             *}
-             *
-             *function inner_action(v)
-             *{
-             *	if(v == "Copy in HEX")
-             *	{
-             *		LiteGUI.toClipboard( "in HEX");
-             *	}
-             *	else
-             *	{
-             *		LiteGUI.toClipboard( "in RGB");
-             *	}
-             *}
-             */
-    
-            myColor = new jscolor.color(input_element);
-            myColor.pickerFaceColor = "#333";
-            myColor.pickerBorderColor = "black";
-            myColor.pickerInsetColor = "#222";
-            myColor.position = options.position || 0;
-    
-            if (options.disabled)
-            {myColor.pickerOnfocus = false;} // This doesnt work
-    
-            if (value.length > 2)
-            {
-                myColor.fromRGB(value[0],value[1],value[2]);
-            }
-    
-            // Update values in rgb format
-            input_element.addEventListener("change", () =>
-            {
-                const rgbelement = element.querySelector(".rgb-color");
-                if (rgbelement)
-                {rgbelement.innerHTML = LiteGUI.Inspector.parseColor(myColor.rgb);}
-            });
-            input_element.addEventListener("focusin", () =>
-            {
-                input_element.focused = true;
-            });
-            input_element.addEventListener("focusout", () =>
-            {
-                input_element.focused = false;
-                if (options.callback)
-                {
-                    options.callback.call(element, myColor.position, "#" + myColor.toString(), myColor);
-                }
-                else if (options.on_change)
-                {
-                    options.on_change.call(element, myColor.position, "#" + myColor.toString(), myColor);
-                }
-            });
-    
-            if (options.add_dragger)
-            {
-                myColor.onImmediateChange = function(dragging: boolean)
-                {
-                    const v: number[] = [ myColor.rgb[0], myColor.rgb[1], myColor.rgb[2] ];
-                    // Inspector.onWidgetChange.call(that,element,name,v, options);
-                    const event_data = [v.concat(), myColor.toString()];
-                    LiteGUI.trigger(element, "wbeforechange", event_data);
-                    this.values.set(name, v);
-                    if (options.on_change && dragging)
-                    {
-                        options.on_change.call(element, myColor.position, "#" + myColor.toString(), myColor);
-                    }
-                    else if ((options.on_change || options.callback) && !dragging)
-                    {
-                        if (options.callback)
-                        {
-                            options.callback.call(element, myColor.position, "#" + myColor.toString(), myColor);
-                        }
-                        else if (options.on_change)
-                        {
-                            options.on_change.call(element, myColor.position, "#" + myColor.toString(), myColor);
-                        }
-                    }
-                    LiteGUI.trigger(element, "wchange", event_data);
-                    if (that.onchange) {that.onchange(name, v.concat(), element);}
-                };
-    
-                // Alpha dragger
-                options.step = options.step || 0.01;
-                options.dragger_class = "nano";
-    
-                const dragger = new LiteGUI.Dragger(myColor.position, options);
-                element.querySelector('.wcontent').appendChild(dragger.root);
-                const callOnInmediateChange = function(dragging: boolean)
-                {
-                    if (myColor.onImmediateChange)
-                    {myColor.onImmediateChange(dragging);}
-                };
-                const callOnStopDragging = function()
-                {
-                    if (!input_element.focused)
-                    {
-                        callOnInmediateChange(false);
-                    }
-                };
-                dragger.root.addEventListener("stop_dragging", callOnStopDragging);
-                dragger.input.addEventListener("change", () =>
-                {
-                    const v = parseFloat(dragger.input.value);
-                    myColor.position = v;
-                    callOnInmediateChange(dragger.dragging);
-                });
-    
-                element.setValue = function(value: number[], skip_event: boolean)
-                {
-                    myColor.fromRGB(value[0],value[1],value[2]);
-                    if (!skip_event)
-                    {LiteGUI.trigger(dragger.input, "change");}
-                };
-            }
-            else
-            {
-                myColor.onImmediateChange = () =>
-                {
-                    const v = [ myColor.rgb[0] * myColor.rgb_intensity, myColor.rgb[1] * myColor.rgb_intensity, myColor.rgb[2] * myColor.rgb_intensity ];
-                    // Inspector.onWidgetChange.call(that,element,name,v, options);
-                    const event_data = [v.concat(), myColor.toString()];
-                    LiteGUI.trigger(element, "wbeforechange", event_data);
-                    this.values.set(name, v);
-                    if (options.on_change)
-                    {options.on_change.call(element, v.concat(), "#" + myColor.toString(), myColor);}LiteGUI.trigger(element, "wchange", event_data);
-                    if (that.onchange) {that.onchange(name, v.concat(), element);}
-                };
-                element.setValue = function(value: number[])
-                {
-                    myColor.fromRGB(value[0],value[1],value[2]);
-                };
-            }
-    
-            element.getValue = function()
-            {
-                return value;
-            };
-        }
-        else
-        {
-            input_element.addEventListener("change", () =>
-            {
-                const rgbelement = element.querySelector(".rgb-color");
-                if (rgbelement)
-                {rgbelement.innerHTML = LiteGUI.Inspector.parseColor(myColor.rgb);}
-            });
-        }
-    
-        this.processElement(element, options);
-        return element;
+		return AddColorPosition(this, name, value, options);
     };
     
+	/**
+	 * Adds a file input widget to the inspector with the specified name, value, and options.
+	 * @method addFile
+	 *
+	 * @param {string} name - The name of the file input widget.
+	 * @param {string} [value] - The initial value of the file input widget.
+	 * @param {((data: FileAddedResponse) => void) | AddFileOptions} [options] - The options for the file input widget.
+	 * @returns The created file input widget element.
+	 */
     addFile(name: string, value?: string, options?: ((data:FileAddedResponse)=>void) | addFileOptions)
     {
-        const that = this;
-        this.values.set(name, {name:value||""});
-		const processedOptions:addFileOptions = that.processOptions(options);
-    
-        const element = this.createWidget(name,"<span class='inputfield full whidden' style='width: calc(100% - 26px)'><span class='filename'></span></span><button class='litebutton' style='width:20px; margin-left: 2px;'>...</button><input type='file' size='100' class='file' value='"+value+"'/>", processedOptions);
-        const content = element.querySelector(".wcontent") as HTMLElement;
-        content.style.position = "relative";
-        const input = element.querySelector(".wcontent input") as HTMLInputElement;
-        if (processedOptions.accept)
-		{
-			input.accept = typeof(processedOptions.accept) === "string" ? processedOptions.accept : processedOptions.accept.toString();
-		}
-        const filename_element = element.querySelector(".wcontent .filename") as HTMLElement;
-        if (value) {filename_element.innerText = value;}
-    
-        input.addEventListener("change", (e: Event) =>
-        {
-			if(!e || !e.target) {return;}
-			const target = e.target as HTMLInputElement;
-			if(!target.files) {return;}
-            if (!target.files.length)
-            {
-                // Nothing
-                filename_element.innerText = "";
-                this.onWidgetChange.call(that, element, name, null, processedOptions, null, null);
-                return;
-            }
-    
-            const url = null;
-            // Var data = { url: url, filename: e.target.value, file: e.target.files[0], files: e.target.files };
-			const result = target.files[0] as FileAddedResponse;
-			result.files = target.files
-            if (processedOptions.generate_url) {result.url = URL.createObjectURL(target.files[0]);}
-            filename_element.innerText = result.name;
-    
-            if (processedOptions.read_file)
-            {
-                 const reader = new FileReader();
-                 reader.onload = (e2: ProgressEvent<FileReader>) =>
-                {
-                    result.data = e2.target?.result;
-                    this.onWidgetChange.call(that, element, name, result, processedOptions, null, null);
-                 };
-                 if (processedOptions.read_file == "binary")
-                     {reader.readAsArrayBuffer(result);}
-                 else if (processedOptions.read_file == "data_url")
-                     {reader.readAsDataURL(result);}
-                 else
-                     {reader.readAsText(result);}
-            }
-            else
-            {
-                this.onWidgetChange.call(that, element, name, result, processedOptions, null, null);
-            }
-        });
-    
-        this.appendWidget(element,processedOptions);
-        return element;
+        return AddFile(this, name, value, options);
     };
     
     addLine(name: string, value: number[][], options: LineEditorOptions)
