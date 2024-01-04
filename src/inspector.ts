@@ -3357,6 +3357,7 @@ export class Inspector
     
     //* **** Containers ********/
     // Creates an empty container but it is not set active
+	//! TODO: figure out what to do with the name
     addContainer(name: string, options: containerOptions)
     {
         if (name && name.constructor !== String)
