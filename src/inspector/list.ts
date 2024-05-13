@@ -10,7 +10,7 @@ import { Inspector } from "../inspector";
  * @param {string} [name]
  * @param {string[]} [value] String array of values
  * @param {AddListOptions} [options] here is a list for this widget (check createWidget for a list of generic options):
- * - multiselection: allow multiple selection
+ * - multiSelection: allow multiple selection
  * - callback: function to call once an items is clicked
  * - selected: the item selected
  * @return {InspectorListWidget} the widget in the form of the DOM element that contains it
@@ -81,7 +81,7 @@ export function AddList(that:Inspector, name?: string, values?: string[], option
 	const inner_item_click = (e: MouseEvent) =>
 	{
 		const el = e.target as HTMLLIElement;
-		if (options!.multiselection)
+		if (options!.multiSelection)
 		{
 			el.classList.toggle("selected");
 		}

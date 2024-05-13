@@ -230,7 +230,7 @@ export interface AddListOptions extends CreateWidgetOptions, WidgetChangeOptions
 {
 	height?: number;
 	disabled?: boolean;
-	multiselection?: boolean;
+	multiSelection?: boolean;
 	selected?: string;
 	callback_dblclick?: (value:string)=>void;
 }

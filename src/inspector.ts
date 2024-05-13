@@ -40,14 +40,9 @@ import { HTMLDivElementPlus,
 	beginGroupOptions,
 	containerOptions,
 	addTreeOptions,
-	addFileOptions,
-	LineEditorOptions,
-	addColorOptions,
-	addIconOptions,
 	properties_info,
 	ParentNodePlus,
-	TreeNode,
-	FileAddedResponse} from "./@types/globals";
+	TreeNode} from "./@types/globals";
 import { LiteGUI } from "./core";
 import { purgeElement } from "./core";
 import { AddButton, AddButtons } from "./inspector/button";
@@ -70,7 +65,7 @@ import { AddTags } from "./inspector/tags";
 import { AddTextArea } from "./inspector/textArea";
 import { AddVector } from "./inspector/vector";
 import { jscolor } from "./jscolor";
-import { LineEditor } from "./widgets";
+import { LineEditor, LineEditorOptions } from "./widgets/lineEditor";
 
 export class Inspector 
 {
@@ -893,10 +888,7 @@ export class Inspector
      * @return {InspectorStringWidget} the widget in the form of the DOM element that contains it
      *
      */
-    addString(name?: string,  value?: string, options?: AddStringOptions) : InspectorStringWidget
-    {
-		return AddString(this, name, value, options);
-    };
+    addString = AddString.bind(this, this);
     
     /**
      * Widget to edit strings, but it adds a button behind (useful to search values somewhere in case the user do not remember the name)
@@ -911,10 +903,7 @@ export class Inspector
      * @return {InspectorStringWidget} the widget in the form of the DOM element that contains it
      *
      */
-    addStringButton(name?: string, value?: string, options?: AddStringButtonOptions) : InspectorStringWidget
-    {
-        return AddStringButton(this, name, value, options);
-    };
+    addStringButton = AddStringButton.bind(this, this);
     
     /**
      * Widget to edit strings with multiline support
@@ -930,10 +919,7 @@ export class Inspector
      * @return {InspectorStringWidget} the widget in the form of the DOM element that contains it
      *
      */
-    addTextArea(name?: string, value?: string, options?: AddTextAreaOptions): InspectorStringWidget
-    {
-		return AddTextArea(this, name, value, options);
-    };
+    addTextArea = AddTextArea.bind(this, this);
     
     /**
      * Widget to edit numbers (it adds a dragging mini widget in the right side)
@@ -1072,10 +1058,7 @@ export class Inspector
      * @return {InspectorPadWidget} the widget in the form of the DOM element that contains it
      *
      */
-    addPad(name?: string, value?: [number, number], options?: AddPadOptions): InspectorPadWidget
-    {
-        return AddPad(this, name, value, options);
-    };
+    addPad = AddPad.bind(this, this);
     
     /**
      * Widget to show plain information in HTML (not interactive)
@@ -1088,10 +1071,7 @@ export class Inspector
      * @return {InspectorInfoWidget} the widget in the form of the DOM element that contains it
      *
      */
-    addInfo(name?: string, value?: string, options?: AddInfoOptions): InspectorInfoWidget
-    {
-        return AddInfo(this, name, value, options);
-    };
+    addInfo = AddInfo.bind(this, this);
     
     /**
      * Widget to edit a number using a slider
@@ -1106,10 +1086,7 @@ export class Inspector
      * @return {InspectorSliderWidget} the widget in the form of the DOM element that contains it
      *
      */
-    addSlider(name?: string, value?: number, options?: AddSliderOptions): InspectorSliderWidget
-    {
-        return AddSlider(this, name, value, options);
-    };
+    addSlider = AddSlider.bind(this, this);
     
     /**
      * Widget to edit a boolean value using a checkbox
@@ -1121,13 +1098,10 @@ export class Inspector
      * - label_on: text to show when on
      * - label_off: text to show when off
      * - callback: function to call once the value changes
-     * @return {HTMLElement} the widget in the form of the DOM element that contains it
+     * @return {InspectorCheckboxWidget} the widget in the form of the DOM element that contains it
      *
      */
-    addCheckbox(name: string, value: boolean, options?: AddCheckboxOptions): InspectorCheckboxWidget
-    {
-		return AddCheckbox(this, name, value, options);
-    };
+    addCheckbox = AddCheckbox.bind(this, this);
     
     /**
      * Widget to edit a set of boolean values using checkboxes
@@ -1138,14 +1112,10 @@ export class Inspector
      * @return {InspectorCheckboxWidget[]} the widgets in the form of the DOM element that contains it
      *
      */
-    addFlags(flags: {[key:string]:boolean}, force_flags?: {[key:string]:(boolean | undefined)},
-		options?: AddCheckboxOptions | AddFlagsOptions): InspectorCheckboxWidget[]
-    {
-		return AddFlags(this, flags, force_flags, options);
-    };
+    addFlags = AddFlags.bind(this, this);
     
     /**
-     * Widget to edit an enumeration using a combobox
+     * Widget to edit an enumeration using a combo box
      * @method addCombo
      * @param {string | undefined} name
      * @param {string | undefined} value
@@ -1156,10 +1126,7 @@ export class Inspector
      * @return {InspectorComboWidget} the widget in the form of the DOM element that contains it
      *
      */
-    addCombo(name?: string, value?: string, options?: AddComboOptions): InspectorComboWidget
-    {    
-        return AddCombo(this, name, value, options);
-    };
+    addCombo = AddCombo.bind(this, this);
     
     /**
      * Widget with an array of buttons that return the name of the button when pressed and remains selected
@@ -1173,10 +1140,7 @@ export class Inspector
      * @return {InspectorComboButtonsWidget} the widget in the form of the DOM element that contains it
      *
      */
-    addComboButtons(name?: string, value?: string, options?: AddComboOptions): InspectorComboButtonsWidget
-    {    
-		return AddComboButtons(this, name, value, options);
-    };
+    addComboButtons = AddComboButtons.bind(this, this);
     
     /**
      * Widget with an array of buttons that return the name of the button when pressed and remains selected
@@ -1190,10 +1154,7 @@ export class Inspector
      * @return {InspectorComboWidget} the widget in the form of the DOM element that contains it
      *
      */
-    addTags(name?: string, value?: string[], options?: AddTagOptions)
-    {
-        return AddTags(this, name, value, options);
-    };
+    addTags = AddTags.bind(this, this);
     
     /**
      * Widget to select from a list of items
@@ -1201,16 +1162,13 @@ export class Inspector
      * @param {string} [name]
      * @param {string[]} [value] String array of values
      * @param {AddListOptions} [options] here is a list for this widget (check createWidget for a list of generic options):
-     * - multiselection: allow multiple selection
+     * - multiSelection: allow multiple selection
      * - callback: function to call once an items is clicked
      * - selected: the item selected
      * @return {InspectorListWidget} the widget in the form of the DOM element that contains it
      *
      */
-    addList(name?: string, values?: string[], options?: AddListOptions): InspectorListWidget
-    {    
-        return AddList(this, name, values, options);
-    };
+    addList = AddList.bind(this, this);
     
     /**
      * Creates an HTML button widget with optional name, value, and options.
@@ -1221,10 +1179,7 @@ export class Inspector
      * @param {AddButtonOptions | (() => void)} [options] - The options for the button.
      * @returns {InspectorButtonWidget} - The created button widget element.
      */
-    addButton(name?: string, value?: string, options?: AddButtonOptions | (()=>void))
-    {    
-        return AddButton(this, name, value, options);
-    };
+    addButton = AddButton.bind(this, this);
 
 	/**
 	 * Creates an HTML buttons widget with optional name, value, and options.
@@ -1235,10 +1190,7 @@ export class Inspector
 	 * @param {AddButtonOptions | (() => void)} [options] - The options for the buttons.
 	 * @returns {HTMLElement} - The element containing the buttons.
 	 */
-    addButtons(name?: string, values?: string[], options?: AddButtonOptions | (()=>void))
-    {
-        return AddButtons(this, name, values, options);
-    };
+    addButtons = AddButtons.bind(this, this);
 
 	/**
 	 * Creates an HTML buttons widget with optional name, value, and options.
@@ -1249,10 +1201,7 @@ export class Inspector
 	 * @param {AddButtonOptions | (() => void)} [options] - The options for the buttons.
 	 * @returns {InspectorButtonWidget} - The element containing the buttons.
 	 */
-    addIcon(name?: string, value?: boolean, options?: addIconOptions)
-    {		
-		return AddIcon(this, name, value, options);
-    };
+    addIcon = AddIcon.bind(this, this);
     
 	/**
 	 * Adds a color input widget to the Inspector.
@@ -1263,10 +1212,7 @@ export class Inspector
 	 * @param {AddColorOptions} [options] - Additional options for the color input.
 	 * @returns {InspectorWidget} The created color input widget.
 	 */
-    addColor(name: string, value?: [number, number, number], options?: addColorOptions)
-    {
-        return AddColor(this, name, value, options);
-    };
+    addColor = AddColor.bind(this, this);
     
 	/**
 	 * Creates a color picker widget with optional dragger and RGB display.
@@ -1277,10 +1223,7 @@ export class Inspector
 	 * @param {addColorOptions} [options] - Additional options for the color picker.
 	 * @returns The created color picker element.
 	 */
-    addColorPosition(name: string, value: [number, number, number], options: addColorOptions)
-    {    
-		return AddColorPosition(this, name, value, options);
-    };
+    addColorPosition = AddColorPosition.bind(this, this);
     
 	/**
 	 * Adds a file input widget to the inspector with the specified name, value, and options.
@@ -1291,12 +1234,9 @@ export class Inspector
 	 * @param {((data: FileAddedResponse) => void) | AddFileOptions} [options] - The options for the file input widget.
 	 * @returns The created file input widget element.
 	 */
-    addFile(name: string, value?: string, options?: ((data:FileAddedResponse)=>void) | addFileOptions)
-    {
-        return AddFile(this, name, value, options);
-    };
+    addFile = AddFile.bind(this, this);
     
-    addLine(name: string, value: number[][], options: LineEditorOptions)
+    addLineEditor(name: string, value: number[][], options?: LineEditorOptions)
     {
         const that = this;
         this.values.set(name, value);
@@ -1304,10 +1244,11 @@ export class Inspector
         const element = this.createWidget(name,"<span class='line-editor'></span>", options);
         element.style.width = "100%";
     
-        const line_editor: LineEditor = new LiteGUI.LineEditor(value, options);
-        element.querySelector("span.line-editor").appendChild(line_editor);
+        const lineEditor:LineEditor = new LiteGUI.LineEditor(value, options);
+        const span = element.querySelector("span.line-editor") as HTMLSpanElement;
+		span.appendChild(lineEditor);
     
-        LiteGUI.bind(line_editor, "change", (e: any) =>
+        LiteGUI.bind(lineEditor, "change", (e: any) =>
         {
             LiteGUI.trigger(element, "wbeforechange",[e.target.value]);
             if (options.callback) {options.callback.call(element,e.target.value);}

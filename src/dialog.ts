@@ -1,5 +1,49 @@
-import { DialogButtonOptions, DialogOptions, DialogReferenceElement, DocumentPlus, HTMLDivElementPlus, LiteguiObject, PanelRoot } from "./@types/globals";
+import { DocumentPlus, LiteGUIObject } from "./@types/globals";
 import { LiteGUI } from "./core";
+
+
+export interface DialogButtonOptions
+{
+	name?: string;
+	className?: string;
+	callback?: (button: HTMLButtonElement)=>void;
+	close?: boolean;
+}
+
+export interface DialogOptions
+{
+	min_height?: number;
+	parent?: string | HTMLDivElement;
+	attach?: boolean;
+	scroll?: boolean;
+	buttons?: Array<DialogButtonOptions>;
+	fullContent?: boolean;
+	closable?: boolean;
+	close?: string;
+	detachable?: boolean;
+	hide?: boolean;
+	minimize?: boolean;
+	title?: string;
+	className?: string;
+	content?: string;
+	minHeight?: number | number;
+	minWidth?: number | number;
+	height?: string | number;
+	width?: string | number;
+	id?: string;
+	resizable?: boolean;
+	draggable?: boolean;
+	onClose?: ()=>void;
+}
+
+export interface DialogRoot extends HTMLDivElement
+{
+	ownerDocument: DocumentPlus;
+	dialog: Dialog;
+	id: string;
+}
+
+type DockType = 'full' | 'left' | 'right' | 'bottom' | 'top';
 
 /** **************** DIALOG **********************/
 export class Dialog
@@ -9,27 +53,28 @@ export class Dialog
 	minWidth?: number;
 	minHeight?: number;
 	content!: HTMLDivElement;
-	root!: HTMLDivElement;
+	root!: DialogRoot;
 	footer!: HTMLDivElement;
-	dialog_window?: Window;
+	dialogWindow?: Window;
 	old_box?: DOMRect;
 	minimized: Dialog[] = [];
 	header?: HTMLDivElement;
 	detach_window?: boolean;
 	resizable: boolean = false;
 	draggable: boolean = false;
-	on_resize?: Function;
-	on_close?: Function;
-	on_attached_to_DOM?: Function;
-	on_detached_from_DOM?: Function;
-	private _old_height?: string;
+	onResize?: (e?: MouseEvent, w?: number, h?: number) => void;
+	onClose?: ()=>void;
+	onAttachedToDOM?: ()=>void;
+	onDetachedFromDOM?: ()=>void;
+	private _oldHeight?: string;
+	public static titleHeight: string = "20px";
 	public static MINIMIZED_WIDTH = 200;
 
 	/**
 	 * Dialog
 	 *
 	 * @class Dialog
-	 * @param {DialogOptions} options useful options are { title, width, height, closable, on_close, scroll }
+	 * @param {DialogOptions} options useful options are { title, width, height, closable, onClose, scroll }
 	 * @constructor
 	 */
 	constructor(options? : DialogOptions | string)
@@ -48,10 +93,16 @@ export class Dialog
 		this.init(options);
 	}
 
-	getDialog(id : string) : HTMLElement | null
+	/**
+	 * Get a dialog from the document by id
+	 *
+	 * @param {string} id 
+	 * @returns {Dialog | undefined}
+	 */
+	getDialog(id : string)
 	{
-		const element = document.getElementById(id);
-		if (!element) {return null;}
+		const element = <DialogRoot>document.getElementById(id);
+		if (!element) {return;}
 		return element.dialog;
 	}
 
@@ -66,11 +117,11 @@ export class Dialog
 		this.minHeight = options.minHeight ?? 100;
 		const content = options.content ?? "";
 
-		const panel = document.createElement("div") as PanelRoot;
-		if (options.id) {panel.id = options.id;}
+		const root = <DialogRoot>document.createElement("div");
+		if (options.id) {root.id = options.id;}
 
-		panel.className = "litedialog " + (options.className ?? "");
-		panel.data = this;
+		root.className = "litedialog " + (options.className ?? "");
+		root.dialog = this;
 
 		let code = "";
 		if (options.title)
@@ -93,17 +144,17 @@ export class Dialog
 
 		code += "<div class='content'>"+content+"</div>";
 		code += "<div class='panel-footer'></div>";
-		panel.innerHTML = code;
+		root.innerHTML = code;
 
-		this.root = panel;
-		this.header = panel.querySelector(".panel-header") as HTMLDivElement;
-		this.content = panel.querySelector(".content") as HTMLDivElement;
-		this.footer = panel.querySelector(".panel-footer") as HTMLDivElement;
+		this.root = root;
+		this.header = root.querySelector(".panel-header") as HTMLDivElement;
+		this.content = root.querySelector(".content") as HTMLDivElement;
+		this.footer = root.querySelector(".panel-footer") as HTMLDivElement;
 
-		if (options.fullcontent)
+		if (options.fullContent)
 		{
 			this.content.style.width = "100%";
-			this.content.style.height = options.title ? "calc( 100% - "+Dialog.title_height+" )" : "100%";
+			this.content.style.height = options.title ? "calc( 100% - " + Dialog.titleHeight + " )" : "100%";
 		}
 
 		if (options.buttons)
@@ -117,31 +168,31 @@ export class Dialog
 		if (options.scroll == true) {this.content!.style.overflow = "auto";}
 
 		// Buttons *********************************
-		const close_button = panel.querySelector(".close-button");
+		const close_button = root.querySelector(".close-button");
 		if (close_button)
 		{
 			close_button.addEventListener("click", this.close.bind(this));
 		}
 
-		const maximize_button = panel.querySelector(".maximize-button");
+		const maximize_button = root.querySelector(".maximize-button");
 		if (maximize_button)
 		{
 			maximize_button.addEventListener("click", this.maximize.bind(this));
 		}
 
-		const minimize_button = panel.querySelector(".minimize-button");
+		const minimize_button = root.querySelector(".minimize-button");
 		if (minimize_button)
 		{
 			minimize_button.addEventListener("click", this.minimize.bind(this));
 		}
 
-		const hide_button = panel.querySelector(".hide-button");
+		const hide_button = root.querySelector(".hide-button");
 		if (hide_button)
 		{
 			hide_button.addEventListener("click", this.hide.bind(this));
 		}
 
-		const detach_button = panel.querySelector(".detach-button");
+		const detach_button = root.querySelector(".detach-button");
 		if (detach_button)
 		{
 			detach_button.addEventListener("click", () => { that.detachWindow(undefined, undefined); });
@@ -152,14 +203,14 @@ export class Dialog
 
 		this.root?.addEventListener("DOMNodeInsertedIntoDocument", ()=>
 		{
-			if (that.on_attached_to_DOM) {that.on_attached_to_DOM();}
-			if (that.on_resize) {that.on_resize();}
+			if (that.onAttachedToDOM) {that.onAttachedToDOM();}
+			if (that.onResize) {that.onResize();}
 		});
 		this.root?.addEventListener("DOMNodeRemovedFromDocument", ()=>
 		{
-			if (that.on_detached_from_DOM)
+			if (that.onDetachedFromDOM)
 			{
-				that.on_detached_from_DOM();
+				that.onDetachedFromDOM();
 			}
 		});
 
@@ -179,11 +230,11 @@ export class Dialog
 	 * Add widget or html to the content of the dialog
 	 * @method add
 	 */
-	add(litegui_item : LiteguiObject)
+	add(item : LiteGUIObject)
 	{
-		if(litegui_item.root)
+		if(item.root)
 		{
-			this.content.appendChild(litegui_item.root);
+			this.content.appendChild(item.root);
 		}
 	}
 
@@ -221,7 +272,7 @@ export class Dialog
 		if (options.draggable)
 		{
 			this.draggable = true;
-			const element = panel.querySelector(".panel-header") as HTMLElement | undefined;
+			const element = panel.querySelector(".panel-header") as HTMLElement | null;
 			if(element)
 			{
 				LiteGUI.draggable(panel, element, ()=>
@@ -272,21 +323,21 @@ export class Dialog
 			{
 				const rect = LiteGUI.getRect(root);
 				const w = rect.width;
-				const neww = w - (mouse[0] - e.pageX);
+				const newW = w - (mouse[0] - e.pageX);
 
 				const h = rect.height;
-				const newh = h - (mouse[1] - e.pageY);
+				const newH = h - (mouse[1] - e.pageY);
 
-				if (is_corner) {root.style.width = neww + "px";}
-				root.style.height = newh + "px";
+				if (is_corner) {root.style.width = newW + "px";}
+				root.style.height = newH + "px";
 
 				mouse[0] = e.pageX;
 				mouse[1] = e.pageY;
-				(that.content as HTMLDivElementPlus).style.height = "calc( 100% - 24px )";
+				that.content.style.height = "calc( 100% - 24px )";
 
-				if (that.on_resize && (w != neww || h != newh))
+				if (that.onResize && (w != newW || h != newH))
 				{
-					that.on_resize(e,neww,newh);
+					that.onResize(e, newW, newH);
 				}
 			}
 			else if (e.type == "mouseup")
@@ -304,50 +355,49 @@ export class Dialog
 		corner.addEventListener("mousedown", inner_mouse, true);
 	}
 
-	dockTo(parent : LiteguiObject, dock_type? : string)
+	dockTo(parent : LiteGUIObject, dockType? : DockType, titleHeight?: string | number)
 	{
-		if (!parent) {return;}
+		if (parent == undefined) {return;}
+
+		dockType = dockType || "full";
+
 		const panel = this.root;
-
-		dock_type = dock_type || "full";
-		//parent = parent.content || parent;
-
 		panel.style.top = "0";
 		panel.style.left = "0";
 
 		panel.style.boxShadow = "0 0 0";
 
-		if (dock_type == "full")
+		if (dockType == "full")
 		{
 			panel.style.position = "relative";
 			panel.style.width = "100%";
 			panel.style.height = "100%";
 			this.content.style.width = "100%";
-			this.content.style.height = "calc(100% - "+ LiteGUI.Panel.title_height +")"; // Title offset: 20px
+			this.content.style.height = "calc(100% - " + titleHeight ?? LiteGUI.Panel.titleHeight + ")"; // Title offset: 20px
 			this.content.style.overflow = "auto";
 		}
-		else if (dock_type == 'left' || dock_type == 'right')
+		else if (dockType == 'left' || dockType == 'right')
 		{
 			panel.style.position = "absolute";
 			panel.style.top = "0";
-			panel.style[dock_type] = "0";
+			panel.style[dockType] = "0";
 
 			panel.style.width = this.width + "px";
 			panel.style.height = "100%";
-			this.content.style.height = "calc(100% - "+ LiteGUI.Panel.title_height +")";
+			this.content.style.height = "calc(100% - " + titleHeight ?? LiteGUI.Panel.titleHeight + ")";
 			this.content.style.overflow = "auto";
 
-			if (dock_type == 'right')
+			if (dockType == 'right')
 			{
 				panel.style.left = "auto";
 				panel.style.right = "0";
 			}
 		}
-		else if (dock_type == 'bottom' || dock_type == 'top')
+		else if (dockType == 'bottom' || dockType == 'top')
 		{
 			panel.style.width = "100%";
 			panel.style.height = this.height + "px";
-			if (dock_type == 'bottom')
+			if (dockType == 'bottom')
 			{
 				panel.style.bottom = "0";
 				panel.style.top = "auto";
@@ -359,43 +409,59 @@ export class Dialog
 			LiteGUI.draggable(panel);
 		}
 
-
-		/*if (parent.content)
-		{parent.content.appendChild(panel);}
-		else if (typeof(parent) == "string")
+		if (typeof(parent) == "string")
 		{
 			parent = document.querySelector(parent);
 			if (parent)
-			{parent.appendChild(panel);}
+			{
+				parent.appendChild(panel);
+			}
 		}
-		else
-		{*/parent.root?.appendChild(panel);//}
+		else if (parent.content)
+		{
+			parent.content.appendChild(panel);
+		}
+		else if (parent.root)
+		{
+			parent.root.appendChild(panel);
+		}
 	}
 
-	addButton(name : string, options? : object | Function)
+	addButton(name?: string, options? : DialogButtonOptions |
+		((button: HTMLButtonElement)=>void))
 	{
-		options = options! || {};
+		if (options == undefined)
+		{
+			options = {} as DialogButtonOptions;
+		}
+
 		if (options.constructor === Function)
-		{options = { callback: options } as DialogButtonOptions;}
+		{
+			options = { callback: options } as DialogButtonOptions;
+		}
+
+		const buttonOptions = options as DialogButtonOptions;
 
 		const that = this;
 		const button = document.createElement("button");
 		button.className = "litebutton";
 
-		button.innerHTML = name;
-		if ((options as DialogButtonOptions).className)
-		{button.className += " " + (options as DialogButtonOptions).className;}
+		if (name != undefined) {button.innerHTML = name;}
+		if (typeof buttonOptions.className == 'string')
+		{
+			button.className += " " + buttonOptions.className;
+		}
 
-		this.root!.querySelector(".panel-footer")!.appendChild(button);
+		this.root?.querySelector(".panel-footer")!.appendChild(button);
 
 		const buttonCallback = function(e : any)
 		{
-			if ((options as DialogButtonOptions).callback)
+			if (buttonOptions.callback)
 			{
-				(options as DialogButtonOptions).callback!(button);
+				buttonOptions.callback(button);
 			}
 
-			if ((options as DialogButtonOptions).close)
+			if (buttonOptions.close)
 			{
 				that.close();
 			}
@@ -413,11 +479,11 @@ export class Dialog
 	{
 		LiteGUI.remove(this.root!);
 		LiteGUI.trigger(this, "closed", this);
-		if (this.on_close) {this.on_close();}
-		if (this.dialog_window)
+		if (this.onClose) {this.onClose();}
+		if (this.dialogWindow)
 		{
-			this.dialog_window.close();
-			this.dialog_window = undefined;
+			this.dialogWindow.close();
+			this.dialogWindow = undefined;
 		}
 	}
 
@@ -536,17 +602,17 @@ export class Dialog
 	 * Shows a hidden dialog
 	 * @method show
 	 */
-	show(reference_element? : DialogReferenceElement)
+	show(ownerDocument?: DocumentPlus)
 	{
 		if (!this.root.parentNode)
 		{
-			if (!reference_element)
+			if (!ownerDocument)
 			{
 				LiteGUI.add(this);
 			}
 			else
 			{
-				const doc = reference_element.ownerDocument;
+				const doc = ownerDocument;
 				const parent = doc.querySelector(".litegui-wrap") ?? doc.body;
 				parent.appendChild(this.root);
 				const w = doc.defaultView ?? doc.parentWindow;
@@ -566,17 +632,17 @@ export class Dialog
 	 * Hides the dialog
 	 * @method hide
 	 */
-	hide(/* v : any */)
+	hide()
 	{
-		this.root!.style.display = "none";
+		this.root.style.display = "none";
 		LiteGUI.trigger(this, "hidden");
 	}
 
 	fadeIn(time : number)
 	{
 		time = time || 1000;
-		this.root!.style.display = "";
-		this.root!.style.opacity = "0";
+		this.root.style.display = "";
+		this.root.style.opacity = "0";
 		const that = this;
 		setTimeout(()=>
 		{
@@ -587,7 +653,11 @@ export class Dialog
 
 	setPosition(x : number, y : number)
 	{
-		if (!this.root.parentNode) {console.warn("LiteGUI.Dialog: Cannot set position of dialog if it is not in the DOM");}
+		if (!this.root.parentNode)
+		{
+			console.warn("LiteGUI.Dialog: Cannot set position of dialog if it is not in the DOM");
+		}
+		
 		this.root.style.position = "absolute";
 		this.root.style.left = x + "px";
 		this.root.style.top = y + "px";
@@ -651,14 +721,16 @@ export class Dialog
 		this.content.innerHTML = "";
 	}
 
-	detachWindow(on_complete? : Function, on_close? : Function) : Window | undefined
+	detachWindow(onComplete? : Function, onClose? : Function) : Window | undefined
 	{
 		if(this.minimized.length > 0)
 		{
 			this.maximize();
 		}
-		if (this.dialog_window)
-		{return;}
+		if (this.dialogWindow)
+		{
+			return;
+		}
 
 		// Create window
 		const rect = this.root!.getClientRects()[0];
@@ -666,57 +738,61 @@ export class Dialog
 		const h = rect.height;
 		let title = "Window";
 		if (this.header)
-		{title = this.header!.textContent as string;}
+		{
+			title = this.header.textContent ?? '';
+		}
 
-		const dialog_window = window.open("","","width="+w+", height="+h+", location=no, status=no, menubar=no, titlebar=no, fullscreen=yes") as Window;
-		dialog_window.document.write("<head><title>"+title+"</title>");
-		this.dialog_window = dialog_window;
+		const dialogWindow = window.open("","","width="+w+", height="+h+", location=no, status=no, menubar=no, titlebar=no, fullscreen=yes") as Window;
+		dialogWindow.document.write("<head><title>"+title+"</title>");
+		this.dialogWindow = dialogWindow;
 
 		// Transfer style
 		const styles = document.querySelectorAll("link[rel='stylesheet'],style");
 		for (let i = 0; i < styles.length; i++)
-		{dialog_window.document.write(styles[i].outerHTML);}
-		dialog_window.document.write("</head><body></body>");
-		dialog_window.document.close();
-
-		const that = this;
+		{dialogWindow.document.write(styles[i].outerHTML);}
+		dialogWindow.document.write("</head><body></body>");
+		dialogWindow.document.close();
 
 		// Closing event
-		dialog_window.onbeforeunload = function()
+		dialogWindow.onbeforeunload = function()
 		{
-			const index = LiteGUI.windows.indexOf(dialog_window);
+			const index = LiteGUI.windows.indexOf(dialogWindow);
 			if (index != -1) {LiteGUI.windows.splice(index, 1);}
-			if (on_close) {on_close();}
+			if (onClose) {onClose();}
 		};
 
 		// Move the content there
-		dialog_window.document.body.appendChild(this.content as HTMLDivElement);
+		dialogWindow.document.body.appendChild(this.content);
 		this.root!.style.display = "none"; // Hide
-		this._old_height = this.content.style.height;
+		this._oldHeight = this.content.style.height;
 		this.content.style.height = "100%";
 
-		LiteGUI.windows.push(dialog_window);
+		LiteGUI.windows.push(dialogWindow);
 
-		if (on_complete)
-		{on_complete();}
+		if (onComplete)
+		{onComplete();}
 
-		return dialog_window;
+		return dialogWindow;
 	}
 
-	reattachWindow(/* on_complete : Function */)
+	reattachWindow(onComplete?: ()=>void)
 	{
-		if (!this.dialog_window)
-		{return;}
+		if (!this.dialogWindow) {return;}
 
-		this.root?.appendChild(this.content as HTMLDivElement);
-		this.root!.style.display = ""; // Show
-		(this.content as HTMLDivElement).style.height = this._old_height as string;
-		delete this._old_height;
-		this.dialog_window.close();
-		const index = LiteGUI.windows.indexOf(this.dialog_window);
-		if (index != -1)
-		{LiteGUI.windows.splice(index, 1);}
-		this.dialog_window = undefined;
+		this.root.appendChild(this.content);
+		this.root.style.display = ""; // Show
+		if (this._oldHeight)
+		{
+			this.content.style.height = this._oldHeight;
+			this._oldHeight = undefined;
+		}
+
+		this.dialogWindow.close();
+		const index = LiteGUI.windows.indexOf(this.dialogWindow);
+		if (index != -1) {LiteGUI.windows.splice(index, 1);}
+		this.dialogWindow = undefined;
+		
+		if (onComplete) {onComplete();}
 	}
 
 	//* ********************************************
@@ -726,8 +802,8 @@ export class Dialog
 		const dialogs = document.body.querySelectorAll("litedialog");
 		for (let i = 0; i < dialogs.length; i++)
 		{
-			const dialog = dialogs[i] as HTMLDivElementPlus;
-			dialog.data?.show();
+			const dialog = dialogs[i] as DialogRoot;
+			dialog.dialog?.show();
 		}
 	}
 
@@ -736,8 +812,8 @@ export class Dialog
 		const dialogs = document.body.querySelectorAll("litedialog");
 		for (let i = 0; i < dialogs.length; i++)
 		{
-			const dialog = dialogs[i] as HTMLDivElementPlus;
-			dialog.data?.hide();
+			const dialog = dialogs[i] as DialogRoot;
+			dialog.dialog?.hide();
 		}
 	}
 
@@ -746,8 +822,8 @@ export class Dialog
 		const dialogs = document.body.querySelectorAll("litedialog");
 		for (let i = 0; i < dialogs.length; i++)
 		{
-			const dialog = dialogs[i] as HTMLDivElementPlus;
-			dialog.data?.close();
+			const dialog = dialogs[i] as DialogRoot;
+			dialog.dialog?.close();
 		}
 	}
 

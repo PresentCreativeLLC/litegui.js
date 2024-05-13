@@ -1,16 +1,26 @@
 import { isArray, isFunction } from "util";
 import {Area, Split} from "./area";
-import { Dialog } from "./dialog";
+import { Dialog, DialogOptions } from "./dialog";
 import { Menubar} from "./menubar";
 import { Panel } from "./panel";
 import { Tabs } from "./tabs";
-import { Button, SearchBox, ContextMenu, Checkbox, LiteBox, List, Slider, LineEditor, ComplexList } from "./widgets"
+import { Button, SearchBox, ContextMenu, Checkbox, LiteBox, List, Slider, ComplexList } from "./widgets";
+import { LineEditor } from "./widgets/lineEditor";
 import { Console } from "./console";
 import { Tree } from "./tree";
 import { Inspector } from "./inspector"
 import { Dragger } from "./dragger";
 import { Table } from "./table";
-import { ContextMenuOptions, DialogOptions, DocumentPlus, EventTargetPlus, HTMLButtonElementPlus, HTMLDivElementPlus, HTMLElementPlus, HTMLLIElementPlus, HTMLScriptElementPlus, HTMLSpanElementPlus, LiteguiObject, MessageOptions } from "./@types/globals";
+import { ContextMenuOptions,
+	DocumentPlus,
+	EventTargetPlus,
+	HTMLButtonElementPlus,
+	HTMLDivElementPlus,
+	HTMLElementPlus,
+	HTMLScriptElementPlus,
+	HTMLSpanElementPlus,
+	LiteGUIObject,
+	MessageOptions } from "./@types/globals";
 
 let escapeHtmlEntities: any;
 // Those useful HTML unicode codes that I never remember but I always need
@@ -290,25 +300,25 @@ export class Core
 	/**
 	 * Appends litegui widget to the global interface
 	 * @method add
-	 * @param {Object} litegui_element
+	 * @param {Object} element
 	 */
-	add(litegui_element : LiteguiObject): void
+	add(element : LiteGUIObject): void
 	{
-		this.content?.appendChild((litegui_element.root as HTMLElement) || litegui_element);
+		this.content?.appendChild((element.root as HTMLElement) || element);
 	}
 
 	/**
 	 * Remove from the interface, it is is an HTML element it is removed from its parent, if it is a widget the same.
 	 * @method remove
-	 * @param {Object} litegui_element it also supports HTMLentity, selector string or Array of elements
+	 * @param {Object} element it also supports HTMLentity, selector string or Array of elements
 	 */
-	remove(litegui_element : LiteguiObject | HTMLElement | string | Array<HTMLLIElement>): void
+	remove(element : LiteGUIObject | HTMLElement | string | Array<HTMLLIElement>): void
 	{
-		if (!litegui_element) {return;}
+		if (!element) {return;}
 
-		if (litegui_element.constructor === String) // Selector
+		if (typeof element === 'string') // Selector
 		{
-			const elements = document.querySelectorAll(litegui_element);
+			const elements = document.querySelectorAll(element);
 			for (let i = 0; i < elements.length; ++i)
 			{
 				const element = elements[i];
@@ -318,20 +328,20 @@ export class Core
 				}
 			}
 		}
-		if (litegui_element.constructor === Array || litegui_element.constructor === NodeList)
+		else if (Array.isArray(element) || element.constructor === NodeList)
 		{
-			for (let i = 0; i < litegui_element.length; ++i)
+			for (let i = 0; i < element.length; ++i)
 			{
-				this.remove(litegui_element[i]);
+				this.remove(element[i]);
 			}
 		}
-		else if ((litegui_element as LiteguiObject).root && (litegui_element as LiteguiObject).root!.parentNode) // Ltiegui widget
+		else if ((element as LiteGUIObject).root && (element as LiteGUIObject).root.parentNode) // LiteGUI widget
 		{
-			(litegui_element as LiteguiObject).root!.parentNode!.removeChild((litegui_element as LiteguiObject).root!);
+			(element as LiteGUIObject).root.parentNode.removeChild((element as LiteGUIObject).root);
 		}
-		else if ((litegui_element as HTMLElement).parentNode) // Regular HTML entity
+		else if ((element as HTMLElement).parentNode) // Regular HTML entity
 		{
-			(litegui_element as HTMLElement).parentNode!.removeChild((litegui_element as HTMLElement));
+			(element as HTMLElement).parentNode!.removeChild((element as HTMLElement));
 		}
 	}
 
@@ -518,10 +528,10 @@ export class Core
 	 * Requires a new CSS
 	 * @method requireCSS
 	 * @param {String} url string with url or an array with several urls
-	 * @param {Function} on_complete
+	 * @param {Function} onComplete
 	 *
 	 */
-	requireCSS(url : string | Array<string>, on_complete : Function)
+	requireCSS(url : string | Array<string>, onComplete : Function)
 	{
 		if (typeof(url)=="string")
 		{url = [url];}
@@ -537,7 +547,7 @@ export class Core
 			const head = document.getElementsByTagName('head')[0];
 			head.appendChild(link);
 			if (url.length == 0)
-			{link.onload = on_complete as (this:GlobalEventHandlers, ev: Event) => any;}
+			{link.onload = onComplete as (this:GlobalEventHandlers, ev: Event) => any;}
 		}
 	}
 
@@ -545,7 +555,7 @@ export class Core
 	 * Request file from url (it could be a binary, text, etc.). If you want a simplied version use
 	 * @method request
 	 * @param {Object} request object with all the parameters like data (for sending forms), dataType, success, error
-	 * @param {Function} on_complete
+	 * @param {Function} onComplete
 	 *
 	 */
 	request(request : {url: string, dataType: string, mimeType?: string, data?: Array<string>, nocache?: boolean, error?: Function, success?: Function})
@@ -639,39 +649,39 @@ export class Core
 	 * Request file from url
 	 * @method requestText
 	 * @param {String} url
-	 * @param {Function} on_complete
+	 * @param {Function} onComplete
 	 * @param {Function} on_error
 	 *
 	 */
-	requestText(url : string, on_complete : Function, on_error : Function)
+	requestText(url : string, onComplete : Function, on_error : Function)
 	{
-		return this.request({ url: url, dataType: "text", success: on_complete, error: on_error });
+		return this.request({ url: url, dataType: "text", success: onComplete, error: on_error });
 	}
 
 	/**
 	 * Request file from url
 	 * @method requestJSON
 	 * @param {String} url
-	 * @param {Function} on_complete
+	 * @param {Function} onComplete
 	 * @param {Function} on_error
 	 *
 	 */
-	requestJSON(url : string, on_complete : Function, on_error : Function)
+	requestJSON(url : string, onComplete : Function, on_error : Function)
 	{
-		return this.request({ url: url, dataType: "json", success: on_complete, error: on_error });
+		return this.request({ url: url, dataType: "json", success: onComplete, error: on_error });
 	}
 
 	/**
 	 * Request binary file from url
 	 * @method requestBinary
 	 * @param {String} url
-	 * @param {Function} on_complete
+	 * @param {Function} onComplete
 	 * @param {Function} on_error
 	 *
 	 */
-	requestBinary(url : string, on_complete : Function, on_error : Function)
+	requestBinary(url : string, onComplete : Function, on_error : Function)
 	{
-		return this.request({ url: url, dataType: "binary", success: on_complete, error: on_error });
+		return this.request({ url: url, dataType: "binary", success: onComplete, error: on_error });
 	}
 
 
@@ -679,12 +689,12 @@ export class Core
 	 * Request script and inserts it in the DOM
 	 * @method requireScript
 	 * @param {String|Array} url the url of the script or an array containing several urls
-	 * @param {Function} on_complete
+	 * @param {Function} onComplete
 	 * @param {Function} on_error
 	 * @param {Function} on_progress (if several files are required, on_progress is called after every file is added to the DOM)
 	 *
 	 */
-	requireScript(url : string | Array<string>, on_complete : Function, on_error : Function, on_progress : Function, version : Number)
+	requireScript(url : string | Array<string>, onComplete : Function, on_error : Function, on_progress : Function, version : Number)
 	{
 		if (!url) {throw ("invalid URL");}
 
@@ -701,9 +711,9 @@ export class Core
 			{
 				if (on_progress) {on_progress(script.original_src, script.num);}
 			}
-			else if (on_complete)
+			else if (onComplete)
 			{
-				on_complete(loaded_scripts);
+				onComplete(loaded_scripts);
 			}
 		};
 
@@ -729,7 +739,7 @@ export class Core
 
 
 	// Old version, it loads one by one, so it is slower
-	requireScriptSerial(url : string | Array<string>, on_complete : Function, on_progress : Function)
+	requireScriptSerial(url : string | Array<string>, onComplete : Function, on_progress : Function)
 	{
 		if (typeof(url)=="string")
 		{url = [url];}
@@ -753,8 +763,8 @@ export class Core
 
 				loaded_scripts.push(this);
 
-				if (on_complete)
-				{on_complete(loaded_scripts);}
+				if (onComplete)
+				{onComplete(loaded_scripts);}
 			};
 			document.getElementsByTagName('head')[0].appendChild(script);
 		}
@@ -801,7 +811,7 @@ export class Core
 		elem.root = elem;
 		if (content)
 		{elem.innerHTML = content;}
-		elem.add = function(v : HTMLDivElementPlus | LiteguiObject) { this.appendChild((v as LiteguiObject).root! || v); };
+		elem.add = function(v : HTMLDivElementPlus | LiteGUIObject) { this.appendChild((v as LiteGUIObject).root! || v); };
 
 		if (style)
 		{
@@ -968,7 +978,7 @@ export class Core
 		options.content = content;
 		options.close = 'fade';
 		const dialog = new LiteGUI.Dialog(options);
-		if (options.closable) {dialog.addButton("Close",{ close: true });}
+		if (options.closable) {dialog.addButton("Close", { close: true });}
 		dialog.makeModal();
 		return dialog;
 	}

@@ -125,12 +125,18 @@ export class Table
 			let value = null;
 
 			if (row.constructor === Array)
-			{value = row[ j ];}
+			{
+				value = row[ j ];
+			}
 			else
-			{value = row[ column.field as keyof object ];}
+			{
+				value = row[ column.field as keyof object ];
+			}
 
 			if (value === undefined)
-			{value = "";}
+			{
+				value = "";
+			}
 
 			cells[j].innerHTML = value as string;
 		}
@@ -140,8 +146,7 @@ export class Table
 	updateCell(row : number, cell : number, data : string)
 	{
 		const tr = this.rows[ row ];
-		if (!tr)
-		{return;}
+		if (!tr) {return;}
 		const newCell = tr.childNodes[cell] as ChildNodePlus;
 		if (!newCell) {return;}
 		newCell.innerHTML = data;
@@ -206,7 +211,9 @@ export class Table
 				const th = document.createElement("th");
 				th.innerHTML = column.name as string;
 				if (column.width)
-				{th.style.width = column.width as string;}
+				{
+					th.style.width = column.width as string;
+				}
 				column.th = th;
 				this.header.appendChild(th);
 			}

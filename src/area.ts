@@ -1,7 +1,7 @@
 // Enclose in a scope
 /** **************** AREA **************/
 
-import { AreaOptions, AreaElement, LiteguiObject, ParentNodePlus } from "./@types/globals";
+import { AreaOptions, AreaElement, LiteGUIObject, ParentNodePlus } from "./@types/globals";
 import { LiteGUI } from "./core";
 
 
@@ -542,7 +542,7 @@ export class Area
         this.onResize();
     };
 
-    add(v: LiteguiObject | HTMLElement)
+    add(v: LiteGUIObject | HTMLElement)
     {
         let value = v;
         if (typeof(value) == "string")
@@ -552,7 +552,7 @@ export class Area
             value = element;
         }
 
-        this.content.appendChild(((value as LiteguiObject).root as HTMLElement) || value);
+        this.content.appendChild(((value as LiteGUIObject).root as HTMLElement) || value);
     };
 
     query(v: any)

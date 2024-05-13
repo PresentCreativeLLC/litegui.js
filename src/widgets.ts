@@ -1,11 +1,22 @@
 import { LiteGUI, special_codes } from "./core";
-import { HTMLDivElementPlus, HTMLSpanElementPlus, EventTargetPlus, HTMLLIElementPlus, MouseEventPlus, LiteguiObject, ButtonOptions, SearchBoxOptions, ContextMenuOptions, ListOptions, SliderOptions, LineEditorOptions, ComplexListOptions } from "./@types/globals/index"
+import {
+	HTMLDivElementPlus,
+	HTMLSpanElementPlus,
+	EventTargetPlus,
+	HTMLLIElementPlus,
+	MouseEventPlus,
+	LiteGUIObject,
+	ButtonOptions,
+	SearchBoxOptions,
+	ContextMenuOptions,
+	ListOptions,
+	SliderOptions,
+	ComplexListOptions } from "./@types/globals/index"
 
 interface ListItem
 {
 	name: string, title: string, id: string
 }
-
 
 export class Button
 {
@@ -17,7 +28,7 @@ export class Button
 
 		if (typeof (options) === "function") { options = { callback: options }; }
 
-		// "thas" is equal to "this", so this doesnt make sense const that: ThisType<Window> = this;
+		// "that" is equal to "this", so this doesn't make sense const that: ThisType<Window> = this;
 		const element = document.createElement("div") as HTMLDivElement;
 		element.className = "litegui button";
 
@@ -42,14 +53,13 @@ export class Button
 }
 
 /**
-	 * SearchBox
-	 *
-	 * @class SearchBox
-	 * @constructor
-	 * @param {*} value
-	 * @param {Object} options
-	 */
-
+ * SearchBox
+ *
+ * @class SearchBox
+ * @constructor
+ * @param {*} value
+ * @param {Object} options
+ */
 export class SearchBox
 {
 	root: HTMLDivElement;
@@ -573,7 +583,7 @@ export class List
 
 
 		if (options.parent) {
-			if ((options.parent as LiteguiObject).root) { (options.parent as LiteguiObject).root?.appendChild(root); }
+			if ((options.parent as LiteGUIObject).root) { (options.parent as LiteGUIObject).root?.appendChild(root); }
 			else
 			{
 				//options.parent.appendChild(root);
@@ -699,300 +709,6 @@ export class Slider
 			}
 		}
 	};
-}
-
-/**
- * LineEditor
- *
- * @class LineEditor
- * @constructor
- * @param {Number} value
- * @param {Object} options
- */
-
-export class LineEditor
-{
-	root: HTMLDivElementPlus;
-	options: LineEditorOptions;
-	canvas: HTMLCanvasElement;
-	selected: number;
-	last_mouse: number[];
-
-	mouseMoveBind = this.onmousemove.bind(this);
-	mouseUpBind = this.onmouseup.bind(this);
-	constructor(value: number[][], options?: LineEditorOptions)
-	{
-		this.options = options! || {};
-		const element = this.root = document.createElement("div") as HTMLDivElementPlus;
-		element.className = "curve " + (this.options.extra_class ? this.options.extra_class : "");
-		element.style.minHeight = "50px";
-		element.style.width = this.options.width?.toString() || "100%";
-
-		element.bgcolor = this.options.bgcolor || "#222";
-		element.pointscolor = this.options.pointscolor || "#5AF";
-		element.linecolor = this.options.linecolor || "#444";
-
-		element.valuesArray = value;
-		element.xrange = this.options.xrange || [0, 1]; // Min,max
-		element.yrange = this.options.xrange || [0, 1]; // Min,max
-		element.defaulty = this.options.defaulty != null ? this.options.defaulty : 0.5;
-		element.no_trespassing = this.options.no_trespassing || false;
-		element.show_samples = this.options.show_samples || 0;
-		element.options = options;
-		element.style.minWidth = "50px";
-		element.style.minHeight = "20px";
-
-		const canvas = this.canvas = document.createElement("canvas");
-		canvas.width = this.options.width || 200;
-		canvas.height = this.options.height || 50;
-		element.appendChild(canvas);
-		element.canvas = canvas;
-
-		element.addEventListener("mousedown", this.onmousedown.bind(this));
-
-		this.selected = -1;
-
-		this.last_mouse = [0, 0];
-
-		this.redraw();
-		//return element;
-	}
-
-	getValueAt(x: number)
-	{
-		if (x < this.root.xrange![0] || x > this.root.xrange![1]) { return this.root.defaulty; }
-
-		let last = [this.root.xrange![0], this.root.defaulty] as number[];
-		let f = 0, v: number[];
-		for (let i = 0; i < this.root.valuesArray!.length; i++) {
-			v = this.root.valuesArray![i];
-			if (x == v[0]) { return v[1]; }
-			if (x < v[0]) {
-				f = (x - last[0]) / (v[0] - last[0]);
-				return last[1] * (1 - f) + v[1] * f;
-			}
-			last = v;
-		}
-
-		v = [this.root.xrange![1], this.root.defaulty!];
-		f = (x - last[0]) / (v[0] - last[0]);
-		return last[1] * (1 - f) + v[1] * f;
-	}
-
-	resample(samples: number)
-	{
-		const r:number[] = [];
-		const dx = (this.root.xrange![1] - this.root.xrange![0]) / samples;
-		for (let i = this.root.xrange![0]; i <= this.root.xrange![1]; i += dx)
-		{
-			const v = this.getValueAt(i);
-			if(v) { r.push(v); }
-		}
-		return r;
-	}
-
-	addValue(v: number[])
-	{
-		for (let i = 0; i < this.root.valuesArray!.length; i++) {
-			const value = this.root.valuesArray![i];
-			if (value[0] < v[0]) { continue; }
-			this.root.valuesArray!.splice(i, 0, v);
-			this.redraw();
-			return;
-		}
-
-		this.root.valuesArray!.push(v);
-		this.redraw();
-	}
-
-	// Value to canvas
-	convert(v: number[]) {
-		return [this.canvas.width * ((this.root.xrange![1] - this.root.xrange![0]) * v[0] + this.root.xrange![0]),
-		this.canvas.height * ((this.root.yrange![1] - this.root.yrange![0]) * v[1] + this.root.yrange![0])];
-	}
-
-	// Canvas to value
-	unconvert(v: number[]) {
-		return [(v[0] / this.canvas.width - this.root.xrange![0]) / (this.root.xrange![1] - this.root.xrange![0]),
-		(v[1] / this.canvas.height - this.root.yrange![0]) / (this.root.yrange![1] - this.root.yrange![0])];
-	}
-
-	redraw()
-	{
-		if(!this.canvas || !this.canvas.parentNode) { return; }
-		const rect = this.canvas.getBoundingClientRect();
-		if (rect && this.canvas.width != rect.width && rect.width && rect.width < 1000) { this.canvas.width = rect.width; }
-		if (rect && this.canvas.height != rect.height && rect.height && rect.height < 1000) { this.canvas.height = rect.height; }
-
-		const ctx = this.canvas.getContext("2d");
-		if (!ctx) { return; }
-		ctx.setTransform(1, 0, 0, 1, 0, 0);
-		ctx.translate(0, this.canvas.height);
-		ctx.scale(1, -1);
-
-		ctx.fillStyle = this.root.bgcolor as string;
-		ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-		ctx.strokeStyle = this.root.linecolor as string;
-		ctx.beginPath();
-
-		// Draw line
-		let pos = this.convert([this.root.xrange![0], this.root.defaulty!]);
-		ctx.moveTo(pos[0], pos[1]);
-
-		for (const i in this.root.valuesArray) {
-			const value: number[] = this.root.valuesArray[parseInt(i)];
-			pos = this.convert(value);
-			ctx.lineTo(pos[0], pos[1]);
-		}
-
-		pos = this.convert([this.root.xrange![1], this.root.defaulty!]);
-		ctx.lineTo(pos[0], pos[1]);
-		ctx.stroke();
-
-		// Draw points
-		for (let i = 0; i < this.root.valuesArray!.length; i += 1) {
-			const value = this.root.valuesArray![i];
-			pos = this.convert(value);
-			if (this.selected == i) { ctx.fillStyle = "white"; }
-			else { ctx.fillStyle = this.root.pointscolor as string; }
-			ctx.beginPath();
-			ctx.arc(pos[0], pos[1], this.selected == i ? 4 : 2, 0, Math.PI * 2);
-			ctx.fill();
-		}
-
-		if (this.root.show_samples) {
-			const samples = this.resample(this.root.show_samples);
-			ctx.fillStyle = "#888";
-			for (let i = 0; i < samples.length; i += 1) {
-				const value = [i * ((this.root.xrange![1] - this.root.xrange![0]) / this.root.show_samples) + this.root.xrange![0], samples[i]] as number[];
-				pos = this.convert(value);
-				ctx.beginPath();
-				ctx.arc(pos[0], pos[1], 2, 0, Math.PI * 2);
-				ctx.fill();
-			}
-		}
-	}
-
-	onmousedown(evt: MouseEvent) {
-		document.addEventListener("mousemove", this.mouseMoveBind);
-		document.addEventListener("mouseup", this.mouseUpBind);
-
-		const rect = this.canvas.getBoundingClientRect();
-		const mousex = evt.clientX - rect.left;
-		const mousey = evt.clientY - rect.top;
-
-		this.selected = this.computeSelected(mousex, this.canvas.height - mousey);
-
-		if (this.selected == -1) {
-			const v = this.unconvert([mousex, this.canvas.height - mousey]);
-			this.root.valuesArray!.push(v);
-			this.sortValues();
-			this.selected = this.root.valuesArray!.indexOf(v);
-		}
-
-		this.last_mouse = [mousex, mousey];
-		this.redraw();
-		evt.preventDefault();
-		evt.stopPropagation();
-	}
-
-	onmousemove(evt: MouseEvent) {
-		console.log("onmousemove");
-		const rect = this.canvas.getBoundingClientRect();
-		let mousex = evt.clientX - rect.left;
-		let mousey = evt.clientY - rect.top;
-
-		if (mousex < 0) { mousex = 0; }
-		else if (mousex > this.canvas.width) { mousex = this.canvas.width; }
-		if (mousey < 0) { mousey = 0; }
-		else if (mousey > this.canvas.height) { mousey = this.canvas.height; }
-
-		// Dragging to remove
-		if (this.selected != -1 && this.distance([evt.clientX - rect.left, evt.clientY - rect.top], [mousex, mousey]) > this.canvas.height * 0.5) {
-			this.root.valuesArray!.splice(this.selected, 1);
-			this.onmouseup(evt);
-			return;
-		}
-
-		const dx = this.last_mouse[0] - mousex;
-		const dy = this.last_mouse[1] - mousey;
-		const delta = this.unconvert([-dx, dy]);
-		if (this.selected != -1) {
-			let minx = this.root.xrange![0];
-			let maxx = this.root.xrange![1];
-
-			if (this.root.no_trespassing) {
-				if (this.selected > 0) { minx = this.root.valuesArray![this.selected - 1][0]; }
-				if (this.selected < (this.root.valuesArray!.length - 1)) { maxx = this.root.valuesArray![this.selected + 1][0]; }
-			}
-
-			const v = this.root.valuesArray![this.selected];
-			v[0] += delta[0];
-			v[1] += delta[1];
-			if (v[0] < minx) { v[0] = minx; }
-			else if (v[0] > maxx) { v[0] = maxx; }
-			if (v[1] < this.root.yrange![0]) { v[1] = this.root.yrange![0]; }
-			else if (v[1] > this.root.yrange![1]) { v[1] = this.root.yrange![1]; }
-		}
-
-		this.sortValues();
-		this.redraw();
-		this.last_mouse[0] = mousex;
-		this.last_mouse[1] = mousey;
-		this.onchange();
-
-		evt.preventDefault();
-		evt.stopPropagation();
-	}
-
-	onmouseup(evt: MouseEvent)
-	{
-		this.selected = -1;
-		this.redraw();
-		document.removeEventListener("mousemove", this.mouseMoveBind);
-		document.removeEventListener("mouseup", this.mouseUpBind);
-		this.onchange();
-		evt.preventDefault();
-		evt.stopPropagation();
-	}
-
-	onresize(e: any)
-	{
-		this.redraw();
-	}
-
-	onchange()
-	{
-		if (this.options.callback) { this.options.callback.call(this.root, this.root.value); }
-		else { LiteGUI.trigger(this.root, "change"); }
-	}
-
-	distance(a: number[], b: number[]) { return Math.sqrt(Math.pow(b[0] - a[0], 2) + Math.pow(b[1] - a[1], 2)); }
-
-	computeSelected(x: number, y: number) {
-		let min_dist = 100000;
-		const max_dist = 8; // Pixels
-		let selected = -1;
-		for (let i = 0; i < this.root.valuesArray!.length; i++) {
-			const value = this.root.valuesArray![i];
-			const pos = this.convert(value);
-			const dist = this.distance([x, y], pos);
-			if (dist < min_dist && dist < max_dist) {
-				min_dist = dist;
-				selected = i;
-			}
-		}
-		return selected;
-	}
-
-	sortValues()
-	{
-		let v:number[] | undefined = undefined;
-		if (this.selected != -1) { v = this.root.valuesArray![this.selected]; }
-		this.root.valuesArray!.sort((a: number[], b: number[]) => { return a[0] - b[0]; });
-		if (v) { this.selected = this.root.valuesArray!.indexOf(v); }
-	}
 }
 
 

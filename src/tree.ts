@@ -275,126 +275,6 @@ export class Tree
 		this.root.appendChild(element);
 	};
 
-	_isNodeChildrenVisible(id : string) : boolean
-	{
-		const node = this.getItem(id) as HTMLLIElementPlus;
-		if (!node) {return false;}
-		if (node.classList.contains("hidden")) {return false;}
-
-		// Check listboxes
-		const listbox = node.querySelector(".listbox") as HTMLSpanElementPlus;
-		if (!listbox) {return true;}
-		if (listbox.liteBox?.getValue() == "closed") {return false;}
-		return true;
-	};
-
-	_findElement(id : string)
-	{
-		if (!id || id.constructor !== String)
-		{
-			throw ("findElement param must be string with item id");
-		}
-		for (let i = 0; i < this.root.childNodes.length; ++i)
-		{
-			const childNode = this.root.childNodes[i] as ChildNodePlus;
-			if (!childNode.classList || !childNode.classList.contains("ltreeitem"))
-			{
-				continue;
-			}
-			if (childNode.classList.contains("ltreeitem-" + id))
-			{
-				return childNode;
-			}
-		}
-
-		return null;
-	};
-
-	_findElementIndex(id : string) : number
-	{
-		for (let i = 0; i < this.root.childNodes.length; ++i)
-		{
-			const childNode = this.root.childNodes[i] as ChildNodePlus;
-			if (!childNode.classList || !childNode.classList.contains("ltreeitem"))
-			{
-				continue;
-			}
-
-			if (typeof(id) === "string")
-			{
-				if (childNode.dataset["item_id"] === id)
-				{
-					return i;
-				}
-			}
-			else if (childNode === id)
-			{
-				return i;
-			}
-		}
-
-		return -1;
-	};
-
-	_findElementLastChildIndex(start_index : number) : number
-	{
-		if (start_index == -1)
-		{
-			return -1;
-		}
-
-		const level = parseInt((this.root.childNodes[ start_index ] as ChildNodePlus).dataset["level"]);
-
-		for (let i = start_index+1; i < this.root.childNodes.length; ++i)
-		{
-			const childNode = this.root.childNodes[i] as ChildNodePlus;
-			if (!childNode.classList || !childNode.classList.contains("ltreeitem"))
-			{
-				continue;
-			}
-
-			const current_level = parseInt(childNode.dataset["level"]);
-			if (current_level == level)
-			{
-				return i;
-			}
-		}
-
-		return -1;
-	};
-
-	// Returns child elements (you can control levels)
-	_findChildElements(id : string, only_direct : boolean) : ChildNodePlus[] | undefined
-	{
-		const parent_index = this._findElementIndex(id);
-		if (parent_index == -1)
-		{
-			return;
-		}
-
-		const parent = this.root.childNodes[ parent_index ] as ChildNodePlus;
-		const parent_level = parseInt(parent.dataset["level"]);
-
-		const result = [];
-
-		for (let i = parent_index + 1; i < this.root.childNodes.length; ++i)
-		{
-			const childNode = this.root.childNodes[i] as ChildNodePlus;
-			if (!childNode.classList || !childNode.classList.contains("ltreeitem"))
-			{
-				continue;
-			}
-
-			const current_level = parseInt(childNode.dataset["level"]);
-			if (only_direct && current_level > (parent_level + 1)) {continue;}
-			if (current_level <= parent_level) {return result;}
-
-			result.push(childNode);
-		}
-
-		return result;
-	};
-
 	createTreeItem(data : TreeNode, options : TreeOptions, level : string) : HTMLLIElementPlus | undefined
 	{
 		if (data === null || data === undefined)
@@ -1248,122 +1128,243 @@ export class Tree
 		return items[index];
 	};
 
-// Private
+	// Private
 
-private unmarkAllAsSelected()
-{
-	this.root.classList.remove("selected");
-	const selected_array = this.root.querySelectorAll(".ltreeitem.selected");
-	if (selected_array)
+	private _isNodeChildrenVisible(id : string) : boolean
 	{
-		for (let i = 0; i < selected_array.length; i++)
+		const node = this.getItem(id) as HTMLLIElementPlus;
+		if (!node) {return false;}
+		if (node.classList.contains("hidden")) {return false;}
+
+		// Check listboxes
+		const listbox = node.querySelector(".listbox") as HTMLSpanElementPlus;
+		if (!listbox) {return true;}
+		if (listbox.liteBox?.getValue() == "closed") {return false;}
+		return true;
+	};
+
+	private _findElement(id : string)
+	{
+		if (!id || id.constructor !== String)
 		{
-			selected_array[i].classList.remove("selected");
+			throw ("findElement param must be string with item id");
 		}
-	}
-	const semiselected = this.root.querySelectorAll(".ltreeitem.semiselected");
-	for (let i = 0; i < semiselected.length; i++)
-	{
-		semiselected[i].classList.remove("semiselected");
-	}
-};
-
-private isNodeSelected(node : ChildNodePlus | HTMLLIElementPlus) : boolean
-{
-	// Already selected
-	if (node.classList.contains("selected")) {return true;}
-	return false;
-};
-
-private markAsSelected(node : ChildNodePlus | HTMLLIElementPlus, add_to_existing_selection : boolean = false)
-{
-	// Already selected
-	if (node.classList.contains("selected")) {return;}
-
-	// Clear old selection
-	if (!add_to_existing_selection) {this.unmarkAllAsSelected();}
-
-	// Mark as selected (it was node.title_element?)
-	node.classList.add("selected");
-
-	// Go up and semiselect
-	let parent = this.getParent(node) as ChildNodePlus;
-	const visited = [];
-	while (parent && visited.indexOf(parent) == -1)
-	{
-		parent.classList.add("semiselected");
-		visited.push(parent);
-		parent = this.getParent(parent) as ChildNodePlus;
-	}
-};
-
-// Updates the widget to collapse
-private _updateListBox(node : ChildNodePlus , options? : TreeOptions, current_level : number = 0)
-{
-	if (!node) {return;}
-
-	const that = this;
-
-	if (!node.listbox)
-	{
-		const pre = node.title_element.querySelector(".collapsebox");
-		const box = new LiteGUI.LiteBox(true, (e: Event) =>
+		for (let i = 0; i < this.root.childNodes.length; ++i)
 		{
-			that.onClickBox(e, node);
-			LiteGUI.trigger(that.root, "item_collapse_change", 
-            { 
-                item: node, 
-                data: box.getValue() 
-            });
-		});
-        const element = box.root as HTMLSpanElementPlus;
-		element.stopPropagation = true;
-		element.setEmpty(true);
-		pre!.appendChild(element);
-		node.listbox = element;
-	}
+			const childNode = this.root.childNodes[i] as ChildNodePlus;
+			if (!childNode.classList || !childNode.classList.contains("ltreeitem"))
+			{
+				continue;
+			}
+			if (childNode.classList.contains("ltreeitem-" + id))
+			{
+				return childNode;
+			}
+		}
 
-	if ((options && options.collapsed) || current_level >= this.collapsed_depth)
+		return null;
+	};
+
+	private _findElementIndex(id : string) : number
 	{
-		(node.listbox as HTMLSpanElementPlus).collapse();
-	}
-
-	const child_elements = this.getChildren(node.dataset["item_id"]);
-	if (!child_elements) {return;}
-
-	if (child_elements.length)
-	{
-		node.listbox.setEmpty(false);
-	}
-	else
-	{
-		node.listbox.setEmpty(true);
-	}
-};
-
-private onClickBox(e : Event, node : string | ChildNodePlus)
-{
-	const children = this.getChildren(node);
-
-	if (!children) {return;}
-
-	// Update children visibility
-	for (let i = 0; i < children.length; ++i)
-	{
-		const child = children[i];
-
-		const child_parent = this.getParent(child);
-		let visible = true;
-		if (child_parent) {visible = this._isNodeChildrenVisible(child_parent as string);}
-		if (visible)
+		for (let i = 0; i < this.root.childNodes.length; ++i)
 		{
-			child.classList.remove("hidden");
+			const childNode = this.root.childNodes[i] as ChildNodePlus;
+			if (!childNode.classList || !childNode.classList.contains("ltreeitem"))
+			{
+				continue;
+			}
+
+			if (typeof(id) === "string")
+			{
+				if (childNode.dataset["item_id"] === id)
+				{
+					return i;
+				}
+			}
+			else if (childNode === id)
+			{
+				return i;
+			}
+		}
+
+		return -1;
+	};
+
+	private _findElementLastChildIndex(start_index : number) : number
+	{
+		if (start_index == -1)
+		{
+			return -1;
+		}
+
+		const level = parseInt((this.root.childNodes[ start_index ] as ChildNodePlus).dataset["level"]);
+
+		for (let i = start_index+1; i < this.root.childNodes.length; ++i)
+		{
+			const childNode = this.root.childNodes[i] as ChildNodePlus;
+			if (!childNode.classList || !childNode.classList.contains("ltreeitem"))
+			{
+				continue;
+			}
+
+			const current_level = parseInt(childNode.dataset["level"]);
+			if (current_level == level)
+			{
+				return i;
+			}
+		}
+
+		return -1;
+	};
+
+	// Returns child elements (you can control levels)
+	private _findChildElements(id : string, only_direct : boolean) : ChildNodePlus[] | undefined
+	{
+		const parent_index = this._findElementIndex(id);
+		if (parent_index == -1)
+		{
+			return;
+		}
+
+		const parent = this.root.childNodes[ parent_index ] as ChildNodePlus;
+		const parent_level = parseInt(parent.dataset["level"]);
+
+		const result = [];
+
+		for (let i = parent_index + 1; i < this.root.childNodes.length; ++i)
+		{
+			const childNode = this.root.childNodes[i] as ChildNodePlus;
+			if (!childNode.classList || !childNode.classList.contains("ltreeitem"))
+			{
+				continue;
+			}
+
+			const current_level = parseInt(childNode.dataset["level"]);
+			if (only_direct && current_level > (parent_level + 1)) {continue;}
+			if (current_level <= parent_level) {return result;}
+
+			result.push(childNode);
+		}
+
+		return result;
+	};
+
+	private unmarkAllAsSelected()
+	{
+		this.root.classList.remove("selected");
+		const selected_array = this.root.querySelectorAll(".ltreeitem.selected");
+		if (selected_array)
+		{
+			for (let i = 0; i < selected_array.length; i++)
+			{
+				selected_array[i].classList.remove("selected");
+			}
+		}
+		const semiselected = this.root.querySelectorAll(".ltreeitem.semiselected");
+		for (let i = 0; i < semiselected.length; i++)
+		{
+			semiselected[i].classList.remove("semiselected");
+		}
+	};
+
+	private isNodeSelected(node : ChildNodePlus | HTMLLIElementPlus) : boolean
+	{
+		// Already selected
+		if (node.classList.contains("selected")) {return true;}
+		return false;
+	};
+
+	private markAsSelected(node : ChildNodePlus | HTMLLIElementPlus, add_to_existing_selection : boolean = false)
+	{
+		// Already selected
+		if (node.classList.contains("selected")) {return;}
+
+		// Clear old selection
+		if (!add_to_existing_selection) {this.unmarkAllAsSelected();}
+
+		// Mark as selected (it was node.title_element?)
+		node.classList.add("selected");
+
+		// Go up and soft select
+		let parent = this.getParent(node) as ChildNodePlus;
+		const visited = [];
+		while (parent && visited.indexOf(parent) == -1)
+		{
+			parent.classList.add("semiselected");
+			visited.push(parent);
+			parent = this.getParent(parent) as ChildNodePlus;
+		}
+	};
+
+	// Updates the widget to collapse
+	private _updateListBox(node : ChildNodePlus , options? : TreeOptions, current_level : number = 0)
+	{
+		if (!node) {return;}
+
+		const that = this;
+
+		if (!node.listbox)
+		{
+			const pre = node.title_element.querySelector(".collapsebox");
+			if (!pre) {return;}
+			const box = new LiteGUI.LiteBox(true, (e: Event) =>
+			{
+				that.onClickBox(e, node);
+				LiteGUI.trigger(that.root, "item_collapse_change", 
+				{ 
+					item: node, 
+					data: box.getValue() 
+				});
+			});
+			const element = box.root;
+			element.stopPropagation = true;
+			element.setEmpty(true);
+			pre.appendChild(element);
+			node.listbox = element;
+		}
+
+		if ((options && options.collapsed) || current_level >= this.collapsed_depth)
+		{
+			node.listbox.collapse();
+		}
+
+		const child_elements = this.getChildren(node.dataset["item_id"]);
+		if (!child_elements) {return;}
+
+		if (child_elements.length)
+		{
+			node.listbox.setEmpty(false);
 		}
 		else
 		{
-			child.classList.add("hidden");
+			node.listbox.setEmpty(true);
 		}
-	}
-};
+	};
+
+	private onClickBox(e : Event, node : string | ChildNodePlus)
+	{
+		const children = this.getChildren(node);
+
+		if (!children) {return;}
+
+		// Update children visibility
+		for (let i = 0; i < children.length; ++i)
+		{
+			const child = children[i];
+
+			const child_parent = this.getParent(child);
+			let visible = true;
+			if (child_parent) {visible = this._isNodeChildrenVisible(child_parent as string);}
+			if (visible)
+			{
+				child.classList.remove("hidden");
+			}
+			else
+			{
+				child.classList.add("hidden");
+			}
+		}
+	};
 
 }

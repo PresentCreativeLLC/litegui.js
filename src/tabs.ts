@@ -1,5 +1,5 @@
 import { LiteGUI, special_codes } from "./core";
-import { HTMLDivElementPlus, HTMLLIElementPlus, HTMLParagraphElementPlus, LiteguiObject, TabsOptions } from "./@types/globals/index";
+import { HTMLDivElementPlus, HTMLLIElementPlus, HTMLParagraphElementPlus, LiteGUIObject, TabsOptions } from "./@types/globals/index";
 
 /**
  * Widget that contains several tabs and their content
@@ -590,7 +590,7 @@ export class Tabs
 		target_tabs.selectTab(id);
 	}
 
-	detachTab(id: string, on_complete: CallableFunction, on_close: CallableFunction) {
+	detachTab(id: string, onComplete: CallableFunction, onClose: CallableFunction) {
 		const index = this.getTabIndex(id);
 		const tab = this.tabs[index];
 		if (!tab) { return; }
@@ -619,7 +619,7 @@ export class Tabs
 		// Closing event
 		tab_window.onbeforeunload = function () {
 			newtabs.transferTab(id, that, index);
-			if (on_close) { on_close(); }
+			if (onClose) { onClose(); }
 		};
 
 		// Move the content there
@@ -630,7 +630,7 @@ export class Tabs
 		newtabs.tabs[newtabs.getTabIndexInTab(id)].tab.selected = true;
 		this.recomputeTabsByIndex();
 
-		if (on_complete) { on_complete(); }
+		if (onComplete) { onComplete(); }
 
 		return tab_window;
 	}
@@ -658,9 +658,9 @@ class tab_info
 		this.title = title;
 	}
 
-	add(v: LiteguiObject | HTMLDivElementPlus)
+	add(v: LiteGUIObject | HTMLDivElementPlus)
 	{
-		this.content.appendChild((v as LiteguiObject).root ? (v as LiteguiObject).root! : (v as HTMLDivElementPlus));
+		this.content.appendChild((v as LiteGUIObject).root ? (v as LiteGUIObject).root! : (v as HTMLDivElementPlus));
 	}
 	setTitle(title: string)
 	{

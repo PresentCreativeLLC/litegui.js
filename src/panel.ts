@@ -1,37 +1,56 @@
-import { LiteguiObject, PanelOptions, PanelRoot } from "./@types/globals";
+import { LiteGUIObject } from "./@types/globals";
 import { LiteGUI } from "./core";
+
+export interface PanelRoot extends HTMLDivElement
+{
+	panel: Panel;
+	id: string;
+}
+
+export interface PanelOptions
+{
+	scroll?: boolean;
+	position?: Array<number | string>;
+	height?: number | string;
+	width?: number | string;
+	title?: string;
+	className?: string;
+	content?: string;
+}
 
 /** **************** PANEL **************/
 export class Panel
 {
+	static titleHeight: string = "20px";
 	root: PanelRoot;
-	title_height: string;
 	options: PanelOptions;
-	content: HTMLDivElement | string;
-	header?: HTMLDivElement;
+	content: HTMLDivElement;
 	footer: HTMLDivElement;
+	header?: HTMLDivElement;
 
 	constructor(id: string | PanelOptions, options?: PanelOptions)
 	{
-		if (!options && id && typeof id != 'string')
+		if (typeof id != 'string')
 		{
-			options = id;
+			const temp = id;
 			id = "";
+			if (!options && temp != undefined)
+			{
+				options = temp;
+			}
 		}
 
 		const op = this.options = options = options ?? {};
-	
-		this.content = op.content ?? "";
 
 		const root = this.root = document.createElement("div") as PanelRoot;
-		if (id) {root.id = id as string;}
+		root.id = id;
 
 		root.className = "litepanel " + (op.className ?? "");
-		root.data = this;
+		root.panel = this;
 
 		let code = "";
-		if (op.title) {code += "<div class='panel-header'>"+op.title+"</div>";}
-		code += "<div class='content'>"+this.content+"</div>";
+		if (op.title) {code += "<div class='panel-header'>" + op.title + "</div>";}
+		code += "<div class='content'>" + (op.content ?? "") + "</div>";
 		code += "<div class='panel-footer'></div>";
 		root.innerHTML = code;
 
@@ -49,21 +68,23 @@ export class Panel
 			this.root.style.top = LiteGUI.sizeToCSS(op.position[1]) as string;
 		}
 
-		// If(options.scroll == false)	this.content.style.overflow = "hidden";
 		if (op.scroll == true) {this.content.style.overflow = "auto";}
-		this.title_height = "20px";
 	}
 
-	add(litegui_item: LiteguiObject)
+	add(item: LiteGUIObject)
 	{
-		(this.content as Element).appendChild(litegui_item.root!);
+		if (item.root)
+		{
+			this.content.appendChild(item.root);
+		}
 	}
 
 	clear()
 	{
-		while ((this.content as Element).firstChild)
+		const content = this.content;
+		while (content.firstChild != undefined)
 		{
-			(this.content as Element).removeChild((this.content as Element).firstChild!);
+			content.removeChild(content.firstChild);
 		}
 	};
 }

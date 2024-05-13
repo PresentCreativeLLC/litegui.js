@@ -176,8 +176,8 @@ export interface MouseEventPlus extends MouseEvent
 	layerX: number;
 }
 
-export type LiteguiObject = Area | Console | Dialog | Dragger | Inspector | Menubar | Panel | Tabs | Table | Tree | Button |
-    SearchBox | ContextMenu |Checkbox | LiteBox | List | Slider | LineEditor | ComplexList;
+export type LiteGUIObject = Area | Console | Dialog | Dragger | Inspector | Menubar | Panel | Tabs | Table | Tree | Button |
+    SearchBox | ContextMenu | Checkbox | LiteBox | List | Slider | LineEditor | ComplexList;
 
 export interface AreaOptions
 {
@@ -250,22 +250,6 @@ export interface TreeNode
 
 
 
-export interface PanelRoot extends HTMLDivElement
-{
-	data: Panel | Dialog;
-	id: string;
-}
-
-export interface PanelOptions
-{
-	scroll?: boolean;
-	position?: Array<number | string>;
-	height?: number | string;
-	width?: number | string;
-	title?: string;
-	className?: string;
-	content?: string;
-}
 
 export interface TabsOptions
 {
@@ -319,7 +303,7 @@ export interface ContextMenuOptions
 
 export interface ListOptions
 {
-	parent?: LiteguiObject | HTMLDivElementPlus;
+	parent?: LiteGUIObject | HTMLDivElementPlus;
 	callback?: Function;
 }
 
@@ -329,21 +313,6 @@ export interface SliderOptions
 	max?: number;
 }
 
-export interface LineEditorOptions extends AppendOptions
-{
-	callback?: Function;
-	height?: number;
-	width?: number;
-	show_samples?: number;
-	no_trespassing?: boolean;
-	defaulty?: number;
-	xrange?: number[];
-	linecolor?: string;
-	pointscolor?: string;
-	bgcolor?: string;
-	extra_class?: string;
-}
-
 export interface ComplexListOptions
 {
 	height?: string | number;
@@ -351,45 +320,6 @@ export interface ComplexListOptions
 	onItemSelected?: (node: HTMLDivElementPlus, data: HTMLSpanElementPlus) => void;
 	onItemToggled?: (node: HTMLDivElementPlus, data: HTMLSpanElementPlus, isEnabled: boolean) => void;
 	onItemRemoved?: (node: HTMLDivElementPlus, data: HTMLSpanElementPlus) => void;
-}
-
-export interface DialogOptions
-{
-	min_height?: number;
-	parent?: string | HTMLElementPlus;
-	attach?: boolean;
-	scroll?: boolean;
-	buttons?: Array<DialogButtonOptions>;
-	fullcontent?: boolean;
-	closable?: boolean;
-	close?: string;
-	detachable?: boolean;
-	hide?: boolean;
-	minimize?: boolean;
-	title?: string;
-	className?: string;
-	content?: string;
-	minHeight?: number | number;
-	minWidth?: number | number;
-	height?: string | number;
-	width?: string | number;
-	id?: string;
-	resizable?: boolean;
-	draggable?: boolean;
-	on_close?: ()=>void;
-}
-
-export interface DialogButtonOptions
-{
-	name: string;
-	className?: string;
-	callback?: Function;
-	close?: boolean;
-}
-
-export interface DialogReferenceElement extends HTMLElement
-{
-	ownerDocument: DocumentPlus;
 }
 
 export interface DocumentPlus extends Document
